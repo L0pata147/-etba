@@ -3,6 +3,8 @@ import { Download, Eye, EyeOff, RotateCcw, Upload } from 'lucide-react';
 import type { AppData } from '../types';
 import { useStore } from '../store';
 import { exportJson, readImportFile } from '../lib/storage';
+import { isAndroidApp } from '../lib/native';
+import { ReminderSettings } from '../components/ReminderSettings';
 import { Button, Card, Modal, PageHeader, Segmented, SectionTitle, Toggle } from '../components/ui';
 
 export function SettingsPage() {
@@ -65,6 +67,13 @@ export function SettingsPage() {
         <Toggle checked={s.speechEnabled} onChange={(v) => updateSettings({ speechEnabled: v })} label="Nabízet diktování odpovědí mikrofonem" />
       </Card>
 
+      {isAndroidApp() && (
+        <Card className="space-y-3 p-5">
+          <SectionTitle>Upozornění</SectionTitle>
+          <ReminderSettings />
+        </Card>
+      )}
+
       <Card className="space-y-4 p-5">
         <SectionTitle sub="Nepovinné. Bez klíče aplikace funguje, jen bez AI učitele.">AI učitel (Claude API)</SectionTitle>
         <div>
@@ -106,8 +115,8 @@ export function SettingsPage() {
           <Button
             icon={<Download size={18} />}
             onClick={() => {
-              exportJson({ ...data, settings: { ...data.settings, aiApiKey: '' } });
-              toast('Data byla exportována do souboru JSON.', 'success');
+              const where = exportJson({ ...data, settings: { ...data.settings, aiApiKey: '' } });
+              toast(where ? `Záloha uložena: ${where}` : 'Data byla exportována do souboru JSON.', 'success');
             }}
           >
             Exportovat data (JSON)

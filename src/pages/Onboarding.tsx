@@ -8,6 +8,7 @@ import { daysUntil } from '../lib/progress';
 import { useTheme } from '../components/Layout';
 import { Button, Card, cx, plural } from '../components/ui';
 import { StorageWarning } from '../components/StorageWarning';
+import { ReminderSettings } from '../components/ReminderSettings';
 
 function defaultExamDate(): string {
   const now = new Date();
@@ -151,6 +152,9 @@ export function Onboarding() {
                     <div className="text-sm text-slate-500">{t}</div>
                   </button>
                 ))}
+              </div>
+              <div className="mt-5">
+                <ReminderSettings compact />
               </div>
             </div>
           )}

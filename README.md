@@ -17,6 +17,23 @@ npm test           # testy logiky (vitest)
 Build je statický (`base: './'`, HashRouter) – složku `dist/` lze otevřít na libovolném statickém hostingu
 (GitHub Pages, Netlify…) bez backendu.
 
+## Android aplikace (APK) s upozorněními
+
+Složka `android/` obsahuje malou nativní aplikaci: celá webová aplikace běží ve WebView
+a Android k ní přidává **denní připomínku** (AlarmManager – funguje offline, obnoví se po
+restartu telefonu), ukládání zálohy do *Stažených souborů* a výběr souboru pro import.
+
+```bash
+bash android/setup-tools.sh   # jednorázově: stáhne nástroje z Maven Central a android.jar
+npm run android:build         # web → jeden HTML soubor → APK v android/build-apk/
+```
+
+Sestavení nepotřebuje Android Studio ani Gradle: `javac` → `dx` (dex) → ARSCLib (zdroje
+a binární manifest) → apksig (podpis v2). APK je podepsané klíčem `android/keystore/`;
+stejný klíč je potřeba i pro aktualizace, jinak by se aplikace musela odinstalovat (a data
+by se ztratila). Připomínka přijde jen ve dny, kdy se uživatel ještě neučil; před maturitou
+připomíná počet zbývajících dní.
+
 ## Co aplikace umí
 
 | Oblast | Funkce |

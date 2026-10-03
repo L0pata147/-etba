@@ -112,6 +112,8 @@ export function buildSession(data: AppData, cfg: SessionConfig): Question[] {
   const perArea = new Map<string, number>();
   const bookCap = books.length > 1 ? Math.max(2, Math.ceil((cfg.count || 20) * 0.45)) : Infinity;
   let budget = cfg.minutes ? cfg.minutes * 60 : Infinity;
+  // Dlouhé otázky (vlastní odpověď) smí zabrat nejvýš ~třetinu času, aby trénink nebyl jen ze 2 otázek
+  let openBudget = cfg.minutes ? cfg.minutes * 60 * 0.35 : Infinity;
   const target = cfg.minutes ? Infinity : cfg.count;
 
   for (const q of ranked) {
@@ -121,11 +123,13 @@ export function buildSession(data: AppData, cfg: SessionConfig): Question[] {
     if ((perBook.get(q.bookId) ?? 0) >= bookCap) continue;
     if (cfg.perArea && (perArea.get(`${q.bookId}|${q.area}`) ?? 0) >= cfg.perArea) continue;
     const s = estimateSeconds(q);
-    if (s > budget) {
+    const isLong = q.type === 'open' || q.type === 'speech';
+    if (s > budget || (isLong && s > openBudget)) {
       if (budget < 12) break;
       continue;
     }
     budget -= s;
+    if (isLong) openBudget -= s;
     facts.add(fk);
     perBook.set(q.bookId, (perBook.get(q.bookId) ?? 0) + 1);
     perArea.set(`${q.bookId}|${q.area}`, (perArea.get(`${q.bookId}|${q.area}`) ?? 0) + 1);

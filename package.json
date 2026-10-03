@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc -b",
-    "build:single": "vite build --config vite.single.config.ts"
+    "build:single": "vite build --config vite.single.config.ts",
+    "android:build": "npm run build:single && cp dist-single/index.html android/app/src/main/assets/index.html && bash android/build-apk.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",

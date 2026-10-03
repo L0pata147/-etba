@@ -1,5 +1,6 @@
 import type { AppData, Settings } from '../types';
 import { BOOK_DATABASE, DEFAULT_LIST_IDS, emptyBook, seedToBook } from '../data/books';
+import { saveFileNative } from './native';
 
 export const STORAGE_KEY = 'maturitni-trener:data';
 export const DATA_VERSION = 1;
@@ -12,6 +13,8 @@ export const DEFAULT_SETTINGS: Settings = {
   aiApiKey: '',
   aiModel: 'claude-opus-5-5',
   speechEnabled: true,
+  reminderEnabled: false,
+  reminderTime: '18:00',
 };
 
 export function defaultData(): AppData {
@@ -107,18 +110,24 @@ export function saveData(data: AppData): boolean {
   }
 }
 
-export function exportJson(data: AppData): void {
-  const blob = new Blob([JSON.stringify({ app: 'maturitni-trener', exportedAt: new Date().toISOString(), ...data }, null, 2)], {
+/** Vrátí umístění souboru, pokud ho uložila Android aplikace; jinak spustí stažení v prohlížeči */
+export function exportJson(data: AppData): string | null {
+  const json = JSON.stringify({ app: 'maturitni-trener', exportedAt: new Date().toISOString(), ...data }, null, 2);
+  const name = `maturitni-trener-${new Date().toISOString().slice(0, 10)}.json`;
+  const nativePath = saveFileNative(name, json);
+  if (nativePath) return nativePath;
+  const blob = new Blob([json], {
     type: 'application/json',
   });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `maturitni-trener-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = name;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return null;
 }
 
 export async function readImportFile(file: File): Promise<AppData> {

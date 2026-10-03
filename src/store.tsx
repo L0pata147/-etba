@@ -3,6 +3,7 @@ import type { AnswerResult, AppData, Book, Question, SessionRecord, Settings, St
 import { defaultData, loadData, saveData } from './lib/storage';
 import { dayKey, gradeFromScore, masteryKey, questionBookIds, updateMastery, updateSrs } from './lib/progress';
 import { BADGES } from './lib/insights';
+import { applyReminder, syncNative } from './lib/native';
 
 export interface Toast {
   id: number;
@@ -63,6 +64,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     if (!saveData(data)) toast('Data se nepodařilo uložit (plné úložiště prohlížeče?).', 'error');
   }, [data, toast]);
+
+  // Android aplikace: při spuštění obnovit naplánovanou připomínku (vynucené zastavení ji smaže)
+  useEffect(() => {
+    if (data.settings.reminderEnabled) applyReminder(true, data.settings.reminderTime);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- jen jednou při startu
+  }, []);
+
+  // Android aplikace: stav učení pro text upozornění (s malým zpožděním, ať se nepočítá při každém kliknutí)
+  useEffect(() => {
+    const t = setTimeout(() => syncNative(data), 1500);
+    return () => clearTimeout(t);
+  }, [data]);
 
   // Synchronizace mezi záložkami
   useEffect(() => {

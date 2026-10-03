@@ -312,6 +312,9 @@ export interface Settings {
   aiApiKey: string;
   aiModel: string;
   speechEnabled: boolean;
+  /** Denní připomínka v Android aplikaci */
+  reminderEnabled: boolean;
+  reminderTime: string;
 }
 
 export interface AppData {
