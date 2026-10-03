@@ -67,6 +67,18 @@ export function migrate(raw: unknown): AppData {
   };
 }
 
+/** Lze v tomto okně trvale ukládat data? (v uzavřených náhledech souborů ne) */
+export function storageAvailable(): boolean {
+  try {
+    const k = `${STORAGE_KEY}:test`;
+    localStorage.setItem(k, '1');
+    localStorage.removeItem(k);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function loadData(): AppData {
   let raw: string | null = null;
   try {

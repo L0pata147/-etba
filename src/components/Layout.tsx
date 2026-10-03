@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../store';
 import { cx } from './ui';
+import { StorageWarning } from './StorageWarning';
 import { levelFromXp, streak } from '../lib/progress';
 
 const NAV = [
@@ -148,6 +149,7 @@ export function Layout({ children }: { children: ReactNode }) {
       )}
 
       <main className={cx('mx-auto max-w-6xl px-4 pt-5 sm:px-6 lg:ml-64 lg:px-10 lg:pt-8', inSession ? 'pb-10' : 'pb-28 lg:pb-12')}>
+        <StorageWarning />
         <div key={loc.pathname} className="animate-fade-up">
           {children}
         </div>

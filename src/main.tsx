@@ -1,9 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
+import { HashRouter, MemoryRouter } from 'react-router-dom';
 import './index.css';
 import { StoreProvider } from './store';
 import { App } from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Motiv nastavíme hned, aby při načtení neproblikla špatná barva
 try {
@@ -15,12 +16,31 @@ try {
   /* nevadí */
 }
 
+/**
+ * Některé náhledy souborů (aplikace, správci souborů) běží v uzavřeném rámu,
+ * kde nejde měnit adresu stránky – tam použijeme navigaci v paměti.
+ */
+function canUseHashRouter(): boolean {
+  try {
+    if (!/^(https?|file):$/.test(window.location.protocol)) return false;
+    new URL(window.location.href);
+    window.history.replaceState(window.history.state, '', window.location.href);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const Router = canUseHashRouter() ? HashRouter : MemoryRouter;
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <HashRouter>
-      <StoreProvider>
-        <App />
-      </StoreProvider>
-    </HashRouter>
+    <ErrorBoundary>
+      <Router>
+        <StoreProvider>
+          <App />
+        </StoreProvider>
+      </Router>
+    </ErrorBoundary>
   </StrictMode>,
 );
