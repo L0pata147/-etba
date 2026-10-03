@@ -141,8 +141,8 @@ export function buildSession(data: AppData, cfg: SessionConfig): Question[] {
   return result;
 }
 
-const SECTION_RANK: Record<SectionId, number> = { art1: 0, art2: 1, art3: 2, lhk: 3, basics: 4, terms: 5, nonart1: 6, nonart2: 7 };
-const AREA_RANK: AreaId[] = ['context', 'theme', 'chronotope', 'composition', 'genre', 'narrator', 'characters', 'narrative', 'speech', 'verse', 'language', 'tropes', 'authorContext', 'litContext', 'basics', 'terms', 'nonart1', 'nonart2'];
+const SECTION_RANK: Record<SectionId, number> = { art1: 0, art2: 1, art3: 2, lhk: 3, basics: 4, terms: 5, nonart1: 6, nonart2: 7, 'it-teorie': 8, 'it-prakticke': 9, 'it-vypocty': 10 };
+const AREA_RANK: AreaId[] = ['context', 'theme', 'chronotope', 'composition', 'genre', 'narrator', 'characters', 'narrative', 'speech', 'verse', 'language', 'tropes', 'authorContext', 'litContext', 'basics', 'terms', 'nonart1', 'nonart2', 'it-ustni', 'it-teorie', 'it-pojmy', 'it-prikazy', 'it-postupy', 'it-vypocty'];
 
 export function sortBySyllabus(qs: Question[]): Question[] {
   return [...qs].sort((a, b) => {

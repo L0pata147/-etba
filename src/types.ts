@@ -18,9 +18,67 @@ export type AreaId =
   | 'basics'
   | 'terms'
   | 'nonart1'
-  | 'nonart2';
+  | 'nonart2'
+  // IT předměty
+  | 'it-pojmy'
+  | 'it-teorie'
+  | 'it-ustni'
+  | 'it-prikazy'
+  | 'it-postupy'
+  | 'it-vypocty';
 
-export type SectionId = 'art1' | 'art2' | 'art3' | 'lhk' | 'basics' | 'terms' | 'nonart1' | 'nonart2';
+export type SectionId =
+  | 'art1'
+  | 'art2'
+  | 'art3'
+  | 'lhk'
+  | 'basics'
+  | 'terms'
+  | 'nonart1'
+  | 'nonart2'
+  | 'it-teorie'
+  | 'it-prakticke'
+  | 'it-vypocty';
+
+/** Maturitní předměty */
+export type SubjectId = 'cjl' | 'site';
+
+export type Platform = 'cisco' | 'linux' | 'windows';
+
+/** Téma ústní zkoušky (IT předměty) */
+export interface Topic {
+  id: string;
+  subject: SubjectId;
+  number: number;
+  title: string;
+  summary: string;
+  /** Doporučená osnova odpovědi */
+  outline: { heading: string; points: string[] }[];
+  terms: { term: string; def: string }[];
+  quiz: { q: string; a: string; wrong: string[]; why?: string }[];
+  deep: { q: string; answer: string; points: KeyPoint[] }[];
+}
+
+/** Příkaz pro trenažér (Cisco IOS, Linux, Windows Server) */
+export interface CommandItem {
+  id: string;
+  platform: Platform;
+  group: string;
+  task: string;
+  command: string;
+  /** Další přijatelné zápisy (zkratky, varianty) */
+  accepted?: string[];
+  note?: string;
+}
+
+/** Postup krok za krokem k praktické zkoušce */
+export interface Procedure {
+  id: string;
+  platform: Platform;
+  title: string;
+  goal: string;
+  steps: { text: string; cmd?: string }[];
+}
 
 export type CategoryId = 'do18' | 'st19' | 'svet20' | 'cz20';
 
@@ -210,6 +268,10 @@ export interface FillQuestion extends QuestionBase {
   type: 'fill' | 'identifyWork' | 'identifyAuthor' | 'identifyTerm';
   accepted: string[];
   answer: string;
+  /** Přesné porovnání (adresy, příkazy) – bez tolerance překlepů */
+  exact?: boolean;
+  /** Text nad polem pro odpověď (např. „Napiš příkaz“) */
+  inputLabel?: string;
 }
 
 export interface OrderQuestion extends QuestionBase {
@@ -295,6 +357,8 @@ export interface StudyWeek {
   index: number;
   start: string;
   bookIds: string[];
+  /** Témata IT předmětů v tomto týdnu */
+  topicIds?: string[];
   extras: string[];
   done: boolean;
 }

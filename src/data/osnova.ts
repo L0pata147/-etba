@@ -18,9 +18,12 @@ export const SECTIONS: Record<SectionId, { label: string; short: string; group: 
   terms: { label: 'Literární pojmy', short: 'Pojmy', group: 'Literární pojmy' },
   nonart1: { label: 'Analýza neuměleckého textu – I. část', short: 'Neumělecký I', group: 'Analýza neuměleckého textu' },
   nonart2: { label: 'Analýza neuměleckého textu – II. část', short: 'Neumělecký II', group: 'Analýza neuměleckého textu' },
+  'it-teorie': { label: 'Sítě – teorie a ústní témata', short: 'Teorie', group: 'Počítačové sítě' },
+  'it-prakticke': { label: 'Sítě – praktické dovednosti (příkazy, postupy)', short: 'Praxe', group: 'Počítačové sítě' },
+  'it-vypocty': { label: 'Sítě – výpočty (adresace, podsítě)', short: 'Výpočty', group: 'Počítačové sítě' },
 };
 
-export const SECTION_ORDER: SectionId[] = ['art1', 'art2', 'art3', 'lhk', 'basics', 'terms', 'nonart1', 'nonart2'];
+export const SECTION_ORDER: SectionId[] = ['art1', 'art2', 'art3', 'lhk', 'basics', 'terms', 'nonart1', 'nonart2', 'it-teorie', 'it-prakticke', 'it-vypocty'];
 
 const isVerse = (b: Book) => b.verse.trim().length > 0;
 const isLyric = (b: Book) => b.kind === 'lyrika' || b.kind === 'lyricko-epika';
@@ -164,6 +167,12 @@ export const AREAS: AreaInfo[] = [
     section: 'nonart2',
     examPrompt: () => 'Analyzujte neumělecký text.',
   },
+  { id: 'it-pojmy', label: 'Pojmy', short: 'Pojmy', section: 'it-teorie', examPrompt: () => '' },
+  { id: 'it-teorie', label: 'Teorie', short: 'Teorie', section: 'it-teorie', examPrompt: () => '' },
+  { id: 'it-ustni', label: 'Výklad tématu (ústní)', short: 'Výklad tématu', section: 'it-teorie', examPrompt: () => '' },
+  { id: 'it-prikazy', label: 'Příkazy', short: 'Příkazy', section: 'it-prakticke', examPrompt: () => '' },
+  { id: 'it-postupy', label: 'Postupy', short: 'Postupy', section: 'it-prakticke', examPrompt: () => '' },
+  { id: 'it-vypocty', label: 'Výpočty', short: 'Výpočty', section: 'it-vypocty', examPrompt: () => '' },
 ];
 
 export const AREA_MAP = Object.fromEntries(AREAS.map((a) => [a.id, a])) as Record<AreaId, AreaInfo>;
