@@ -66,8 +66,12 @@ export function Layout({ children }: { children: ReactNode }) {
   const unknownCount = Object.keys(data.unknown).length;
   const inSession = loc.pathname.startsWith('/trenink/relace') || loc.pathname.startsWith('/simulace/');
 
-  useEffect(() => setMenuOpen(false), [loc.pathname]);
-  useEffect(() => window.scrollTo(0, 0), [loc.pathname]);
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [loc.pathname]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [loc.pathname]);
 
   const navList = (
     <nav className="flex flex-col gap-0.5">

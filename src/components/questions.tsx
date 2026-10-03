@@ -77,7 +77,9 @@ export function Prompt({ text }: { text: string }) {
 
 function Flashcard({ q, result, onSubmit }: P<FlashcardQuestion>) {
   const [flipped, setFlipped] = useState(false);
-  useEffect(() => setFlipped(false), [q.id]);
+  useEffect(() => {
+    setFlipped(false);
+  }, [q.id]);
   return (
     <div>
       <div className="flip-card">
@@ -124,7 +126,9 @@ function Flashcard({ q, result, onSubmit }: P<FlashcardQuestion>) {
 
 function Abc({ q, result, onSubmit }: P<AbcQuestion>) {
   const [picked, setPicked] = useState<number | null>(null);
-  useEffect(() => setPicked(null), [q.id]);
+  useEffect(() => {
+    setPicked(null);
+  }, [q.id]);
   const letters = 'ABCD';
   return (
     <div>
@@ -176,7 +180,9 @@ function Abc({ q, result, onSubmit }: P<AbcQuestion>) {
 
 function TrueFalse({ q, result, onSubmit }: P<TrueFalseQuestion>) {
   const [picked, setPicked] = useState<boolean | null>(null);
-  useEffect(() => setPicked(null), [q.id]);
+  useEffect(() => {
+    setPicked(null);
+  }, [q.id]);
   const btn = (val: boolean, label: string) => {
     const state = result ? (val === q.isTrue ? 'correct' : picked === val ? 'wrong' : 'idle') : 'open';
     return (
@@ -382,7 +388,9 @@ function Order({ q, result, onSubmit }: P<OrderQuestion>) {
   }, [q.id]);
   const [items, setItems] = useState(initial);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
-  useEffect(() => setItems(initial), [initial]);
+  useEffect(() => {
+    setItems(initial);
+  }, [initial]);
 
   const move = (from: number, to: number) => {
     if (to < 0 || to >= items.length || result) return;
