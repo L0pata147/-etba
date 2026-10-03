@@ -11,7 +11,8 @@ import type {
   Question,
   TrueFalseQuestion,
 } from '../types';
-import { evaluatePoints, matchesAnswer } from '../lib/text';
+import { evaluatePoints } from '../lib/text';
+import { checkFillAnswer } from '../lib/answers';
 import { shuffle } from '../lib/random';
 import { useSpeechRecognition } from '../lib/speech';
 import { useStore } from '../store';
@@ -235,17 +236,17 @@ function Fill({ q, result, onSubmit }: P<FillQuestion>) {
   }, [q.id]);
   const submit = () => {
     if (!value.trim()) return;
-    onSubmit({ score: matchesAnswer(value, q.accepted) ? 1 : 0, userAnswer: value.trim() });
+    onSubmit({ score: checkFillAnswer(q, value) ? 1 : 0, userAnswer: value.trim() });
   };
   const ok = result && result.score >= 1;
   return (
     <div>
-      <div className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500">{FILL_HINT[q.type]}</div>
+      <div className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500">{q.inputLabel ?? FILL_HINT[q.type]}</div>
       <Prompt text={q.prompt} />
       <div className="mt-5 flex flex-col gap-2 sm:flex-row">
         <input
           ref={ref}
-          className={cx('input text-lg', result && (ok ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10' : 'border-rose-500 bg-rose-50 dark:bg-rose-500/10'))}
+          className={cx('input text-lg', (q.command || q.exact) && 'font-mono', result && (ok ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10' : 'border-rose-500 bg-rose-50 dark:bg-rose-500/10'))}
           value={value}
           disabled={!!result}
           placeholder="Tvoje odpověď…"
@@ -267,7 +268,13 @@ function Fill({ q, result, onSubmit }: P<FillQuestion>) {
           </Button>
         )}
       </div>
-      <p className="mt-2 text-xs text-slate-500">Diakritika ani malé překlepy nevadí.</p>
+      <p className="mt-2 text-xs text-slate-500">
+        {q.command
+          ? 'Velikost písmen, uvozovky ani „sudo“ nevadí. Cisco zkratky (conf t, int g0/0…) jsou v pořádku.'
+          : q.exact
+            ? 'Piš přesně – u adres a čísel se nepřipouštějí překlepy.'
+            : 'Diakritika ani malé překlepy nevadí.'}
+      </p>
     </div>
   );
 }

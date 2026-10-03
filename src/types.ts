@@ -272,6 +272,10 @@ export interface FillQuestion extends QuestionBase {
   exact?: boolean;
   /** Text nad polem pro odpověď (např. „Napiš příkaz“) */
   inputLabel?: string;
+  /** Povinné části odpovědi (dlouhé příkazy – stačí, když odpověď obsahuje všechny) */
+  required?: string[];
+  /** Odpověď je příkaz (kontrola tolerantní k mezerám, velikosti písmen, sudo) */
+  command?: boolean;
 }
 
 export interface OrderQuestion extends QuestionBase {

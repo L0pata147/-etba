@@ -1,0 +1,428 @@
+import { topic } from './helpers';
+
+export const SITE_TOPICS_2 = [
+  topic(
+    11,
+    'dynamicke-smerovani',
+    'Dynamické interní směrování',
+    'Dynamické směrovací protokoly uvnitř autonomního systému (IGP) si mezi routery vyměňují informace o sítích a samy reagují na změny. Dělí se na distance-vector (RIP, EIGRP) a link-state (OSPF, IS-IS).',
+    [
+      ['Princip a pojmy', ['routery si vyměňují informace o sítích a samy počítají nejlepší cesty', 'konvergence – stav, kdy mají všechny routery shodný pohled na síť', 'metrika – „cena“ cesty (počet skoků, šířka pásma, zpoždění)', 'IGP (uvnitř AS) × EGP (mezi AS – BGP)']],
+      ['Distance-vector', ['router zná jen vzdálenost a směr („směrování podle pověsti“)', 'RIP: metrika počet skoků (max 15, 16 = nedosažitelné), aktualizace každých 30 s, AD 120', 'EIGRP (Cisco): metrika ze šířky pásma a zpoždění, algoritmus DUAL, rychlá konvergence, AD 90']],
+      ['Link-state – OSPF', ['každý router zná celou topologii (LSA, databáze LSDB)', 'nejkratší cesty počítá Dijkstrův algoritmus (SPF)', 'metrika cost = referenční šířka pásma / šířka pásma linky', 'sousedství pomocí Hello paketů, volba DR/BDR na sdíleném segmentu', 'oblasti (areas), páteřní oblast 0; AD 110']],
+      ['Konfigurace OSPF na Cisco', ['router ospf 1', 'network 192.168.1.0 0.0.0.255 area 0 (wildcard maska)', 'passive-interface pro rozhraní do LAN', 'kontrola: show ip ospf neighbor, show ip route ospf']],
+      ['Srovnání se statickým', ['+ automatická reakce na výpadky, škálovatelnost', '− režie (CPU, paměť, provoz), složitější konfigurace, nutnost zabezpečení (autentizace)']],
+    ],
+    [
+      ['IGP', 'Interior Gateway Protocol – směrovací protokol uvnitř autonomního systému.'],
+      ['konvergence', 'Stav, kdy mají všechny routery shodné a aktuální směrovací informace.'],
+      ['OSPF', 'Link-state směrovací protokol používající Dijkstrův algoritmus a oblasti.'],
+      ['RIP', 'Distance-vector protokol s metrikou počtu skoků (max 15).'],
+      ['EIGRP', 'Pokročilý distance-vector protokol od Cisco s algoritmem DUAL.'],
+      ['metrika', 'Hodnota, podle které protokol vybírá nejlepší cestu.'],
+      ['LSA', 'Zpráva link-state protokolu popisující stav linek.'],
+    ],
+    [
+      ['Jakou metriku používá RIP?', 'počet skoků', ['šířku pásma', 'zpoždění a šířku pásma', 'cost']],
+      ['Jaký algoritmus používá OSPF?', 'Dijkstrův (SPF)', ['Bellman-Ford', 'DUAL', 'Spanning Tree']],
+      ['Jaká je administrativní vzdálenost OSPF?', '110', ['90', '120', '1']],
+      ['Jak se jmenuje páteřní oblast OSPF?', 'area 0', ['area 1', 'backbone 100', 'area 255']],
+      ['Kolik skoků nejvýše zvládne RIP?', '15', ['16', '255', '30']],
+      ['Který protokol je link-state?', 'OSPF', ['RIP', 'EIGRP', 'BGP']],
+    ],
+    [
+      {
+        q: 'Porovnej distance-vector a link-state směrovací protokoly.',
+        answer:
+          'Distance-vector protokoly (RIP, EIGRP) znají jen vzdálenost (metriku) a směr (souseda), kterým se k síti dostanou – informace přebírají od sousedů. RIP posílá periodicky celé tabulky a pomalu konverguje. Link-state protokoly (OSPF, IS-IS) si rozesílají informace o stavu linek, každý router má mapu celé topologie (LSDB) a sám spočítá nejkratší cesty Dijkstrovým algoritmem. Konvergují rychleji a lépe škálují (oblasti), ale potřebují víc paměti a výkonu.',
+        points: [
+          ['distance-vector: vzdálenost a směr od sousedů', ['vzdálen', 'směr', 'soused']],
+          ['RIP / EIGRP', ['rip', 'eigrp']],
+          ['link-state: celá topologie, Dijkstra', ['topolog', 'dijkstr', 'spf']],
+          ['OSPF', ['ospf']],
+          ['rychlost konvergence / nároky', ['konverg', 'paměť', 'výkon']],
+        ],
+      },
+    ],
+  ),
+  topic(
+    12,
+    'externi-smerovani',
+    'Externí směrování a peering',
+    'Mezi autonomními systémy (sítěmi poskytovatelů a velkých organizací) se směruje protokolem BGP. Peering je vzájemná výměna provozu mezi sítěmi, typicky v propojovacích uzlech (IXP) jako NIX.CZ.',
+    [
+      ['Autonomní systém (AS)', ['síť pod jednotnou správou se společnou směrovací politikou (ISP, velká firma)', 'identifikuje ho číslo ASN (přiděluje RIR, v Evropě RIPE NCC)', 'uvnitř AS IGP (OSPF…), mezi AS EGP – BGP']],
+      ['BGP', ['Border Gateway Protocol – path-vector protokol internetu', 'komunikuje přes TCP port 179, sousedé (peers) se konfigurují ručně', 'eBGP mezi AS (AD 20), iBGP uvnitř AS (AD 200)', 'atributy: AS_PATH (seznam AS, zabraňuje smyčkám), NEXT_HOP, LOCAL_PREF, MED', 'rozhoduje podle politiky, ne jen podle nejkratší cesty']],
+      ['Peering a tranzit', ['tranzit – placená služba: poskytovatel zprostředkuje přístup do celého internetu', 'peering – dvě sítě si vzájemně vyměňují provoz svých zákazníků, často bez poplatků', 'IXP (Internet Exchange Point) – uzel, kde se propojuje mnoho sítí; v ČR NIX.CZ']],
+      ['Multihoming a význam', ['připojení k více poskytovatelům kvůli redundanci', 'chyby v BGP mohou způsobit výpadky velkých částí internetu (route leak, hijacking) – ochrana RPKI']],
+    ],
+    [
+      ['autonomní systém', 'Síť pod jednotnou správou s vlastní směrovací politikou, identifikovaná číslem ASN.'],
+      ['BGP', 'Path-vector protokol pro směrování mezi autonomními systémy (internet).'],
+      ['peering', 'Vzájemná výměna provozu mezi dvěma sítěmi, často bezplatná.'],
+      ['tranzit', 'Placená služba přístupu do celého internetu přes poskytovatele.'],
+      ['IXP', 'Internet Exchange Point – propojovací uzel mnoha sítí (např. NIX.CZ).'],
+      ['AS_PATH', 'Atribut BGP se seznamem AS na cestě; slouží k prevenci smyček.'],
+    ],
+    [
+      ['Jaký protokol se používá ke směrování mezi autonomními systémy?', 'BGP', ['OSPF', 'RIP', 'EIGRP']],
+      ['Na jakém portu komunikuje BGP?', 'TCP 179', ['UDP 520', 'TCP 80', 'UDP 179']],
+      ['Jak se jmenuje největší propojovací uzel (IXP) v ČR?', 'NIX.CZ', ['CZ.NIC', 'CESNET', 'RIPE NCC']],
+      ['Čím se liší peering od tranzitu?', 'peering je vzájemná výměna provozu, tranzit je placený přístup do celého internetu', ['peering je placený, tranzit zdarma', 'jde o totéž', 'peering se používá jen uvnitř AS']],
+      ['K čemu slouží atribut AS_PATH?', 'zabraňuje smyčkám a ovlivňuje výběr cesty', ['šifruje provoz', 'určuje číslo VLAN', 'přiděluje IP adresy']],
+    ],
+    [
+      {
+        q: 'Vysvětli rozdíl mezi interním a externím směrováním a roli BGP v internetu.',
+        answer:
+          'Interní směrování (IGP – OSPF, EIGRP, RIP) probíhá uvnitř jednoho autonomního systému a hledá technicky nejlepší cestu. Externí směrování propojuje autonomní systémy (poskytovatele, velké sítě) – v internetu se používá výhradně BGP. BGP je path-vector protokol, sousedy navazuje přes TCP 179, nese atributy (AS_PATH, LOCAL_PREF…) a rozhoduje podle obchodních a provozních politik, např. zda provoz poslat přes placený tranzit, nebo přes peering v IXP.',
+        points: [
+          ['IGP uvnitř AS', ['igp', 'uvnitř', 'ospf']],
+          ['mezi AS – BGP', ['bgp', 'mezi']],
+          ['path-vector / AS_PATH', ['path', 'atribut']],
+          ['politika, peering a tranzit', ['politik', 'peering', 'tranzit']],
+        ],
+      },
+    ],
+  ),
+  topic(
+    13,
+    'udp-porty',
+    'Adresace síťových procesů; UDP',
+    'Transportní vrstva (L4) adresuje konkrétní aplikace pomocí čísel portů. UDP je jednoduchý nespojovaný protokol bez potvrzování – rychlý, vhodný pro DNS, DHCP, streamování a hry.',
+    [
+      ['Porty a sokety', ['port = 16bitové číslo (0–65535) identifikující proces/službu', 'well-known 0–1023, registrované 1024–49151, dynamické 49152–65535', 'soket = IP adresa + port (+ protokol); spojení určuje dvojice soketů', 'multiplexing – více aplikací současně přes jedno síťové rozhraní']],
+      ['Známé porty', ['TCP: HTTP 80, HTTPS 443, SSH 22, Telnet 23, FTP 20/21, SMTP 25, RDP 3389', 'UDP: DNS 53, DHCP 67/68, TFTP 69, SNMP 161, NTP 123', 'DNS používá i TCP 53 (přenos zóny, velké odpovědi)']],
+      ['UDP', ['nespojovaný – žádné navazování spojení', 'nespolehlivý – bez potvrzování, opakování a řazení', 'bez řízení toku a zahlcení', 'hlavička jen 8 B: zdrojový port, cílový port, délka, kontrolní součet']],
+      ['Kdy UDP', ['krátké dotazy a odpovědi (DNS, DHCP)', 'provoz v reálném čase, kde je zpoždění horší než ztráta (VoIP, video, hry)', 'spolehlivost případně řeší aplikace sama']],
+    ],
+    [
+      ['port', '16bitové číslo, které na transportní vrstvě určuje aplikaci (službu).'],
+      ['soket', 'Kombinace IP adresy a portu.'],
+      ['UDP', 'Nespojovaný transportní protokol bez potvrzování s hlavičkou 8 B.'],
+      ['well-known porty', 'Porty 0–1023 vyhrazené známým službám.'],
+      ['multiplexing', 'Současná komunikace více aplikací díky rozlišení portů.'],
+    ],
+    [
+      ['Jaký port používá DNS?', '53', ['80', '67', '22']],
+      ['Jak velká je hlavička UDP?', '8 B', ['20 B', '4 B', '40 B']],
+      ['Které porty používá DHCP?', 'UDP 67 a 68', ['TCP 67 a 68', 'UDP 53', 'TCP 20 a 21']],
+      ['Proč se pro VoIP používá UDP?', 'nízké zpoždění je důležitější než opakované doručení ztracených dat', ['UDP šifruje hovory', 'UDP zaručuje doručení', 'TCP nepodporuje zvuk']],
+      ['Do jakého rozsahu patří dynamické (klientské) porty?', '49152–65535', ['0–1023', '1024–49151', '1–65535']],
+      ['Na jakém portu běží SSH?', '22', ['23', '21', '443']],
+    ],
+    [
+      {
+        q: 'Co je port a soket a jak díky nim může PC současně používat prohlížeč i e-mail?',
+        answer:
+          'Port je 16bitové číslo na transportní vrstvě, které určuje konkrétní službu nebo proces. Soket je kombinace IP adresy a portu; spojení je jednoznačně určeno dvojicí soketů (klient a server). Služby naslouchají na známých portech (HTTPS 443, IMAP 993…), klient používá náhodné dynamické porty. Díky různým číslům portů operační systém pozná, které aplikaci doručit přijatá data – tomu se říká multiplexing.',
+        points: [
+          ['port 16 bitů, určuje aplikaci', ['port', '16']],
+          ['soket = IP + port', ['soket', 'socket']],
+          ['známé × dynamické porty', ['znám', 'dynamick', 'well']],
+          ['multiplexing', ['multiplex']],
+        ],
+      },
+    ],
+  ),
+  topic(
+    14,
+    'tcp',
+    'TCP',
+    'TCP je spojovaný a spolehlivý transportní protokol. Spojení navazuje třícestným handshake, data čísluje, potvrzuje a ztracená posílá znovu; řídí tok pomocí okna a reaguje na zahlcení sítě.',
+    [
+      ['Vlastnosti', ['spojovaný – před přenosem naváže spojení', 'spolehlivý – potvrzování (ACK), opakované odeslání ztracených segmentů', 'zachovává pořadí (sekvenční čísla), řízení toku a zahlcení', 'hlavička min. 20 B']],
+      ['Navázání a ukončení spojení', ['3-way handshake: SYN → SYN-ACK → ACK', 'ukončení: FIN, ACK, FIN, ACK (4 kroky)', 'RST – okamžité zrušení spojení']],
+      ['Spolehlivost', ['sekvenční číslo (SEQ) a číslo potvrzení (ACK)', 'časovač – při chybějícím potvrzení retransmise', 'segmentace dat podle MSS']],
+      ['Řízení toku a zahlcení', ['posuvné okno (window size) – kolik dat lze poslat bez potvrzení', 'slow start, congestion avoidance – zpomalení při ztrátách']],
+      ['Použití a srovnání s UDP', ['web (HTTP/HTTPS), e-mail, SSH, FTP, přenos souborů', 'TCP = spolehlivost za cenu režie a zpoždění; UDP = rychlost bez záruk']],
+    ],
+    [
+      ['3-way handshake', 'Navázání TCP spojení výměnou SYN, SYN-ACK, ACK.'],
+      ['sekvenční číslo', 'Číslo určující pořadí bajtů v TCP spojení.'],
+      ['ACK', 'Potvrzení přijetí dat.'],
+      ['okno (window)', 'Množství dat, které lze odeslat bez čekání na potvrzení – řízení toku.'],
+      ['retransmise', 'Opakované odeslání segmentu, který nebyl potvrzen.'],
+      ['MSS', 'Maximum Segment Size – největší množství dat v jednom TCP segmentu.'],
+    ],
+    [
+      ['Jaké je pořadí zpráv při navazování TCP spojení?', 'SYN, SYN-ACK, ACK', ['SYN, ACK, FIN', 'ACK, SYN, SYN-ACK', 'HELLO, ACK, SYN']],
+      ['Čím TCP zajišťuje správné pořadí dat?', 'sekvenčními čísly', ['porty', 'TTL', 'kontrolním součtem']],
+      ['K čemu slouží velikost okna (window size)?', 'k řízení toku – kolik dat lze poslat bez potvrzení', ['k šifrování', 'k určení portu', 'k výpočtu TTL']],
+      ['Který příznak okamžitě ruší spojení?', 'RST', ['FIN', 'PSH', 'URG']],
+      ['Která služba používá TCP?', 'HTTPS', ['DNS dotaz', 'DHCP', 'TFTP']],
+    ],
+    [
+      {
+        q: 'Jak TCP zajišťuje spolehlivý přenos dat?',
+        answer:
+          'TCP nejprve naváže spojení třícestným handshake (SYN, SYN-ACK, ACK). Data rozdělí do segmentů a očísluje je sekvenčními čísly, příjemce přijatá data potvrzuje (ACK) a podle čísel je seřadí. Když odesílatel nedostane potvrzení včas, segment pošle znovu (retransmise). Kontrolní součet odhalí poškozená data. Posuvné okno řídí tok, aby příjemce nebyl zahlcen, a mechanismy řízení zahlcení (slow start) zpomalí přenos při ztrátách v síti.',
+        points: [
+          ['handshake', ['handshake', 'syn']],
+          ['sekvenční čísla a potvrzování', ['sekven', 'ack', 'potvrz']],
+          ['retransmise', ['retransm', 'znovu', 'opak']],
+          ['okno / řízení toku', ['okn', 'window', 'tok']],
+          ['řízení zahlcení', ['zahlcen', 'slow']],
+        ],
+      },
+    ],
+  ),
+  topic(
+    15,
+    'autokonfigurace',
+    'Automatická konfigurace adres IPv4 a IPv6',
+    'V IPv4 přiděluje adresy DHCP procesem DORA. V IPv6 se host může nakonfigurovat sám (SLAAC) podle zpráv routeru, případně s pomocí DHCPv6.',
+    [
+      ['DHCPv4 – proces DORA', ['Discover (klient hledá server – broadcast)', 'Offer (server nabídne adresu)', 'Request (klient o adresu požádá)', 'Acknowledge (server potvrdí)', 'UDP: server port 67, klient 68']],
+      ['Nastavení DHCP serveru', ['rozsah (pool) adres, vyloučené adresy (statické – brána, servery)', 'možnosti: maska, výchozí brána, DNS server, doména', 'doba pronájmu (lease), obnova v polovině doby', 'rezervace – stálá adresa pro konkrétní MAC', 'DHCP relay (ip helper-address) – přeposílá požadavky přes router do jiné sítě']],
+      ['IPv6 – SLAAC', ['router posílá Router Advertisement (RA) s prefixem a bránou', 'host si dotvoří identifikátor rozhraní (EUI-64 nebo náhodný)', 'DAD – kontrola duplicitní adresy pomocí Neighbor Solicitation', 'bez serveru, router nesleduje přidělené adresy']],
+      ['DHCPv6', ['stavové DHCPv6 (příznak M) – adresu přidělí server', 'bezstavové DHCPv6 (příznak O) – adresa ze SLAAC, ostatní (DNS) z DHCPv6', 'na Cisco: ipv6 unicast-routing, ipv6 dhcp pool']],
+      ['Selhání', ['bez odpovědi DHCP si Windows přidělí APIPA 169.254.x.x', 'kontrola: ipconfig /all, ipconfig /renew']],
+    ],
+    [
+      ['DHCP', 'Protokol pro automatické přidělení IP adresy a dalších parametrů.'],
+      ['DORA', 'Discover, Offer, Request, Acknowledge – průběh přidělení adresy DHCP.'],
+      ['lease', 'Doba pronájmu adresy přidělené DHCP.'],
+      ['DHCP relay', 'Přeposílání DHCP požadavků přes router (ip helper-address).'],
+      ['SLAAC', 'Bezstavová automatická konfigurace IPv6 adres podle RA zpráv routeru.'],
+      ['Router Advertisement', 'Zpráva ICMPv6, kterou router oznamuje prefix sítě a bránu.'],
+    ],
+    [
+      ['Jaká je správná posloupnost zpráv DHCP?', 'Discover, Offer, Request, Acknowledge', ['Request, Offer, Discover, Acknowledge', 'Offer, Discover, Acknowledge, Request', 'Discover, Request, Offer, Acknowledge']],
+      ['Jak se v Cisco IOS nastaví přeposílání DHCP do jiné sítě?', 'ip helper-address', ['ip dhcp relay on', 'dhcp forward', 'ip route dhcp']],
+      ['Odkud host při SLAAC zjistí prefix sítě?', 'ze zprávy Router Advertisement', ['z DHCP Offer', 'z DNS', 'z ARP odpovědi']],
+      ['Co si host ověřuje pomocí DAD?', 'zda jeho IPv6 adresu nepoužívá jiné zařízení', ['zda je dostupný DNS', 'zda je kabel zapojen', 'zda má router internet']],
+      ['Kterou adresu dostane Windows, když nenajde DHCP server?', '169.254.x.x', ['127.0.0.1', '0.0.0.0', '192.168.0.1']],
+    ],
+    [
+      {
+        q: 'Porovnej získání adresy pomocí DHCPv4 a SLAAC v IPv6.',
+        answer:
+          'U DHCPv4 klient broadcastem hledá server (Discover), server nabídne adresu (Offer), klient o ni požádá (Request) a server potvrdí (Acknowledge); spolu s adresou předá masku, bránu a DNS a eviduje pronájmy. U SLAAC host žádný server nepotřebuje: router posílá Router Advertisement s prefixem a výchozí bránou, host si doplní identifikátor rozhraní (EUI-64 nebo náhodný) a pomocí DAD ověří, že adresa není obsazená. DNS lze doplnit bezstavovým DHCPv6, případně použít stavové DHCPv6.',
+        points: [
+          ['DORA', ['dora', 'discover', 'offer']],
+          ['parametry: maska, brána, DNS', ['bran', 'dns', 'mask']],
+          ['SLAAC bez serveru, RA', ['slaac', 'advertisement', 'router']],
+          ['EUI-64 / náhodný identifikátor, DAD', ['eui', 'dad', 'náhod']],
+          ['DHCPv6 stavové/bezstavové', ['dhcpv6', 'stav']],
+        ],
+      },
+    ],
+  ),
+  topic(
+    16,
+    'dns',
+    'DNS',
+    'DNS je hierarchický distribuovaný systém, který překládá doménová jména na IP adresy (a zpět). Data jsou uložena v zónách jako záznamy (A, AAAA, MX, CNAME…) na autoritativních serverech.',
+    [
+      ['Účel a hierarchie', ['překlad jmen na IP adresy (např. www.seznam.cz → IP)', 'stromová struktura: kořen „.“, TLD (cz, com, org), domény 2. řádu, subdomény', 'kořenové servery (13 jmen A–M, ve skutečnosti stovky instancí)']],
+      ['Průběh překladu', ['klient se ptá lokálního (rekurzivního) resolveru – rekurzivní dotaz', 'resolver se ptá postupně kořenového, TLD a autoritativního serveru – iterativní dotazy', 'odpovědi se ukládají do cache na dobu TTL']],
+      ['Servery a zóny', ['autoritativní server – spravuje zónu; primární a sekundární (přenos zóny)', 'záznam SOA – hlavní údaje o zóně', 'reverzní zóna (in-addr.arpa) – překlad IP → jméno']],
+      ['Typy záznamů', ['A (IPv4), AAAA (IPv6)', 'CNAME (alias), MX (poštovní server), NS (jmenný server)', 'PTR (reverzní), TXT (např. SPF), SRV (služby – důležité pro Active Directory)']],
+      ['Provoz a zabezpečení', ['UDP 53, TCP 53 pro přenos zóny a velké odpovědi', 'útoky: DNS spoofing / cache poisoning; ochrana DNSSEC (podpisy záznamů)', 'nástroje: nslookup, dig']],
+    ],
+    [
+      ['DNS', 'Domain Name System – překlad doménových jmen na IP adresy.'],
+      ['záznam A', 'DNS záznam přiřazující jménu IPv4 adresu.'],
+      ['záznam AAAA', 'DNS záznam přiřazující jménu IPv6 adresu.'],
+      ['záznam MX', 'DNS záznam určující poštovní server domény.'],
+      ['CNAME', 'Alias – jméno odkazující na jiné jméno.'],
+      ['PTR', 'Záznam reverzní zóny – překlad IP adresy na jméno.'],
+      ['autoritativní server', 'Server, který spravuje data zóny a odpovídá za ni závazně.'],
+      ['rekurzivní dotaz', 'Dotaz, na který server musí vrátit úplnou odpověď (zjistí ji sám).'],
+    ],
+    [
+      ['Který DNS záznam určuje poštovní server domény?', 'MX', ['A', 'CNAME', 'PTR']],
+      ['Který záznam obsahuje IPv6 adresu?', 'AAAA', ['A', 'A6', 'IPV6']],
+      ['K čemu slouží záznam PTR?', 'k překladu IP adresy na jméno', ['k určení aliasu', 'k určení poštovního serveru', 'k přenosu zóny']],
+      ['Jaký dotaz posílá klient svému DNS resolveru?', 'rekurzivní', ['iterativní', 'reverzní', 'autoritativní']],
+      ['Jaký příkaz ve Windows otestuje překlad jména?', 'nslookup', ['ipconfig', 'tracert', 'netstat']],
+      ['Co určuje TTL u DNS záznamu?', 'jak dlouho smí být odpověď v cache', ['počet routerů na cestě', 'prioritu poštovního serveru', 'číslo portu']],
+    ],
+    [
+      {
+        q: 'Popiš, jak probíhá překlad jména www.example.cz, když ho resolver nemá v cache.',
+        answer:
+          'PC pošle rekurzivní dotaz svému DNS resolveru (např. serveru poskytovatele nebo doménovému řadiči). Resolver se iterativně zeptá kořenového serveru, ten ho odkáže na servery domény .cz (TLD). Server .cz ho odkáže na autoritativní server domény example.cz, který vrátí záznam A (případně AAAA) pro www. Resolver odpověď uloží do cache na dobu TTL a předá ji klientovi, který ji také uloží.',
+        points: [
+          ['rekurzivní dotaz na resolver', ['rekurz', 'resolver']],
+          ['kořenový server', ['kořen', 'root']],
+          ['TLD .cz', ['tld', '.cz', 'cz']],
+          ['autoritativní server, záznam A', ['autorit', 'záznam']],
+          ['cache a TTL', ['cache', 'ttl']],
+        ],
+      },
+    ],
+  ),
+  topic(
+    17,
+    'nat',
+    'NAT',
+    'NAT překládá privátní IPv4 adresy na veřejné, aby zařízení v lokální síti mohla komunikovat s internetem. Nejběžnější je PAT (NAT overload), kdy mnoho zařízení sdílí jednu veřejnou adresu díky rozlišení portů.',
+    [
+      ['Proč NAT', ['nedostatek veřejných IPv4 adres', 'privátní adresy (RFC 1918) se v internetu nesměrují', 'vedlejší efekt: skrytí vnitřní struktury sítě (není to ale firewall)']],
+      ['Typy NAT', ['statický NAT – 1:1, pevné přiřazení (server dostupný zvenku)', 'dynamický NAT – přiřazení z poolu veřejných adres', 'PAT / NAT overload – mnoho:1, rozlišení podle portů (domácí routery)', 'port forwarding – přesměrování portu na vnitřní server']],
+      ['Pojmy (Cisco)', ['inside local – privátní adresa vnitřního hosta', 'inside global – veřejná adresa, na kterou se překládá', 'outside global / outside local – adresa vzdáleného cíle', 'tabulka překladů: show ip nat translations']],
+      ['Konfigurace na Cisco (PAT)', ['ip nat inside na rozhraní do LAN, ip nat outside do internetu', 'access-list 1 permit 192.168.1.0 0.0.0.255', 'ip nat inside source list 1 interface g0/1 overload']],
+      ['Nevýhody', ['porušuje princip end-to-end', 'potíže s některými protokoly (IPsec, VoIP/SIP, P2P)', 'režie routeru; v IPv6 se NAT běžně nepoužívá']],
+    ],
+    [
+      ['NAT', 'Network Address Translation – překlad adres mezi privátní a veřejnou sítí.'],
+      ['PAT', 'Port Address Translation (NAT overload) – sdílení jedné veřejné adresy pomocí portů.'],
+      ['statický NAT', 'Pevné překladové přiřazení 1:1.'],
+      ['inside local', 'Privátní adresa vnitřního zařízení.'],
+      ['inside global', 'Veřejná adresa, na kterou se vnitřní adresa překládá.'],
+      ['port forwarding', 'Přesměrování příchozího portu na vnitřní server.'],
+    ],
+    [
+      ['Který typ NAT umožní celé síti sdílet jednu veřejnou adresu?', 'PAT (NAT overload)', ['statický NAT', 'dynamický NAT bez overload', 'NAT64']],
+      ['Jak se v Cisco IOS označí rozhraní směrem do LAN?', 'ip nat inside', ['ip nat outside', 'ip nat lan', 'nat enable']],
+      ['Jak se nazývá privátní adresa vnitřního hosta v terminologii Cisco?', 'inside local', ['inside global', 'outside local', 'outside global']],
+      ['Kdy použiješ statický NAT?', 'když má být vnitřní server dostupný z internetu na pevné adrese', ['když chceš šetřit veřejné adresy pro desítky PC', 'pro IPv6', 'pro přidělování adres']],
+      ['Kterým příkazem zobrazíš aktuální překlady NAT?', 'show ip nat translations', ['show nat', 'show ip route nat', 'show running-config nat']],
+    ],
+    [
+      {
+        q: 'Vysvětli, jak funguje PAT, když dva počítače v LAN současně otevřou webovou stránku.',
+        answer:
+          'Oba počítače mají privátní adresy (inside local). Když posílají pakety do internetu, router nahradí jejich zdrojovou IP adresu svou veřejnou adresou (inside global) a v případě potřeby změní i zdrojový port, aby byla každá komunikace jednoznačná. Do překladové tabulky si uloží dvojici privátní adresa:port ↔ veřejná adresa:port. Když přijde odpověď, podle cílového portu v tabulce zjistí, kterému počítači patří, přeloží adresu zpět a paket doručí.',
+        points: [
+          ['privátní → veřejná adresa', ['privát', 'veřej']],
+          ['rozlišení podle portů', ['port']],
+          ['překladová tabulka', ['tabul']],
+          ['zpětný překlad odpovědi', ['odpov', 'zpět']],
+        ],
+      },
+    ],
+  ),
+  topic(
+    18,
+    'aplikacni-sluzby',
+    'Aplikační služby a jejich zabezpečení',
+    'Aplikační vrstva poskytuje služby jako web, e-mail, přenos souborů či vzdálenou správu. Mnoho starších protokolů přenáší data nešifrovaně, proto se nahrazují zabezpečenými variantami (HTTPS, SSH, SFTP) a síť se chrání firewallem, ACL a dalšími opatřeními.',
+    [
+      ['Základní služby a porty', ['web: HTTP 80, HTTPS 443 (TLS)', 'e-mail: SMTP 25/587 (odesílání), POP3 110/995, IMAP 143/993 (příjem)', 'soubory: FTP 20/21, SFTP (přes SSH 22), SMB 445', 'vzdálená správa: Telnet 23 (nešifrovaný), SSH 22, RDP 3389', 'další: DNS 53, DHCP 67/68, NTP 123, SNMP 161']],
+      ['Šifrování a certifikáty', ['TLS – šifrování a ověření serveru certifikátem', 'certifikát vydává certifikační autorita (CA)', 'symetrická (AES) × asymetrická kryptografie (RSA, veřejný a soukromý klíč)']],
+      ['Zabezpečení', ['principy CIA: důvěrnost, integrita, dostupnost', 'firewall a ACL – povolit jen potřebné porty', 'aktualizace, silná hesla, vícefaktorové ověření, princip nejmenších oprávnění', 'VPN pro vzdálený přístup, oddělení sítí (VLAN, DMZ)']],
+      ['Typické útoky', ['DoS/DDoS – zahlcení služby', 'man-in-the-middle, ARP spoofing, DNS spoofing', 'phishing, útok hrubou silou na hesla', 'DHCP starvation / podvržený DHCP server (obrana DHCP snooping)']],
+    ],
+    [
+      ['HTTPS', 'HTTP zabezpečené pomocí TLS (port 443).'],
+      ['SSH', 'Šifrovaný protokol pro vzdálenou správu (port 22), náhrada Telnetu.'],
+      ['TLS', 'Protokol pro šifrování a ověření komunikace (nástupce SSL).'],
+      ['certifikační autorita', 'Důvěryhodný subjekt, který vydává a podepisuje certifikáty.'],
+      ['firewall', 'Zařízení nebo software, který filtruje provoz podle pravidel.'],
+      ['DMZ', 'Demilitarizovaná zóna – oddělená síť pro veřejně dostupné servery.'],
+      ['DDoS', 'Distribuovaný útok zahlcením služby z mnoha zdrojů.'],
+    ],
+    [
+      ['Který protokol nahrazuje nešifrovaný Telnet?', 'SSH', ['FTP', 'SNMP', 'RDP']],
+      ['Na jakém portu běží HTTPS?', '443', ['80', '8080', '22']],
+      ['Který protokol se používá k odesílání e-mailu?', 'SMTP', ['IMAP', 'POP3', 'SNMP']],
+      ['Co zajišťuje certifikát u HTTPS?', 'ověření identity serveru a šifrování komunikace', ['rychlejší načítání stránek', 'přidělení IP adresy', 'překlad jmen']],
+      ['Co je DMZ?', 'oddělená síť pro servery dostupné z internetu', ['typ útoku', 'šifrovací algoritmus', 'druh kabelu']],
+      ['Který port používá RDP?', '3389', ['3306', '22', '445']],
+    ],
+    [
+      {
+        q: 'Jak bys zabezpečil malou firemní síť se serverem a přístupem do internetu?',
+        answer:
+          'Na hraniční router/firewall nastavím pravidla, která povolí jen nutný provoz (princip nejmenších oprávnění) a veřejné služby umístím do DMZ. Nešifrované protokoly nahradím zabezpečenými – SSH místo Telnetu, HTTPS, SFTP. Síť rozdělím do VLAN (zaměstnanci, hosté, servery). Zařízení i systémy budu aktualizovat, použiji silná hesla a vícefaktorové ověření, na switchích port security a DHCP snooping. Vzdálený přístup zajistím přes VPN a pravidelně budu zálohovat.',
+        points: [
+          ['firewall / ACL, jen nutné porty', ['firewall', 'acl', 'port']],
+          ['šifrované protokoly (SSH, HTTPS)', ['ssh', 'https', 'šifr']],
+          ['segmentace – VLAN, DMZ', ['vlan', 'dmz']],
+          ['aktualizace, hesla, MFA', ['aktualiz', 'hesl', 'faktor']],
+          ['VPN / zálohy', ['vpn', 'záloh']],
+        ],
+      },
+    ],
+  ),
+  topic(
+    19,
+    'wifi',
+    'Bezdrátové sítě IEEE (Wi-Fi)',
+    'Wi-Fi je rodina standardů IEEE 802.11 pro bezdrátové sítě v pásmech 2,4, 5 a 6 GHz. K médiu přistupuje metodou CSMA/CA; zabezpečení zajišťuje WPA2/WPA3 v režimu Personal (heslo) nebo Enterprise (802.1X).',
+    [
+      ['Standardy IEEE 802.11', ['802.11b (2,4 GHz, 11 Mb/s), 802.11a (5 GHz, 54 Mb/s), 802.11g (2,4 GHz, 54 Mb/s)', '802.11n – Wi-Fi 4 (2,4 i 5 GHz, MIMO)', '802.11ac – Wi-Fi 5 (5 GHz, MU-MIMO, gigabitové rychlosti)', '802.11ax – Wi-Fi 6/6E (OFDMA, 6E i pásmo 6 GHz), 802.11be – Wi-Fi 7']],
+      ['Pásma a kanály', ['2,4 GHz – větší dosah a prostup zdmi, méně kanálů, nepřekrývající se 1, 6, 11, více rušení', '5 GHz – víc kanálů a vyšší rychlost, menší dosah', 'výběr kanálů tak, aby se sousední AP nerušila']],
+      ['Architektura', ['AP (přístupový bod), SSID – název sítě', 'BSS (jedno AP), ESS (více AP se stejným SSID – roaming)', 'režim infrastruktura × ad-hoc', 'správa více AP přes kontrolér (WLC)']],
+      ['Přístup k médiu', ['CSMA/CA – vyhýbání se kolizím, potvrzování každého rámce', 'RTS/CTS – řeší problém skrytého uzlu', 'half-duplex – sdílené médium']],
+      ['Zabezpečení', ['WEP – prolomené, nepoužívat; WPA (TKIP) zastaralé', 'WPA2 (AES-CCMP), WPA3 (SAE – odolnější proti útokům na heslo)', 'Personal (PSK – sdílené heslo) × Enterprise (802.1X + RADIUS, vlastní přihlášení)', 'skrytí SSID a filtrování MAC nejsou skutečné zabezpečení']],
+    ],
+    [
+      ['SSID', 'Název bezdrátové sítě.'],
+      ['AP', 'Access Point – přístupový bod bezdrátové sítě.'],
+      ['CSMA/CA', 'Přístupová metoda Wi-Fi, která se vyhýbá kolizím.'],
+      ['WPA3', 'Nejnovější standard zabezpečení Wi-Fi (SAE).'],
+      ['802.1X', 'Standard ověřování přístupu do sítě (s RADIUS serverem) – režim Enterprise.'],
+      ['ESS', 'Více přístupových bodů se stejným SSID tvořících jednu síť (roaming).'],
+      ['MIMO', 'Použití více antén pro současný přenos více datových toků.'],
+    ],
+    [
+      ['Které kanály v pásmu 2,4 GHz se nepřekrývají?', '1, 6, 11', ['1, 2, 3', '1, 5, 9, 13', '2, 7, 12']],
+      ['Jaký standard se označuje jako Wi-Fi 6?', '802.11ax', ['802.11ac', '802.11n', '802.11be']],
+      ['Jaká přístupová metoda se používá ve Wi-Fi?', 'CSMA/CA', ['CSMA/CD', 'Token Ring', 'TDMA']],
+      ['Které zabezpečení Wi-Fi je prolomené a nemá se používat?', 'WEP', ['WPA2', 'WPA3', '802.1X']],
+      ['Jaká je výhoda pásma 2,4 GHz oproti 5 GHz?', 'větší dosah a lepší prostup překážkami', ['vyšší rychlost', 'více nepřekrývajících kanálů', 'menší rušení']],
+      ['Čím se liší WPA2-Enterprise od WPA2-Personal?', 'každý uživatel se ověřuje vlastními údaji přes 802.1X/RADIUS', ['používá slabší šifrování', 'nepoužívá heslo vůbec', 'funguje jen v 5 GHz']],
+    ],
+    [
+      {
+        q: 'Jak bys navrhl a zabezpečil Wi-Fi v malé firmě?',
+        answer:
+          'Použil bych AP s Wi-Fi 6 a pásma 2,4 i 5 GHz; v 2,4 GHz nastavím nepřekrývající se kanály 1, 6, 11, sousední AP na různé kanály a stejné SSID kvůli roamingu (ESS). Pro zaměstnance WPA3 nebo WPA2-Enterprise s ověřováním 802.1X přes RADIUS, pro hosty samostatné SSID v oddělené VLAN s izolací klientů. Nepoužiji WEP ani WPS, změním výchozí hesla AP a budu aktualizovat firmware.',
+        points: [
+          ['pásma a nepřekrývající se kanály', ['kanál', 'ghz', 'pásm']],
+          ['roaming / ESS / stejné SSID', ['roaming', 'ess', 'ssid']],
+          ['WPA3 / WPA2-Enterprise, 802.1X', ['wpa', '802', 'radius']],
+          ['oddělená síť pro hosty', ['host', 'vlan']],
+          ['ne WEP/WPS, aktualizace', ['wep', 'wps', 'aktualiz', 'firmware']],
+        ],
+      },
+    ],
+  ),
+  topic(
+    20,
+    'os',
+    'Operační systémy',
+    'Operační systém spravuje hardware a poskytuje služby aplikacím: správu procesů, paměti, souborů, zařízení a uživatelů. V sítích jsou důležité serverové systémy Windows Server (Active Directory, DNS, DHCP) a Linux (služby, oprávnění, příkazová řádka).',
+    [
+      ['Funkce OS', ['správa procesů a vláken, plánování (preemptivní multitasking)', 'správa paměti – virtuální paměť, stránkování, swap', 'správa souborů a zařízení (ovladače), uživatelů a oprávnění', 'rozhraní: grafické (GUI) a příkazové (CLI – Bash, PowerShell)']],
+      ['Architektura a start', ['jádro (kernel) – monolitické (Linux) × hybridní (Windows) × mikrojádro', 'start: firmware BIOS/UEFI → zavaděč (GRUB, Windows Boot Manager) → jádro → služby', 'souborové systémy: NTFS, FAT32, exFAT (Windows), ext4, XFS (Linux)']],
+      ['Windows Server', ['role a funkce přes Správce serveru nebo PowerShell (Install-WindowsFeature)', 'Active Directory Domain Services – doména, řadič domény, uživatelé, skupiny, organizační jednotky (OU)', 'zásady skupiny (GPO), DNS a DHCP server, sdílení souborů a oprávnění NTFS', 'připojení klienta do domény']],
+      ['Linux', ['distribuce (Debian, Ubuntu, RHEL…), balíčkovací systémy apt/dnf', 'správa služeb systemd (systemctl start/enable/status)', 'oprávnění rwx pro vlastníka, skupinu, ostatní (chmod, chown), uživatel root, sudo', 'konfigurace v textových souborech (/etc), síť: ip, netplan / /etc/network/interfaces']],
+      ['Licence a použití', ['proprietární × open source (GPL)', 'serverové × klientské systémy, virtualizace']],
+    ],
+    [
+      ['jádro (kernel)', 'Základní část OS, která spravuje hardware, procesy a paměť.'],
+      ['proces', 'Běžící program s vlastním adresním prostorem.'],
+      ['virtuální paměť', 'Technika, která rozšiřuje operační paměť o místo na disku (stránkování, swap).'],
+      ['Active Directory', 'Adresářová služba Windows Serveru pro správu uživatelů, počítačů a domény.'],
+      ['GPO', 'Group Policy Object – zásady skupiny pro hromadné nastavení počítačů a uživatelů v doméně.'],
+      ['systemd', 'Správce služeb a startu systému v Linuxu.'],
+      ['chmod', 'Linuxový příkaz pro změnu oprávnění souborů.'],
+    ],
+    [
+      ['Která služba Windows Serveru spravuje doménu, uživatele a počítače?', 'Active Directory Domain Services', ['IIS', 'Hyper-V', 'WSUS']],
+      ['Jakým příkazem v Linuxu (systemd) spustíš službu?', 'systemctl start', ['service on', 'run start', 'chmod start']],
+      ['Co znamenají oprávnění 755 v Linuxu?', 'vlastník rwx, skupina a ostatní r-x', ['všichni rwx', 'vlastník rw-, ostatní r--', 'nikdo nemá zápis']],
+      ['Který souborový systém je typický pro Linux?', 'ext4', ['NTFS', 'FAT32', 'APFS']],
+      ['K čemu slouží GPO?', 'k hromadnému nastavení počítačů a uživatelů v doméně', ['k přidělování IP adres', 'k zálohování', 'k šifrování disku']],
+    ],
+    [
+      {
+        q: 'Porovnej správu serveru ve Windows Serveru a v Linuxu.',
+        answer:
+          'Windows Server se spravuje hlavně graficky přes Správce serveru a konzole MMC, případně PowerShellem; služby se přidávají jako role (AD DS, DNS, DHCP, IIS) a uživatelé a počítače se spravují centrálně v doméně Active Directory, nastavení se hromadně aplikují pomocí GPO. Linux se spravuje převážně z příkazové řádky přes SSH; software se instaluje balíčkovacím systémem (apt, dnf), služby řídí systemd (systemctl), konfigurace je v textových souborech v /etc a oprávnění se nastavují pomocí rwx (chmod, chown). Linux je open source a obvykle zdarma, Windows Server je licencovaný.',
+        points: [
+          ['Windows: GUI, Správce serveru, role', ['správce', 'gui', 'role', 'graf']],
+          ['AD a GPO', ['active', 'ad', 'gpo', 'domén']],
+          ['Linux: CLI, balíčky apt/dnf', ['apt', 'dnf', 'příkaz', 'cli']],
+          ['systemd / konfigurace v /etc', ['systemctl', 'systemd', 'etc']],
+          ['oprávnění rwx / chmod', ['chmod', 'rwx', 'oprávn']],
+        ],
+      },
+    ],
+  ),
+];
