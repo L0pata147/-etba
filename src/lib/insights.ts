@@ -13,7 +13,9 @@ import {
   masteryKey,
   masteryValue,
   streak,
+  topicProgress,
 } from './progress';
+import { SITE_TOPICS } from '../data/site';
 
 const DAY = 86400000;
 
@@ -146,15 +148,19 @@ export interface BadgeDef {
   check: (data: AppData) => boolean;
 }
 
+const TOPIC_AREAS_ANY = (d: AppData, id: string) => (['it-pojmy', 'it-teorie', 'it-ustni'] as const).some((a) => (d.mastery[masteryKey(id, a)]?.attempts ?? 0) > 0);
+
 export const BADGES: BadgeDef[] = [
   { id: 'first-test', emoji: '🏆', label: 'První test', description: 'Dokonči svůj první trénink.', check: (d) => d.sessions.length >= 1 },
   { id: 'perfect', emoji: '💯', label: 'Test na 100 %', description: 'Dokonči trénink (min. 8 otázek) bez chyby.', check: (d) => d.sessions.some((s) => s.total >= 8 && s.score >= 0.999) },
   { id: 'books-5', emoji: '📚', label: '5 knih', description: 'Nauč se 5 knih.', check: (d) => d.books.filter((b) => isBookLearned(d, b)).length >= 5 },
   { id: 'streak-7', emoji: '🔥', label: '7 dní v řadě', description: 'Uč se 7 dní po sobě.', check: (d) => streak(d) >= 7 },
-  { id: 'first-sim', emoji: '🎓', label: 'První simulace', description: 'Absolvuj simulaci ústní maturity.', check: (d) => d.sessions.some((s) => s.mode === 'simulace') },
+  { id: 'first-sim', emoji: '🎓', label: 'První simulace', description: 'Absolvuj simulaci ústní maturity.', check: (d) => d.sessions.some((s) => s.mode === 'simulace' || s.mode === 'simulace-site') },
   { id: 'learned-100', emoji: '🧠', label: '100 otázek', description: 'Měj 100 naučených otázek (opakovaně správně).', check: (d) => Object.values(d.srs).filter(isLearnedQuestion).length >= 100 },
   { id: 'terms-30', emoji: '📖', label: 'Pojmy', description: 'Odpověz na 30 otázek z literárních pojmů.', check: (d) => (d.mastery[masteryKey('terms', 'terms')]?.attempts ?? 0) >= 30 },
   { id: 'all-books', emoji: '🗺️', label: 'Celý seznam', description: 'Procvič každou knihu ze seznamu.', check: (d) => d.books.length > 0 && d.books.every((b) => bookAttempts(d, b.id) > 0) },
+  { id: 'site-topics', emoji: '🌐', label: 'Síťař', description: 'Procvič všech 20 témat z počítačových sítí.', check: (d) => SITE_TOPICS.every((t) => TOPIC_AREAS_ANY(d, t.id)) },
+  { id: 'cli-50', emoji: '⌨️', label: 'Příkazová řádka', description: 'Odpověz na 50 otázek z příkazů (Cisco, Linux, Windows).', check: (d) => ['cisco', 'linux', 'windows'].reduce((s, p) => s + (d.mastery[masteryKey(`site-prikazy-${p}`, 'it-prikazy')]?.attempts ?? 0), 0) >= 50 },
   { id: 'hours-5', emoji: '⏱️', label: '5 hodin učení', description: 'Stráv učením celkem 5 hodin.', check: (d) => Object.values(d.activity).reduce((s, a) => s + a.seconds, 0) >= 5 * 3600 },
 ];
 
@@ -177,6 +183,9 @@ export function generatePlan(data: AppData, examDate: string, now = new Date()):
   const perWeek = Math.max(1, Math.ceil(sorted.length / studyWeeks));
   const weeks: StudyWeek[] = [];
   const extrasCycle = ['Literární pojmy', 'Neumělecký text', 'Literární pojmy – tropy a figury', 'Opakování slabých oblastí'];
+  const practicalCycle = ['Sítě: příkazy Cisco', 'Sítě: výpočty adresace', 'Sítě: Linux / Windows Server', 'Sítě: zadání praktické nanečisto'];
+  const topics = [...SITE_TOPICS].sort((a, b) => topicProgress(data, a.id) - topicProgress(data, b.id) || a.number - b.number);
+  const topicsPerWeek = Math.max(1, Math.ceil(topics.length / studyWeeks));
   for (let i = 0; i < weeksTotal; i++) {
     const start = new Date(now);
     start.setDate(start.getDate() + i * 7);
@@ -195,7 +204,8 @@ export function generatePlan(data: AppData, examDate: string, now = new Date()):
       index: i + 1,
       start: dayKey(start),
       bookIds,
-      extras: isReserve ? ['Celkové opakování', 'Simulace ústní maturity'] : [extrasCycle[i % extrasCycle.length]],
+      topicIds: isReserve ? [] : topics.slice(i * topicsPerWeek, i * topicsPerWeek + topicsPerWeek).map((t) => t.id),
+      extras: isReserve ? ['Celkové opakování', 'Simulace ústní maturity', 'Sítě: simulace ústní a praktické'] : [extrasCycle[i % extrasCycle.length], practicalCycle[i % practicalCycle.length]],
       done: false,
     });
   }

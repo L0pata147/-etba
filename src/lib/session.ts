@@ -1,8 +1,9 @@
-import type { AppData, AreaId, Book, Difficulty, Question, QuestionType, SectionId } from '../types';
+import type { AppData, AreaId, Book, Difficulty, Question, QuestionType, SectionId, SubjectId } from '../types';
 import { AREA_MAP } from '../data/osnova';
 import { generateBookQuestions, generateGlobalQuestions, generateNonArtQuestions, generateTermQuestions } from './generator';
 import { areaMastery, masteryKey, masteryValue } from './progress';
 import { shuffle, weightedSample } from './random';
+import { buildSitePool, type SitePoolOptions } from './topicgen';
 
 export const DIFFICULTY_TYPES: Record<Difficulty, QuestionType[]> = {
   easy: ['abc', 'truefalse', 'flashcard'],
@@ -59,11 +60,20 @@ export interface SessionConfig {
   bySection?: boolean;
   /** Pro každou oblast jen N otázek */
   perArea?: number;
+  /** Předmět – výchozí čeština (literatura); 'all' = všechny předměty */
+  subject?: SubjectId | 'all';
+  /** Výběr z Počítačových sítí (témata, příkazy, postupy, výpočty) */
+  site?: SitePoolOptions;
 }
+
+/** Celý obsah sítí – pro opakování a mix */
+export const ALL_SITE: SitePoolOptions = { commands: ['cisco', 'linux', 'windows'], procedures: true, calc: true };
 
 /** Všechny otázky pro dané knihy + pojmy + neumělecké texty */
 export function buildPool(books: Book[], allBooks: Book[], cfg: Partial<SessionConfig> = {}): Question[] {
-  const pool: Question[] = [];
+  const subject = cfg.subject ?? 'cjl';
+  const pool: Question[] = subject === 'cjl' ? [] : buildSitePool(cfg.site ?? ALL_SITE);
+  if (subject === 'site') return pool;
   for (const b of books) pool.push(...generateBookQuestions(b, allBooks));
   if (cfg.includeGlobal !== false && books.length >= 3) pool.push(...generateGlobalQuestions(books));
   if (cfg.includeTerms) pool.push(...generateTermQuestions(undefined, cfg.termIds));
@@ -110,7 +120,8 @@ export function buildSession(data: AppData, cfg: SessionConfig): Question[] {
   const facts = new Set<string>();
   const perBook = new Map<string, number>();
   const perArea = new Map<string, number>();
-  const bookCap = books.length > 1 ? Math.max(2, Math.ceil((cfg.count || 20) * 0.45)) : Infinity;
+  const multiItem = books.length > 1 || (!!cfg.subject && cfg.subject !== 'cjl' && new Set(pool.map((q) => q.bookId)).size > 1);
+  const bookCap = multiItem ? Math.max(2, Math.ceil((cfg.count || 20) * 0.45)) : Infinity;
   let budget = cfg.minutes ? cfg.minutes * 60 : Infinity;
   // Dlouhé otázky (vlastní odpověď) smí zabrat nejvýš ~třetinu času, aby trénink nebyl jen ze 2 otázek
   let openBudget = cfg.minutes ? cfg.minutes * 60 * 0.35 : Infinity;

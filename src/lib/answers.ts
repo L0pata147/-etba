@@ -26,9 +26,9 @@ export function checkFillAnswer(q: FillQuestion, value: string): boolean {
     if (q.required?.length) return q.required.every((t) => v.includes(normalizeCommand(t)));
     return false;
   }
-  if (q.exact) {
-    const v = normalizeExact(value);
-    return q.accepted.some((a) => normalizeExact(a) === v);
-  }
+  const v = normalizeExact(value);
+  if (q.exact) return q.accepted.some((a) => normalizeExact(a) === v);
+  // doslovná shoda (i pro odpovědi jen ze symbolů, např. „::“)
+  if (q.accepted.some((a) => normalizeExact(a) === v)) return true;
   return matchesAnswer(value, q.accepted);
 }

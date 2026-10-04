@@ -1,5 +1,5 @@
 import type { AppData, Question, QuestionType } from '../types';
-import { buildSession, questionsForMinutes, typesForMinutes, type SessionConfig } from './session';
+import { ALL_SITE, buildSession, questionsForMinutes, typesForMinutes, type SessionConfig } from './session';
 import { recommendations } from './insights';
 import { AREA_MAP } from '../data/osnova';
 import { shuffle } from './random';
@@ -19,6 +19,8 @@ export function minutesSession(minutes: number): SessionConfig {
     includeTerms: true,
     includeNonArt: minutes >= 30,
     includeGlobal: true,
+    subject: 'all',
+    site: ALL_SITE,
   };
 }
 
@@ -34,6 +36,8 @@ export function randomSession(): SessionConfig {
     includeTerms: true,
     includeNonArt: true,
     includeGlobal: true,
+    subject: 'all',
+    site: ALL_SITE,
   };
 }
 
@@ -60,6 +64,8 @@ export function dueSession(): SessionConfig {
     types: [...ALL_TYPES, 'open'],
     count: 25,
     onlyDue: true,
+    subject: 'all',
+    site: ALL_SITE,
     includeTerms: true,
     includeNonArt: true,
     includeGlobal: true,

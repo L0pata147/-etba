@@ -4,7 +4,9 @@ import { ArrowRight, BookOpen, Dices, GraduationCap, Play, RefreshCw, Timer, Tri
 import { useStore } from '../store';
 import { AREA_MAP, CATEGORIES } from '../data/osnova';
 import { areaStats, BADGES, currentWeek, overview, recommendations, staleBooks } from '../lib/insights';
-import { bookProgress, daysUntil, levelFromXp, levelName } from '../lib/progress';
+import { bookProgress, daysUntil, levelFromXp, levelName, sitePracticalProgress, topicProgress } from '../lib/progress';
+import { SITE_TOPICS } from '../data/site';
+import { topicConfig } from './site/common';
 import { dueSession, minutesSession, randomSession, recommendedSession, unknownSession } from '../lib/quick';
 import { useStartSession } from './SessionPage';
 import { Button, Card, EmptyState, ProgressBar, SectionTitle, Stat, Tag, formatDate, plural, relativeDays } from '../components/ui';
@@ -67,6 +69,8 @@ export function Dashboard() {
         <Stat icon="⚠️" label="Zopakovat" value={`${ov.review} ${plural(ov.review, 'kniha', 'knihy', 'knih')}`} tone="rose" />
       </div>
 
+      <SubjectCards />
+
       {/* Doporučení */}
       <Card className="overflow-hidden">
         <div className="bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 p-5 text-white sm:p-7">
@@ -124,7 +128,7 @@ export function Dashboard() {
           ))}
         </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <QuickAction icon={<Dices size={20} />} title="🎲 Náhodný trénink" text="Knihy, autoři, pojmy, kontext" onClick={() => start(randomSession())} />
+          <QuickAction icon={<Dices size={20} />} title="🎲 Náhodný trénink" text="Literatura i sítě napřeskáčku" onClick={() => start(randomSession())} />
           <QuickAction
             icon={<TriangleAlert size={20} />}
             title="🔥 Trénovat, co neumím"
@@ -175,7 +179,7 @@ export function Dashboard() {
               {weakest.map((w) => (
                 <li key={w.area}>
                   <div className="mb-1 flex justify-between text-sm">
-                    <span className="font-medium">{AREA_MAP[w.area].label}</span>
+                    <span className="font-medium">{w.area.startsWith('it-') ? `Sítě – ${AREA_MAP[w.area].label.toLowerCase()}` : AREA_MAP[w.area].label}</span>
                     <span className="tabular-nums text-slate-500">{Math.round(w.mastery * 100)} %</span>
                   </div>
                   <ProgressBar value={w.mastery} />
@@ -252,5 +256,59 @@ function QuickAction({ icon, title, text, onClick, to, disabled }: { icon: React
     <button className={cls} onClick={onClick} disabled={disabled}>
       {inner}
     </button>
+  );
+}
+
+function SubjectCards() {
+  const { data } = useStore();
+  const start = useStartSession();
+  const ov = useMemo(() => overview(data), [data]);
+  const topics = useMemo(() => SITE_TOPICS.map((t) => ({ t, p: topicProgress(data, t.id) })).sort((a, b) => a.p - b.p), [data]);
+  const oral = topics.reduce((s, x) => s + x.p, 0) / topics.length;
+  const prac = sitePracticalProgress(data);
+  const practical = (prac.cisco + (prac.linux + prac.windows) / 2 + prac.postupy + prac.vypocty) / 4;
+  const weakest = topics[0];
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <Card className="p-5">
+        <div className="flex items-center justify-between">
+          <div className="font-bold">📚 Čeština – literatura</div>
+          <span className="font-bold tabular-nums">{Math.round(ov.progress * 100)} %</span>
+        </div>
+        <ProgressBar value={ov.progress} className="mt-2" height="h-2.5" />
+        <p className="mt-2 text-sm text-slate-500">
+          {ov.learned}/{ov.bookCount} knih naučeno
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button size="sm" to="/knihy">
+            Knihy
+          </Button>
+          <Button size="sm" variant="secondary" to="/simulace">
+            Simulace
+          </Button>
+        </div>
+      </Card>
+      <Card className="p-5">
+        <div className="flex items-center justify-between">
+          <div className="font-bold">🌐 Počítačové sítě</div>
+          <span className="font-bold tabular-nums">{Math.round(((oral + practical) / 2) * 100)} %</span>
+        </div>
+        <ProgressBar value={(oral + practical) / 2} className="mt-2" height="h-2.5" />
+        <p className="mt-2 text-sm text-slate-500">
+          ústní {Math.round(oral * 100)} % · praktická {Math.round(practical * 100)} %
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button size="sm" onClick={() => start(topicConfig([weakest.t.id], `Téma ${weakest.t.number}: ${weakest.t.title}`))}>
+            Nejslabší téma: {weakest.t.number}
+          </Button>
+          <Button size="sm" variant="secondary" to="/site">
+            Všechna témata
+          </Button>
+          <Button size="sm" variant="secondary" to="/site/prakticka">
+            Praktická
+          </Button>
+        </div>
+      </Card>
+    </div>
   );
 }

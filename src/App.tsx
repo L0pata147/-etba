@@ -16,6 +16,11 @@ import { Plan } from './pages/Plan';
 import { AiTeacher } from './pages/AiTeacher';
 import { SettingsPage } from './pages/Settings';
 import { Onboarding } from './pages/Onboarding';
+import { SiteHome } from './pages/site/SiteHome';
+import { TopicDetail } from './pages/site/TopicDetail';
+import { SiteOral } from './pages/site/SiteOral';
+import { SitePractical } from './pages/site/SitePractical';
+import { SiteTraining } from './pages/site/SiteTraining';
 
 const Stats = lazy(() => import('./pages/Stats').then((m) => ({ default: m.Stats })));
 
@@ -42,6 +47,11 @@ export function App() {
         <Route path="/plan" element={<Plan />} />
         <Route path="/ai" element={<AiTeacher />} />
         <Route path="/nastaveni" element={<SettingsPage />} />
+        <Route path="/site" element={<SiteHome />} />
+        <Route path="/site/tema/:id" element={<TopicDetail />} />
+        <Route path="/site/losovani" element={<SiteOral />} />
+        <Route path="/site/prakticka" element={<SitePractical />} />
+        <Route path="/site/trenink" element={<SiteTraining />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>

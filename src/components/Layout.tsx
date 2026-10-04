@@ -11,7 +11,10 @@ import {
   Library,
   Menu,
   Moon,
+  Network,
   Newspaper,
+  Shuffle,
+  Terminal,
   Settings,
   Sun,
   TriangleAlert,
@@ -22,21 +25,33 @@ import { cx } from './ui';
 import { StorageWarning } from './StorageWarning';
 import { levelFromXp, streak } from '../lib/progress';
 
-const NAV = [
+interface NavItem {
+  to: string;
+  label: string;
+  icon: typeof Home;
+  end?: boolean;
+  group?: string;
+}
+
+const NAV: NavItem[] = [
   { to: '/', label: 'Dnes', icon: Home, end: true },
-  { to: '/knihy', label: 'Moje knihy', icon: Library },
+  { to: '/knihy', label: 'Moje knihy', icon: Library, group: 'Čeština – literatura' },
   { to: '/trenink', label: 'Trénink', icon: Dumbbell },
   { to: '/simulace', label: 'Simulace maturity', icon: GraduationCap },
   { to: '/pojmy', label: 'Literární pojmy', icon: BookOpen },
   { to: '/neumelecky', label: 'Neumělecký text', icon: Newspaper },
-  { to: '/doucit', label: 'Musím se doučit', icon: TriangleAlert },
+  { to: '/site', label: 'Ústní témata', icon: Network, end: true, group: 'Počítačové sítě' },
+  { to: '/site/losovani', label: 'Simulace ústní', icon: Shuffle },
+  { to: '/site/prakticka', label: 'Praktická zkouška', icon: Terminal },
+  { to: '/site/trenink', label: 'Trénink sítí', icon: Dumbbell },
+  { to: '/doucit', label: 'Musím se doučit', icon: TriangleAlert, group: 'Všechny předměty' },
   { to: '/pokrok', label: 'Můj pokrok', icon: BarChart3 },
   { to: '/plan', label: 'Studijní plán', icon: CalendarDays },
   { to: '/ai', label: 'AI učitel', icon: Bot },
   { to: '/nastaveni', label: 'Nastavení', icon: Settings },
 ];
 
-const MOBILE = [NAV[0], NAV[1], NAV[2], NAV[7]];
+const MOBILE: NavItem[] = [NAV[0], NAV[1], { ...NAV[6], label: 'Sítě', end: false }, NAV[11]];
 
 export function useTheme() {
   const { data, updateSettings } = useStore();
@@ -75,7 +90,12 @@ export function Layout({ children }: { children: ReactNode }) {
 
   const navList = (
     <nav className="flex flex-col gap-0.5">
-      {NAV.map((n) => (
+      {NAV.map((n) => [
+        n.group && (
+          <div key={`g-${n.group}`} className="mt-4 px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            {n.group}
+          </div>
+        ),
         <NavLink
           key={n.to}
           to={n.to}
@@ -94,8 +114,8 @@ export function Layout({ children }: { children: ReactNode }) {
           {n.to === '/doucit' && unknownCount > 0 && (
             <span className="rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white">{unknownCount}</span>
           )}
-        </NavLink>
-      ))}
+        </NavLink>,
+      ])}
     </nav>
   );
 
@@ -211,7 +231,7 @@ function Brand({ compact }: { compact?: boolean }) {
       </div>
       <div className="leading-tight">
         <div className="font-extrabold tracking-tight">Maturitní trenér</div>
-        {!compact && <div className="text-xs text-slate-500 dark:text-slate-400">Ústní zkouška z literatury</div>}
+        {!compact && <div className="text-xs text-slate-500 dark:text-slate-400">Čeština · Počítačové sítě</div>}
       </div>
     </NavLink>
   );

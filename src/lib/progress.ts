@@ -177,3 +177,27 @@ export function daysUntil(dateStr: string, now = new Date()): number | null {
   const today = new Date(dayKey(now) + 'T00:00:00');
   return Math.round((target.getTime() - today.getTime()) / DAY);
 }
+
+// ---------- Počítačové sítě ----------
+
+export const TOPIC_AREAS: AreaId[] = ['it-pojmy', 'it-teorie', 'it-ustni'];
+
+export function topicProgress(data: AppData, topicId: string): number {
+  return TOPIC_AREAS.reduce((s, a) => s + areaMastery(data, topicId, a), 0) / TOPIC_AREAS.length;
+}
+
+export function topicLastStudied(data: AppData, topicId: string): number {
+  return bookLastStudied(data, topicId);
+}
+
+/** Zvládnutí praktické části (příkazy, postupy, výpočty) */
+export function sitePracticalProgress(data: AppData): { cisco: number; linux: number; windows: number; postupy: number; vypocty: number } {
+  const p = (id: string, a: AreaId) => areaMastery(data, id, a);
+  return {
+    cisco: p('site-prikazy-cisco', 'it-prikazy'),
+    linux: p('site-prikazy-linux', 'it-prikazy'),
+    windows: p('site-prikazy-windows', 'it-prikazy'),
+    postupy: (p('site-postupy-cisco', 'it-postupy') + p('site-postupy-linux', 'it-postupy') + p('site-postupy-windows', 'it-postupy')) / 3,
+    vypocty: p('site-vypocty', 'it-vypocty'),
+  };
+}

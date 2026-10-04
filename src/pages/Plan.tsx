@@ -2,7 +2,10 @@ import { CalendarDays, CheckCircle2, Circle, Play, RefreshCw, X } from 'lucide-r
 import type { StudyWeek } from '../types';
 import { useStore } from '../store';
 import { currentWeek, generatePlan } from '../lib/insights';
-import { bookProgress, daysUntil } from '../lib/progress';
+import { bookProgress, daysUntil, topicProgress } from '../lib/progress';
+import { TOPIC_MAP } from '../data/site';
+import { topicConfig } from './site/common';
+import { Link } from 'react-router-dom';
 import { useStartSession } from './SessionPage';
 import { Button, Card, EmptyState, PageHeader, ProgressBar, cx, plural } from '../components/ui';
 
@@ -160,6 +163,21 @@ export function Plan() {
                       </span>
                     );
                   })}
+                  {(w.topicIds ?? []).map((id) => {
+                    const t = TOPIC_MAP[id];
+                    if (!t) return null;
+                    return (
+                      <Link key={id} to={`/site/tema/${id}`} className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-100">
+                        🌐 {t.number}. {t.title}
+                        <span className="text-xs text-emerald-700 dark:text-emerald-300">{Math.round(topicProgress(data, id) * 100)} %</span>
+                      </Link>
+                    );
+                  })}
+                  {(w.topicIds?.length ?? 0) > 0 && (
+                    <Button size="sm" variant="ghost" icon={<Play size={14} />} onClick={() => start(topicConfig(w.topicIds!, `Studijní plán – týden ${w.index} – sítě`))}>
+                      Trénovat témata
+                    </Button>
+                  )}
                   {w.extras.map((e) => (
                     <span key={e} className="rounded-xl bg-slate-100 px-3 py-1 text-sm dark:bg-slate-800">
                       {e}

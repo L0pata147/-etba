@@ -38,6 +38,9 @@ export function AiTeacher() {
     'Zeptej se mě na literárněhistorický kontext některé mé knihy.',
     `Vysvětli mi, proč je ${data.books.find((b) => b.id === 'rur')?.title ?? 'R.U.R.'} drama.`,
     'Procvič se mnou tropy a figury – dávej mi příklady a já je budu určovat.',
+    'Vyzkoušej mě z tématu VLSM – dej mi příklad a kontroluj můj výpočet.',
+    'Vysvětli mi rozdíl mezi OSPF a RIP a pak se mě na to zeptej.',
+    'Jak na Linuxu nastavím DHCP server? Krok po kroku.',
   ];
 
   const send = async (text: string) => {

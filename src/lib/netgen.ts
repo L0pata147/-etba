@@ -105,7 +105,7 @@ const base = (factKey: string, prompt: string, explanation: string) => ({
 });
 
 function fill(kind: string, i: number, prompt: string, answer: string, accepted: string[], explanation: string, inputLabel = 'Výsledek'): FillQuestion {
-  return { ...base(`${kind}-${i}`, prompt, explanation), id: `gen|${kind}`, type: 'fill', answer, accepted: [answer, ...accepted], exact: true, inputLabel };
+  return { ...base(`${kind}-${i}`, prompt, explanation), id: `gen|${kind}|${i}`, type: 'fill', answer, accepted: [answer, ...accepted], exact: true, inputLabel };
 }
 
 type Gen = (i: number) => Question;
@@ -276,7 +276,7 @@ export const GENERATORS: Record<string, { label: string; gen: Gen }> = {
       const b = same ? net + rnd(1, size - 2) : net + size + rnd(1, size - 2);
       const q: TrueFalseQuestion = {
         ...base(`same-net-${i}`, `Jsou adresy ${intToIp(a)}/${p} a ${intToIp(b >>> 0)}/${p} ve stejné podsíti?`, `Síť první adresy: ${intToIp(net)}/${p}, síť druhé: ${intToIp(networkOf(b >>> 0, p))}/${p} → ${same ? 'stejná síť' : 'různé sítě'}.`),
-        id: 'gen|same-net',
+        id: `gen|same-net|${i}`,
         type: 'truefalse',
         isTrue: same,
       };
@@ -294,7 +294,7 @@ export const GENERATORS: Record<string, { label: string; gen: Gen }> = {
       const options = shuffle([port, ...others]);
       const q: AbcQuestion = {
         ...base(`port-${i}`, `Na jakém portu standardně běží ${svc}?`, `${svc} = port ${port}.`),
-        id: 'gen|port',
+        id: `gen|port|${i}`,
         type: 'abc',
         options,
         correctIndex: options.indexOf(port),
