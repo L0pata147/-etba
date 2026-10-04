@@ -3,7 +3,7 @@ import { AREA_MAP } from '../data/osnova';
 import { generateBookQuestions, generateGlobalQuestions, generateNonArtQuestions, generateTermQuestions } from './generator';
 import { areaMastery, masteryKey, masteryValue } from './progress';
 import { shuffle, weightedSample } from './random';
-import { buildSitePool, type SitePoolOptions } from './topicgen';
+import { buildSubjectPool, type ItSubject, type SitePoolOptions } from './topicgen';
 
 export const DIFFICULTY_TYPES: Record<Difficulty, QuestionType[]> = {
   easy: ['abc', 'truefalse', 'flashcard'],
@@ -60,8 +60,8 @@ export interface SessionConfig {
   bySection?: boolean;
   /** Pro každou oblast jen N otázek */
   perArea?: number;
-  /** Předmět – výchozí čeština (literatura); 'all' = všechny předměty */
-  subject?: SubjectId | 'all';
+  /** Předmět – výchozí čeština (literatura); 'all' = všechny předměty, 'it' = všechny IT předměty */
+  subject?: SubjectId | 'all' | 'it';
   /** Výběr z Počítačových sítí (témata, příkazy, postupy, výpočty) */
   site?: SitePoolOptions;
 }
@@ -69,11 +69,19 @@ export interface SessionConfig {
 /** Celý obsah sítí – pro opakování a mix */
 export const ALL_SITE: SitePoolOptions = { commands: ['cisco', 'linux', 'windows'], procedures: true, calc: true };
 
+/** Celý obsah jednotlivých IT předmětů */
+export const ALL_OPTIONS: Record<ItSubject, SitePoolOptions> = {
+  site: ALL_SITE,
+  hw: { calc: true },
+  cloud: { commands: ['docker', 'hyperv', 'proxmox'], procedures: true },
+};
+
 /** Všechny otázky pro dané knihy + pojmy + neumělecké texty */
 export function buildPool(books: Book[], allBooks: Book[], cfg: Partial<SessionConfig> = {}): Question[] {
   const subject = cfg.subject ?? 'cjl';
-  const pool: Question[] = subject === 'cjl' ? [] : buildSitePool(cfg.site ?? ALL_SITE);
-  if (subject === 'site') return pool;
+  if (subject === 'site' || subject === 'hw' || subject === 'cloud') return buildSubjectPool(subject, cfg.site ?? ALL_OPTIONS[subject]);
+  const pool: Question[] = subject === 'cjl' ? [] : (['site', 'hw', 'cloud'] as const).flatMap((s) => buildSubjectPool(s, cfg.site ?? ALL_OPTIONS[s]));
+  if (subject === 'it') return pool;
   for (const b of books) pool.push(...generateBookQuestions(b, allBooks));
   if (cfg.includeGlobal !== false && books.length >= 3) pool.push(...generateGlobalQuestions(books));
   if (cfg.includeTerms) pool.push(...generateTermQuestions(undefined, cfg.termIds));

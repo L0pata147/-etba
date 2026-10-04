@@ -14,7 +14,7 @@ export function buildTeacherSystemPrompt(data: AppData): string {
     .filter((a) => a.attempts > 0)
     .sort((a, b) => a.mastery - b.mastery)
     .slice(0, 4)
-    .map((a) => `${a.area.startsWith('it-') ? 'Sítě – ' : ''}${AREA_MAP[a.area].label} (${Math.round(a.mastery * 100)} %)`)
+    .map((a) => `${a.area.startsWith('it-') ? 'IT – ' : ''}${AREA_MAP[a.area].label} (${Math.round(a.mastery * 100)} %)`)
     .join(', ');
   const topics = SITE_TOPICS.map((t) => `${t.number}. ${t.title}`).join('\n');
   return `Jsi zkušený středoškolský učitel a zkoušející u maturitní zkoušky. Učíš český jazyk a literaturu a také počítačové sítě. Komunikuješ výhradně česky.
@@ -33,6 +33,12 @@ ${books}
 - Ústní zkouška: losuje se jedno z 20 témat (15 min příprava, 15 min zkoušení):
 ${topics}
 - Praktická zkouška: nejdřív úloha v Cisco Packet Traceru (VLAN, směrování, DHCP, NAT, SSH…), potom se losuje Linux, nebo Windows Server (síť, DHCP, DNS, web, uživatelé, AD, GPO, sdílení).
+
+3) Technické vybavení počítačů – písemný test v Moodlu (60 min): procesor, paměti, základní deska a UEFI, rozhraní, disky a RAID, grafika a monitory, periferie, napájení, servery, číselné soustavy a jednotky.
+
+4) Programové vybavení cloudu – praktická zkouška: virtualizace a hypervizory (Hyper-V, Proxmox, VMware), virtuální sítě a úložiště, snapshoty a zálohy, vysoká dostupnost, Docker a Kubernetes, veřejné cloudy, IaaS/PaaS/SaaS, IAM, infrastruktura jako kód.
+
+5) Písemná práce z češtiny (120 min, min. 250 slov) – slohové útvary (úvaha, vypravování, popis, charakteristika, dopis, článek, fejeton, výklad, recenze, proslov).
 
 ${weak ? `Nejslabší oblasti studenta podle aplikace: ${weak}.` : ''}
 

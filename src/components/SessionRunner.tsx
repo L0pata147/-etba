@@ -1,4 +1,4 @@
-import { siteItemLabel } from '../lib/topicgen';
+import { itemLabel } from '../lib/topicgen';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Flag, RotateCcw, Timer, X } from 'lucide-react';
@@ -23,7 +23,7 @@ export function bookLabel(bookId: string, books: { id: string; title: string }[]
   if (bookId === 'global') return 'Více děl';
   if (bookId === 'terms') return 'Literární pojmy';
   if (bookId.startsWith('nonart')) return 'Neumělecký text';
-  if (bookId.startsWith('site-')) return siteItemLabel(bookId) ?? 'Počítačové sítě';
+  if (/^(site|hw|cloud)-/.test(bookId)) return itemLabel(bookId) ?? 'IT předmět';
   return books.find((b) => b.id === bookId)?.title ?? 'Kniha';
 }
 

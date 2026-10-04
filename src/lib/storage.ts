@@ -34,6 +34,7 @@ export function defaultData(): AppData {
     badges: {},
     plan: null,
     settings: { ...DEFAULT_SETTINGS },
+    writings: [],
   };
 }
 
@@ -67,6 +68,7 @@ export function migrate(raw: unknown): AppData {
     badges: r.badges ?? {},
     plan: r.plan ?? null,
     settings: { ...base.settings, ...(r.settings ?? {}) },
+    writings: Array.isArray(r.writings) ? r.writings : [],
   };
 }
 

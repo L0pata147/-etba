@@ -5,6 +5,11 @@ import {
   BookOpen,
   Bot,
   CalendarDays,
+  ClipboardList,
+  Cloud,
+  Cpu,
+  PenLine,
+  Server,
   Dumbbell,
   GraduationCap,
   Home,
@@ -40,10 +45,15 @@ const NAV: NavItem[] = [
   { to: '/simulace', label: 'Simulace maturity', icon: GraduationCap },
   { to: '/pojmy', label: 'Literární pojmy', icon: BookOpen },
   { to: '/neumelecky', label: 'Neumělecký text', icon: Newspaper },
+  { to: '/sloh', label: 'Písemná práce', icon: PenLine },
   { to: '/site', label: 'Ústní témata', icon: Network, end: true, group: 'Počítačové sítě' },
   { to: '/site/losovani', label: 'Simulace ústní', icon: Shuffle },
   { to: '/site/prakticka', label: 'Praktická zkouška', icon: Terminal },
   { to: '/site/trenink', label: 'Trénink sítí', icon: Dumbbell },
+  { to: '/hw', label: 'Okruhy a převody', icon: Cpu, end: true, group: 'Technické vybavení PC' },
+  { to: '/hw/test', label: 'Cvičný test', icon: ClipboardList },
+  { to: '/cloud', label: 'Okruhy', icon: Cloud, end: true, group: 'Programové vybavení cloudu' },
+  { to: '/cloud/prakticka', label: 'Praktická zkouška', icon: Server },
   { to: '/doucit', label: 'Musím se doučit', icon: TriangleAlert, group: 'Všechny předměty' },
   { to: '/pokrok', label: 'Můj pokrok', icon: BarChart3 },
   { to: '/plan', label: 'Studijní plán', icon: CalendarDays },
@@ -51,7 +61,8 @@ const NAV: NavItem[] = [
   { to: '/nastaveni', label: 'Nastavení', icon: Settings },
 ];
 
-const MOBILE: NavItem[] = [NAV[0], NAV[1], { ...NAV[6], label: 'Sítě', end: false }, NAV[11]];
+const byPath = (to: string) => NAV.find((n) => n.to === to)!;
+const MOBILE: NavItem[] = [byPath('/'), byPath('/knihy'), { ...byPath('/site'), label: 'Sítě', end: false }, byPath('/pokrok')];
 
 export function useTheme() {
   const { data, updateSettings } = useStore();
@@ -231,7 +242,7 @@ function Brand({ compact }: { compact?: boolean }) {
       </div>
       <div className="leading-tight">
         <div className="font-extrabold tracking-tight">Maturitní trenér</div>
-        {!compact && <div className="text-xs text-slate-500 dark:text-slate-400">Čeština · Počítačové sítě</div>}
+        {!compact && <div className="text-xs text-slate-500 dark:text-slate-400">Maturita IT – 4 předměty</div>}
       </div>
     </NavLink>
   );

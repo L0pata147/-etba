@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import type { AnswerResult, AppData, Book, Question, SessionRecord, Settings, StudyPlan } from './types';
+import type { AnswerResult, AppData, Book, Question, SessionRecord, Settings, StudyPlan, Writing } from './types';
 import { defaultData, loadData, saveData } from './lib/storage';
 import { dayKey, gradeFromScore, masteryKey, questionBookIds, updateMastery, updateSrs } from './lib/progress';
 import { BADGES } from './lib/insights';
@@ -23,6 +23,8 @@ interface Store {
   removeUnknown: (id: string) => void;
   updateSettings: (patch: Partial<Settings>) => void;
   setPlan: (plan: StudyPlan | null) => void;
+  saveWriting: (w: Writing) => void;
+  deleteWriting: (id: string) => void;
   replaceAll: (data: AppData) => void;
   resetAll: () => void;
   toasts: Toast[];
@@ -159,6 +161,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }),
       updateSettings: (patch) => update((d) => ({ ...d, settings: { ...d.settings, ...patch } })),
       setPlan: (plan) => update((d) => ({ ...d, plan })),
+      saveWriting: (w) => update((d) => ({ ...d, writings: [w, ...d.writings.filter((x) => x.id !== w.id)].slice(0, 100) })),
+      deleteWriting: (id) => update((d) => ({ ...d, writings: d.writings.filter((x) => x.id !== id) })),
       replaceAll: (next) => update(() => next, true),
       resetAll: () => update(() => defaultData()),
     }),

@@ -1,7 +1,10 @@
 import type { AbcQuestion, Difficulty, FillQuestion, FlashcardQuestion, OpenQuestion, OrderQuestion, Platform, Question, Topic, TrueFalseQuestion } from '../types';
+import type { SubjectId } from '../types';
 import { SITE_TOPICS } from '../data/site';
-import { COMMANDS, PLATFORM_LABEL } from '../data/site/commands';
-import { PROCEDURES } from '../data/site/procedures';
+import { ALL_TOPIC_MAP, SUBJECT_TOPICS } from '../data/subjects';
+import { ALL_COMMANDS, PLATFORM_LABEL } from '../data/site/commands';
+import { ALL_PROCEDURES } from '../data/site/procedures';
+import { generateHwCalcQuestions } from './hwgen';
 import { pick, sample, shuffle, uniqueStrings } from './random';
 import { autoPoints } from './text';
 import { generateCalcQuestions } from './netgen';
@@ -34,7 +37,7 @@ export function topicExamQuestion(t: Topic): OpenQuestion {
   };
 }
 
-export function generateTopicQuestions(t: Topic, all: Topic[] = SITE_TOPICS): Question[] {
+export function generateTopicQuestions(t: Topic, all: Topic[] = t.subject === 'cjl' ? SITE_TOPICS : SUBJECT_TOPICS[t.subject]): Question[] {
   const qs: Question[] = [];
   const otherTerms = all.filter((x) => x.id !== t.id).flatMap((x) => x.terms);
 
@@ -115,11 +118,15 @@ export function generateTopicQuestions(t: Topic, all: Topic[] = SITE_TOPICS): Qu
   return qs;
 }
 
+const CLOUD_PLATFORMS: Platform[] = ['docker', 'hyperv', 'proxmox'];
+/** Předmět, ke kterému platforma patří */
+export const platformSubject = (p: Platform): 'site' | 'cloud' => (CLOUD_PLATFORMS.includes(p) ? 'cloud' : 'site');
+
 /** Otázky trenažéru příkazů */
 export function generateCommandQuestions(platforms: Platform[] = ['cisco', 'linux', 'windows']): Question[] {
   const qs: Question[] = [];
-  for (const c of COMMANDS.filter((x) => platforms.includes(x.platform))) {
-    const bookId = `site-prikazy-${c.platform}`;
+  for (const c of ALL_COMMANDS.filter((x) => platforms.includes(x.platform))) {
+    const bookId = `${platformSubject(c.platform)}-prikazy-${c.platform}`;
     const exp = `${c.command}${c.note ? `\n${c.note}` : ''}${c.accepted?.length ? `\nTaké lze: ${c.accepted.slice(0, 3).join(' · ')}` : ''}`;
     const fill: FillQuestion = {
       ...mk(bookId, 'it-prikazy', c.id, 'medium', `${PLATFORM_LABEL[c.platform]} · ${c.group}\n${c.task}`, exp),
@@ -132,7 +139,7 @@ export function generateCommandQuestions(platforms: Platform[] = ['cisco', 'linu
       inputLabel: 'Napiš příkaz',
     };
     qs.push(fill);
-    const same = COMMANDS.filter((x) => x.platform === c.platform && x.id !== c.id).map((x) => x.command);
+    const same = ALL_COMMANDS.filter((x) => x.platform === c.platform && x.id !== c.id).map((x) => x.command);
     const options = shuffle([c.command, ...sample(uniqueStrings(same, [c.command]), 3)]);
     const abc: AbcQuestion = {
       ...mk(bookId, 'it-prikazy', c.id, 'easy', `${PLATFORM_LABEL[c.platform]}: ${c.task}`, exp),
@@ -148,8 +155,8 @@ export function generateCommandQuestions(platforms: Platform[] = ['cisco', 'linu
 
 /** Seřazování kroků postupů */
 export function generateProcedureQuestions(platforms: Platform[] = ['cisco', 'linux', 'windows']): Question[] {
-  return PROCEDURES.filter((p) => platforms.includes(p.platform) && p.steps.length >= 3).map((p): Question => ({
-    ...mk(`site-postupy-${p.platform}`, 'it-postupy', p.id, 'medium', `${PLATFORM_LABEL[p.platform]} – ${p.title}\nSeřaď kroky postupu ve správném pořadí.`, p.steps.map((s, i) => `${i + 1}. ${s.text}${s.cmd ? `\n   ${s.cmd.split('\n')[0]}` : ''}`).join('\n')),
+  return ALL_PROCEDURES.filter((p) => platforms.includes(p.platform) && p.steps.length >= 3).map((p): Question => ({
+    ...mk(`${platformSubject(p.platform)}-postupy-${p.platform}`, 'it-postupy', p.id, 'medium', `${PLATFORM_LABEL[p.platform]} – ${p.title}\nSeřaď kroky postupu ve správném pořadí.`, p.steps.map((s, i) => `${i + 1}. ${s.text}${s.cmd ? `\n   ${s.cmd.split('\n')[0]}` : ''}`).join('\n')),
     id: `${p.id}|order`,
     type: 'order',
     items: p.steps.map((s) => s.text),
@@ -164,24 +171,37 @@ export interface SitePoolOptions {
   calc?: boolean;
 }
 
-/** Všechny otázky z Počítačových sítí podle výběru */
-export function buildSitePool(opts: SitePoolOptions): Question[] {
+export type ItSubject = Exclude<SubjectId, 'cjl'>;
+
+/** Všechny otázky z IT předmětu podle výběru */
+export function buildSubjectPool(subject: ItSubject, opts: SitePoolOptions): Question[] {
   const out: Question[] = [];
+  const all = SUBJECT_TOPICS[subject];
   if (opts.topics !== false) {
-    const topics = opts.topicIds?.length ? SITE_TOPICS.filter((t) => opts.topicIds!.includes(t.id)) : SITE_TOPICS;
-    for (const t of topics) out.push(...generateTopicQuestions(t));
+    const topics = opts.topicIds?.length ? all.filter((t) => opts.topicIds!.includes(t.id)) : all;
+    // pozn.: když vybraná témata patří jinému předmětu, z tohoto se nevezme žádné
+    for (const t of topics) out.push(...generateTopicQuestions(t, all));
   }
-  if (opts.commands?.length) out.push(...generateCommandQuestions(opts.commands));
-  if (opts.procedures) out.push(...generateProcedureQuestions(opts.commands?.length ? opts.commands : undefined));
-  if (opts.calc) out.push(...generateCalcQuestions(3));
+  const platforms = opts.commands?.filter((p) => platformSubject(p) === subject) ?? [];
+  if (platforms.length) out.push(...generateCommandQuestions(platforms));
+  if (opts.procedures && platforms.length) out.push(...generateProcedureQuestions(platforms));
+  if (opts.calc) out.push(...(subject === 'hw' ? generateHwCalcQuestions(3) : subject === 'site' ? generateCalcQuestions(3) : []));
   return out;
 }
 
-/** Popisek „knihy“ pro otázky ze sítí */
-export function siteItemLabel(id: string): string | null {
-  if (id === 'site-vypocty') return 'Sítě – výpočty';
-  if (id.startsWith('site-prikazy-')) return `Příkazy – ${PLATFORM_LABEL[id.replace('site-prikazy-', '') as Platform]}`;
-  if (id.startsWith('site-postupy-')) return `Postupy – ${PLATFORM_LABEL[id.replace('site-postupy-', '') as Platform]}`;
-  const t = SITE_TOPICS.find((x) => x.id === id);
-  return t ? `Sítě ${t.number}: ${t.title}` : null;
+/** Otázky z Počítačových sítí podle výběru */
+export const buildSitePool = (opts: SitePoolOptions) => buildSubjectPool('site', opts);
+
+const SUBJECT_SHORT: Record<ItSubject, string> = { site: 'Sítě', hw: 'Hardware', cloud: 'Cloud' };
+
+/** Popisek „knihy“ pro otázky z IT předmětů */
+export function itemLabel(id: string): string | null {
+  const m = id.match(/^(site|hw|cloud)-(vypocty|prikazy|postupy)(?:-(.+))?$/);
+  if (m) {
+    const [, subj, kind, platform] = m;
+    if (kind === 'vypocty') return `${SUBJECT_SHORT[subj as ItSubject]} – výpočty`;
+    return `${kind === 'prikazy' ? 'Příkazy' : 'Postupy'} – ${PLATFORM_LABEL[platform as Platform] ?? platform}`;
+  }
+  const t = ALL_TOPIC_MAP[id];
+  return t ? `${SUBJECT_SHORT[t.subject as ItSubject]} ${t.number}: ${t.title}` : null;
 }

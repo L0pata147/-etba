@@ -1,4 +1,5 @@
 import type { Procedure } from '../../types';
+import { CLOUD_PROCEDURES } from '../cloud/procedures';
 
 /** Postupy k praktické zkoušce – jak typickou úlohu nastavit krok za krokem */
 export const PROCEDURES: Procedure[] = [
@@ -285,3 +286,6 @@ export const PROCEDURES: Procedure[] = [
     ],
   },
 ];
+
+/** Postupy všech předmětů (sítě + cloud) */
+export const ALL_PROCEDURES: Procedure[] = [...PROCEDURES, ...CLOUD_PROCEDURES];

@@ -191,7 +191,7 @@ function AreaList({ items }: { items: { area: keyof typeof AREA_MAP; mastery: nu
       {items.map((a) => (
         <li key={a.area}>
           <div className="mb-1 flex justify-between text-sm">
-            <span className="font-medium">{a.area.startsWith('it-') ? `Sítě – ${AREA_MAP[a.area].label.toLowerCase()}` : AREA_MAP[a.area].label}</span>
+            <span className="font-medium">{a.area.startsWith('it-') ? `IT – ${AREA_MAP[a.area].label.toLowerCase()}` : AREA_MAP[a.area].label}</span>
             <span className="tabular-nums text-slate-500">
               {Math.round(a.mastery * 100)} % · {a.attempts}×
             </span>

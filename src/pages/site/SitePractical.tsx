@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Calculator, Check, Dices, Eye, EyeOff, ListOrdered, RefreshCw, Terminal } from 'lucide-react';
 import type { Platform } from '../../types';
-import { COMMANDS, COMMAND_GROUPS, PLATFORM_LABEL } from '../../data/site/commands';
-import { PROCEDURES } from '../../data/site/procedures';
+import { ALL_COMMANDS, COMMAND_GROUPS, PLATFORM_LABEL } from '../../data/site/commands';
+import { ALL_PROCEDURES } from '../../data/site/procedures';
 import { GENERATORS, generateCalcQuestions, generateScenario, type Scenario, type ScenarioTask } from '../../lib/netgen';
 import { generateCommandQuestions } from '../../lib/topicgen';
 import { sample, shuffle } from '../../lib/random';
@@ -65,27 +65,7 @@ function ScenarioTab() {
   };
 
   const task = (t: ScenarioTask, i: number) => (
-    <div key={t.id} className={cx('rounded-xl border p-4 transition', done.has(t.id) ? 'border-emerald-300 bg-emerald-50/60 dark:border-emerald-800 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-800')}>
-      <div className="flex items-start gap-3">
-        <button
-          onClick={() => setDone((s) => flip(s, t.id))}
-          className={cx('mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md border-2', done.has(t.id) ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 dark:border-slate-600')}
-          aria-label={done.has(t.id) ? 'Označit jako nesplněné' : 'Označit jako splněné'}
-        >
-          {done.has(t.id) && <Check size={16} />}
-        </button>
-        <div className="min-w-0 flex-1">
-          <div className="font-semibold">
-            {i + 1}. {t.title}
-          </div>
-          <p className="mt-1 text-[15px] text-slate-600 dark:text-slate-300">{t.detail}</p>
-          <button onClick={() => setOpen((s) => flip(s, t.id))} className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-400">
-            {open.has(t.id) ? <EyeOff size={15} /> : <Eye size={15} />} {open.has(t.id) ? 'Skrýt řešení' : 'Ukázat řešení'}
-          </button>
-          {open.has(t.id) && <pre className="mt-2 whitespace-pre-wrap break-words rounded-lg bg-slate-900 p-3 font-mono text-[13px] leading-relaxed text-slate-100">{t.solution}</pre>}
-        </div>
-      </div>
-    </div>
+    <TaskCard key={t.id} t={t} i={i} done={done.has(t.id)} open={open.has(t.id)} onDone={() => setDone((s) => flip(s, t.id))} onOpen={() => setOpen((s) => flip(s, t.id))} />
   );
 
   return (
@@ -158,14 +138,14 @@ function ScenarioTab() {
 
 // ---------- Příkazy ----------
 
-function CommandsTab() {
+export function CommandsTab({ platforms = PLATFORMS }: { platforms?: Platform[] }) {
   const start = useStartSession();
-  const [platform, setPlatform] = useState<Platform>('cisco');
+  const [platform, setPlatform] = useState<Platform>(platforms[0]);
   const [group, setGroup] = useState<string>('');
   const [hide, setHide] = useState(false);
   const [shown, setShown] = useState<Set<string>>(new Set());
   const groups = COMMAND_GROUPS(platform);
-  const list = COMMANDS.filter((c) => c.platform === platform && (!group || c.group === group));
+  const list = ALL_COMMANDS.filter((c) => c.platform === platform && (!group || c.group === group));
 
   const trainGroup = () => {
     const qs = generateCommandQuestions([platform]).filter((q) => list.some((c) => q.factKey === c.id));
@@ -183,7 +163,7 @@ function CommandsTab() {
             setGroup('');
             setShown(new Set());
           }}
-          options={PLATFORMS.map((p) => ({ value: p, label: PLATFORM_LABEL[p] }))}
+          options={platforms.map((p) => ({ value: p, label: PLATFORM_LABEL[p] }))}
         />
         <select value={group} onChange={(e) => setGroup(e.target.value)} aria-label="Skupina příkazů" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
           <option value="">Všechny skupiny</option>
@@ -229,14 +209,14 @@ function CommandsTab() {
 
 // ---------- Postupy ----------
 
-function ProceduresTab() {
+export function ProceduresTab({ platforms = PLATFORMS }: { platforms?: Platform[] }) {
   const start = useStartSession();
-  const [platform, setPlatform] = useState<Platform>('cisco');
-  const list = PROCEDURES.filter((p) => p.platform === platform);
+  const [platform, setPlatform] = useState<Platform>(platforms[0]);
+  const list = ALL_PROCEDURES.filter((p) => p.platform === platform);
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Segmented value={platform} onChange={setPlatform} options={PLATFORMS.map((p) => ({ value: p, label: PLATFORM_LABEL[p] }))} />
+        <Segmented value={platform} onChange={setPlatform} options={platforms.map((p) => ({ value: p, label: PLATFORM_LABEL[p] }))} />
         <Button icon={<ListOrdered size={17} />} onClick={() => start(proceduresConfig([platform], `Postupy ${PLATFORM_LABEL[platform]} – seřaď kroky`))}>
           Seřazování kroků
         </Button>
@@ -288,6 +268,33 @@ function CalcTab() {
             <div className="mt-1 text-sm text-slate-500">8 příkladů →</div>
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/** Úkol zadání s odškrtnutím a skrytým řešením */
+export function TaskCard({ t, i, done, open, onDone, onOpen }: { t: ScenarioTask; i: number; done: boolean; open: boolean; onDone: () => void; onOpen: () => void }) {
+  return (
+    <div className={cx('rounded-xl border p-4 transition', done ? 'border-emerald-300 bg-emerald-50/60 dark:border-emerald-800 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-800')}>
+      <div className="flex items-start gap-3">
+        <button
+          onClick={onDone}
+          className={cx('mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md border-2', done ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 dark:border-slate-600')}
+          aria-label={done ? 'Označit jako nesplněné' : 'Označit jako splněné'}
+        >
+          {done && <Check size={16} />}
+        </button>
+        <div className="min-w-0 flex-1">
+          <div className="font-semibold">
+            {i + 1}. {t.title}
+          </div>
+          <p className="mt-1 text-[15px] text-slate-600 dark:text-slate-300">{t.detail}</p>
+          <button onClick={onOpen} className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-400">
+            {open ? <EyeOff size={15} /> : <Eye size={15} />} {open ? 'Skrýt řešení' : 'Ukázat řešení'}
+          </button>
+          {open && <pre className="mt-2 whitespace-pre-wrap break-words rounded-lg bg-slate-900 p-3 font-mono text-[13px] leading-relaxed text-slate-100">{t.solution}</pre>}
+        </div>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff, Mic, Shuffle } from 'lucide-react';
 import { useStore } from '../../store';
-import { SITE_TOPICS, TOPIC_MAP } from '../../data/site';
+import { ALL_TOPIC_MAP, SUBJECTS, SUBJECT_TOPICS } from '../../data/subjects';
 import { areaMastery, topicProgress } from '../../lib/progress';
 import { topicExamQuestion } from '../../lib/topicgen';
 import { AREA_MAP } from '../../data/osnova';
@@ -23,13 +23,15 @@ function TopicInner({ id }: { id?: string }) {
   const [tab, setTab] = useState<Tab>('vyklad');
   const [hidden, setHidden] = useState(false);
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
-  const t = id ? TOPIC_MAP[id] : undefined;
-  if (!t) return <EmptyState icon="❓" title="Téma nenalezeno" action={<Button to="/site">Zpět na témata</Button>} />;
+  const t = id ? ALL_TOPIC_MAP[id] : undefined;
+  if (!t || t.subject === 'cjl') return <EmptyState icon="❓" title="Téma nenalezeno" action={<Button to="/site">Zpět na témata</Button>} />;
+  const list = SUBJECT_TOPICS[t.subject];
+  const home = SUBJECTS[t.subject].path;
 
   const p = topicProgress(data, t.id);
-  const idx = SITE_TOPICS.findIndex((x) => x.id === t.id);
-  const prev = SITE_TOPICS[idx - 1];
-  const next = SITE_TOPICS[idx + 1];
+  const idx = list.findIndex((x) => x.id === t.id);
+  const prev = list[idx - 1];
+  const next = list[idx + 1];
   const toggleReveal = (i: number) =>
     setRevealed((s) => {
       const n = new Set(s);
@@ -40,8 +42,8 @@ function TopicInner({ id }: { id?: string }) {
 
   return (
     <div>
-      <Button variant="ghost" size="sm" icon={<ArrowLeft size={16} />} to="/site" className="mb-3">
-        Všechna témata
+      <Button variant="ghost" size="sm" icon={<ArrowLeft size={16} />} to={home} className="mb-3">
+        {SUBJECTS[t.subject].emoji} {SUBJECTS[t.subject].short} – všechna témata
       </Button>
       <PageHeader title={`${t.number}. ${t.title}`} sub={t.summary} />
 
@@ -78,9 +80,11 @@ function TopicInner({ id }: { id?: string }) {
           >
             Vyložit celé téma
           </Button>
-          <Button size="sm" variant="secondary" icon={<Shuffle size={16} />} to={`/site/losovani?tema=${t.id}`}>
-            Simulace s tímto tématem
-          </Button>
+          {t.subject === 'site' && (
+            <Button size="sm" variant="secondary" icon={<Shuffle size={16} />} to={`/site/losovani?tema=${t.id}`}>
+              Simulace s tímto tématem
+            </Button>
+          )}
         </div>
       </Card>
 
@@ -149,14 +153,14 @@ function TopicInner({ id }: { id?: string }) {
 
       <div className="mt-6 flex justify-between gap-2">
         {prev ? (
-          <Button variant="secondary" size="sm" to={`/site/tema/${prev.id}`}>
+          <Button variant="secondary" size="sm" to={`/tema/${prev.id}`}>
             ← {prev.number}. {prev.title}
           </Button>
         ) : (
           <span />
         )}
         {next && (
-          <Button variant="secondary" size="sm" to={`/site/tema/${next.id}`}>
+          <Button variant="secondary" size="sm" to={`/tema/${next.id}`}>
             {next.number}. {next.title} →
           </Button>
         )}

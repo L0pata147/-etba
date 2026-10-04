@@ -1,0 +1,102 @@
+import type { Procedure } from '../../types';
+
+/** Postupy k praktické zkoušce z Programového vybavení cloudu */
+export const CLOUD_PROCEDURES: Procedure[] = [
+  {
+    id: 'hv-vm',
+    platform: 'hyperv',
+    title: 'Hyper-V: nový virtuální server',
+    goal: 'Připravit virtuální přepínač, vytvořit VM, nainstalovat do ní OS a nastavit síť.',
+    steps: [
+      { text: 'Nainstalovat roli Hyper-V a restartovat server', cmd: 'Install-WindowsFeature -Name Hyper-V -IncludeManagementTools -Restart' },
+      { text: 'Vytvořit virtuální přepínač (externí pro přístup ven, interní/privátní pro oddělenou síť)', cmd: 'New-VMSwitch -Name LAN -SwitchType Internal' },
+      { text: 'Vytvořit VM 2. generace s pamětí a novým diskem', cmd: 'New-VM -Name SRV1 -Generation 2 -MemoryStartupBytes 4GB -NewVHDPath C:\\VM\\SRV1.vhdx -NewVHDSizeBytes 60GB -SwitchName LAN' },
+      { text: 'Nastavit počet procesorů a dynamickou paměť', cmd: 'Set-VMProcessor -VMName SRV1 -Count 2\nSet-VMMemory -VMName SRV1 -DynamicMemoryEnabled $true' },
+      { text: 'Připojit instalační ISO a nastavit z něj start', cmd: 'Add-VMDvdDrive -VMName SRV1 -Path C:\\ISO\\server.iso\nSet-VMFirmware -VMName SRV1 -FirstBootDevice (Get-VMDvdDrive -VMName SRV1)' },
+      { text: 'Spustit VM, nainstalovat OS a nastavit statickou IP', cmd: 'Start-VM -Name SRV1\nvmconnect localhost SRV1' },
+      { text: 'Před dalšími změnami vytvořit kontrolní bod', cmd: 'Checkpoint-VM -Name SRV1 -SnapshotName PoInstalaci' },
+    ],
+  },
+  {
+    id: 'hv-ha',
+    platform: 'hyperv',
+    title: 'Hyper-V: převzetí služeb při selhání (failover cluster)',
+    goal: 'Zajistit vysokou dostupnost VM na dvou hostitelích se sdíleným úložištěm.',
+    steps: [
+      { text: 'Na oba hostitele nainstalovat Hyper-V a Failover Clustering, být ve stejné doméně', cmd: 'Install-WindowsFeature Failover-Clustering -IncludeManagementTools' },
+      { text: 'Připojit sdílené úložiště (iSCSI / SAN) k oběma uzlům' },
+      { text: 'Ověřit konfiguraci clusteru', cmd: 'Test-Cluster -Node HV1,HV2' },
+      { text: 'Vytvořit cluster s vlastní IP adresou', cmd: 'New-Cluster -Name HVCLUSTER -Node HV1,HV2 -StaticAddress 192.168.1.50' },
+      { text: 'Přidat disk do sdílených svazků clusteru (CSV) a uložit na něj VM' },
+      { text: 'Přidat VM jako roli clusteru a vyzkoušet živou migraci / výpadek uzlu', cmd: 'Add-ClusterVirtualMachineRole -VMName SRV1\nMove-ClusterVirtualMachineRole -Name SRV1 -Node HV2' },
+    ],
+  },
+  {
+    id: 'px-vm',
+    platform: 'proxmox',
+    title: 'Proxmox VE: VM ze šablony a záloha',
+    goal: 'Vytvořit VM, připravit z ní šablonu, naklonovat ji a nastavit zálohování.',
+    steps: [
+      { text: 'Nahrát instalační ISO do úložiště local (ISO Images)' },
+      { text: 'Vytvořit VM (ID, název, ISO, disk, CPU, RAM, síť na mostu vmbr0)', cmd: 'qm create 100 --name sablona --memory 2048 --cores 2 --net0 virtio,bridge=vmbr0' },
+      { text: 'Nainstalovat OS a qemu-guest-agent, systém aktualizovat' },
+      { text: 'Převést VM na šablonu', cmd: 'qm template 100' },
+      { text: 'Vytvořit z šablony nový server', cmd: 'qm clone 100 101 --name web --full' },
+      { text: 'Spustit VM a vytvořit snapshot', cmd: 'qm start 101\nqm snapshot 101 pred-zmenou' },
+      { text: 'Naplánovat zálohu (Datacenter → Backup) nebo zálohovat ručně', cmd: 'vzdump 101 --storage local --mode snapshot' },
+    ],
+  },
+  {
+    id: 'px-ha',
+    platform: 'proxmox',
+    title: 'Proxmox VE: cluster a vysoká dostupnost',
+    goal: 'Spojit uzly do clusteru a zajistit automatický restart VM na jiném uzlu.',
+    steps: [
+      { text: 'Na prvním uzlu vytvořit cluster', cmd: 'pvecm create lab' },
+      { text: 'Na dalších uzlech se připojit do clusteru', cmd: 'pvecm add 192.168.1.10' },
+      { text: 'Ověřit stav clusteru a kvóra (ideálně lichý počet uzlů)', cmd: 'pvecm status' },
+      { text: 'Připravit sdílené úložiště (NFS, iSCSI, Ceph) dostupné všem uzlům' },
+      { text: 'Přidat VM pod správu HA', cmd: 'ha-manager add vm:101' },
+      { text: 'Vyzkoušet živou migraci', cmd: 'qm migrate 101 pve2 --online' },
+    ],
+  },
+  {
+    id: 'dk-web',
+    platform: 'docker',
+    title: 'Docker: webový server v kontejneru',
+    goal: 'Nainstalovat Docker a zpřístupnit web z kontejneru s vlastním obsahem.',
+    steps: [
+      { text: 'Nainstalovat Docker a spustit službu', cmd: 'apt install docker.io\nsystemctl enable --now docker' },
+      { text: 'Stáhnout image', cmd: 'docker pull nginx' },
+      { text: 'Spustit kontejner s mapováním portu a připojeným obsahem', cmd: 'docker run -d --name web -p 8080:80 -v /srv/web:/usr/share/nginx/html nginx' },
+      { text: 'Ověřit běh a logy', cmd: 'docker ps\ndocker logs web' },
+      { text: 'Otestovat v prohlížeči http://adresa-serveru:8080', cmd: 'curl http://localhost:8080' },
+    ],
+  },
+  {
+    id: 'dk-build',
+    platform: 'docker',
+    title: 'Docker: vlastní image z Dockerfile',
+    goal: 'Zabalit vlastní web do image a spustit ho.',
+    steps: [
+      { text: 'Napsat Dockerfile se základním image', cmd: 'FROM nginx:alpine' },
+      { text: 'Zkopírovat obsah do image', cmd: 'COPY web /usr/share/nginx/html' },
+      { text: 'Deklarovat port', cmd: 'EXPOSE 80' },
+      { text: 'Sestavit image', cmd: 'docker build -t mujweb .' },
+      { text: 'Spustit kontejner z vlastního image', cmd: 'docker run -d -p 8080:80 --name mujweb mujweb' },
+    ],
+  },
+  {
+    id: 'dk-compose',
+    platform: 'docker',
+    title: 'Docker Compose: web s databází',
+    goal: 'Popsat vícekontejnerovou aplikaci (WordPress + MySQL) jedním souborem.',
+    steps: [
+      { text: 'Vytvořit compose.yaml se službou databáze, heslem a svazkem pro data', cmd: 'services:\n  db:\n    image: mysql:8\n    environment:\n      MYSQL_ROOT_PASSWORD: heslo\n      MYSQL_DATABASE: wp\n    volumes:\n      - dbdata:/var/lib/mysql' },
+      { text: 'Přidat službu webu s mapováním portu a připojením k databázi', cmd: '  wp:\n    image: wordpress\n    ports:\n      - "8080:80"\n    environment:\n      WORDPRESS_DB_HOST: db\n      WORDPRESS_DB_PASSWORD: heslo\n    depends_on:\n      - db\nvolumes:\n  dbdata:' },
+      { text: 'Spustit aplikaci na pozadí', cmd: 'docker compose up -d' },
+      { text: 'Zkontrolovat stav služeb', cmd: 'docker compose ps' },
+      { text: 'Aplikaci zastavit (svazek s daty zůstane)', cmd: 'docker compose down' },
+    ],
+  },
+];

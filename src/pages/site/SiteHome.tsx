@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { Calculator, Dumbbell, Network, Shuffle, Terminal } from 'lucide-react';
 import { useStore } from '../../store';
 import { SITE_TOPICS } from '../../data/site';
 import { sitePracticalProgress, topicLastStudied, topicProgress } from '../../lib/progress';
-import { Button, Card, PageHeader, Pct, ProgressBar, SectionTitle, relativeDays } from '../../components/ui';
+import { Button, Card, PageHeader, Pct, ProgressBar, SectionTitle } from '../../components/ui';
 import { useStartSession } from '../SessionPage';
+import { TopicGrid } from './TopicGrid';
 import { calcConfig, topicConfig } from './common';
 
 export function SiteHome() {
@@ -79,25 +79,7 @@ export function SiteHome() {
       <SectionTitle sub="Klikni na téma – výklad, pojmy, kvíz a trénink." action={<Button size="sm" variant="secondary" to="/site/trenink">Vlastní trénink</Button>}>
         20 témat ústní zkoušky
       </SectionTitle>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {rows.map(({ t, p, last }) => (
-          <Link key={t.id} to={`/site/tema/${t.id}`} className="card block p-4 transition hover:-translate-y-0.5 hover:shadow-md">
-            <div className="flex items-start gap-3">
-              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-100 font-bold text-brand-800 dark:bg-brand-500/20 dark:text-brand-200">{t.number}</div>
-              <div className="min-w-0 flex-1">
-                <div className="font-bold leading-snug">{t.title}</div>
-                <div className="mt-0.5 text-xs text-slate-500">{last ? `naposledy ${relativeDays(last)}` : 'zatím neprocvičeno'}</div>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-2">
-              <ProgressBar value={p} />
-              <span className="w-10 shrink-0 text-right text-xs font-semibold">
-                <Pct value={p} />
-              </span>
-            </div>
-          </Link>
-        ))}
-      </div>
+      <TopicGrid rows={rows} />
     </div>
   );
 }

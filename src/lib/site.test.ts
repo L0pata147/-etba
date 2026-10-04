@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { FillQuestion, Question } from '../types';
 import { SITE_TOPICS } from '../data/site';
+import { ALL_TOPICS } from '../data/subjects';
 import { COMMANDS } from '../data/site/commands';
 import { PROCEDURES } from '../data/site/procedures';
 import {
@@ -22,7 +23,7 @@ import {
   wildcard,
 } from './netgen';
 import { checkFillAnswer, normalizeCommand } from './answers';
-import { buildSitePool, generateCommandQuestions, generateProcedureQuestions, generateTopicQuestions, siteItemLabel, topicExamQuestion } from './topicgen';
+import { buildSitePool, generateCommandQuestions, generateProcedureQuestions, generateTopicQuestions, itemLabel, topicExamQuestion } from './topicgen';
 import { buildSession } from './session';
 import { defaultData } from './storage';
 import { generatePlan } from './insights';
@@ -153,7 +154,7 @@ describe('Témata a otázky ze sítí', () => {
       expect(new Set(qs.map((q) => q.id)).size).toBe(qs.length);
       qs.forEach(validate);
       expect(topicExamQuestion(t).points.length).toBe(t.outline.length);
-      expect(siteItemLabel(t.id)).toContain(t.title);
+      expect(itemLabel(t.id)).toContain(t.title);
     }
   });
   it('postupy, příkazy a scénáře', () => {
@@ -184,12 +185,13 @@ describe('Témata a otázky ze sítí', () => {
     const cjl = buildSession(data, { title: 't', mode: 'm', difficulty: 'medium', bookIds: [], areas: [], types: [], count: 30 });
     expect(cjl.some((q) => q.bookId.startsWith('site-'))).toBe(false);
   });
-  it('studijní plán rozdělí všech 20 témat', () => {
+  it('studijní plán rozdělí všechna témata IT předmětů', () => {
     const data = defaultData();
     const d = new Date();
     d.setDate(d.getDate() + 60);
     const plan = generatePlan(data, d.toISOString().slice(0, 10));
     const ids = plan.weeks.flatMap((w) => w.topicIds ?? []);
-    expect(new Set(ids).size).toBe(20);
+    expect(new Set(ids).size).toBe(ALL_TOPICS.length);
+    for (const t of SITE_TOPICS) expect(ids).toContain(t.id);
   });
 });

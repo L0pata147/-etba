@@ -201,3 +201,16 @@ export function sitePracticalProgress(data: AppData): { cisco: number; linux: nu
     vypocty: p('site-vypocty', 'it-vypocty'),
   };
 }
+
+/** Průměrné zvládnutí témat předmětu */
+export function subjectTopicsProgress(data: AppData, topicIds: string[]): number {
+  return topicIds.length ? topicIds.reduce((s, id) => s + topicProgress(data, id), 0) / topicIds.length : 0;
+}
+
+/** Zvládnutí příkazů a postupů pro dané platformy (cloud) */
+export function cloudPracticalProgress(data: AppData): number {
+  const ps = ['docker', 'hyperv', 'proxmox'];
+  const cmd = ps.reduce((s, p) => s + areaMastery(data, `cloud-prikazy-${p}`, 'it-prikazy'), 0) / ps.length;
+  const proc = ps.reduce((s, p) => s + areaMastery(data, `cloud-postupy-${p}`, 'it-postupy'), 0) / ps.length;
+  return (cmd + proc) / 2;
+}

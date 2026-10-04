@@ -1,4 +1,5 @@
 import type { CommandItem, Platform } from '../../types';
+import { CLOUD_COMMANDS } from '../cloud/commands';
 
 /**
  * Příkazy pro trenažér. `accepted` = další přijatelné zápisy (zkratky).
@@ -24,6 +25,9 @@ export const PLATFORM_LABEL: Record<Platform, string> = {
   cisco: 'Cisco IOS (Packet Tracer)',
   linux: 'Linux (Debian/Ubuntu)',
   windows: 'Windows Server (PowerShell)',
+  docker: 'Docker a kontejnery',
+  hyperv: 'Hyper-V (PowerShell)',
+  proxmox: 'Proxmox VE',
 };
 
 export const COMMANDS: CommandDef[] = [
@@ -158,4 +162,7 @@ export const COMMANDS: CommandDef[] = [
   c('windows', 'Sdílení', 'Zobraz sdílené složky na serveru.', 'Get-SmbShare', ['net share']),
 ];
 
-export const COMMAND_GROUPS = (platform: Platform) => [...new Set(COMMANDS.filter((x) => x.platform === platform).map((x) => x.group))];
+/** Příkazy všech předmětů (sítě + cloud) */
+export const ALL_COMMANDS: CommandDef[] = [...COMMANDS, ...CLOUD_COMMANDS];
+
+export const COMMAND_GROUPS = (platform: Platform) => [...new Set(ALL_COMMANDS.filter((x) => x.platform === platform).map((x) => x.group))];

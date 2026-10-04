@@ -1,11 +1,22 @@
-import type { KeyPoint, Topic } from '../../types';
+import type { KeyPoint, SubjectId, Topic } from '../../types';
 
 type Outline = [heading: string, points: string[]][];
 type Quiz = [q: string, a: string, wrong: string[], why?: string][];
 type Deep = { q: string; answer: string; points: [label: string, keywords: string[]][] }[];
 
-/** Zkrácený zápis tématu */
-export function topic(
+type TopicFn = (number: number, id: string, title: string, summary: string, outline: Outline, terms: [string, string][], quiz: Quiz, deep: Deep) => Topic;
+
+/** Zkrácený zápis tématu pro daný předmět (id = `${předmět}-${id}`) */
+export const topicFor =
+  (subject: SubjectId): TopicFn =>
+  (...args) =>
+    build(subject, ...args);
+
+/** Téma z Počítačových sítí */
+export const topic: TopicFn = topicFor('site');
+
+function build(
+  subject: SubjectId,
   number: number,
   id: string,
   title: string,
@@ -16,8 +27,8 @@ export function topic(
   deep: Deep,
 ): Topic {
   return {
-    id: `site-${id}`,
-    subject: 'site',
+    id: `${subject}-${id}`,
+    subject,
     number,
     title,
     summary,

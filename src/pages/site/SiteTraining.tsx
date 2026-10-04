@@ -1,16 +1,22 @@
 import { useMemo, useState } from 'react';
 import { Play } from 'lucide-react';
 import type { Difficulty, Platform, QuestionType } from '../../types';
-import { SITE_TOPICS } from '../../data/site';
 import { PLATFORM_LABEL } from '../../data/site/commands';
+import { SUBJECTS, SUBJECT_PLATFORMS, SUBJECT_TOPICS } from '../../data/subjects';
+import type { ItSubject } from '../../lib/topicgen';
 import { useStore } from '../../store';
 import { DIFFICULTY_INFO, DIFFICULTY_TYPES, buildPool } from '../../lib/session';
 import { topicProgress } from '../../lib/progress';
 import { Button, Card, PageHeader, Pct, Segmented, SectionTitle, Toggle, cx } from '../../components/ui';
 import { useStartSession } from '../SessionPage';
-import { PLATFORMS, siteConfig } from './common';
+import { siteConfig } from './common';
 
-export function SiteTraining() {
+const CALC_LABEL: Partial<Record<ItSubject, string>> = { site: 'Výpočty (adresace)', hw: 'Převody a výpočty' };
+
+export function SiteTraining({ subject = 'site' }: { subject?: ItSubject }) {
+  const TOPICS = SUBJECT_TOPICS[subject];
+  const PLATFORMS = subject === 'hw' ? [] : SUBJECT_PLATFORMS[subject];
+  const info = SUBJECTS[subject];
   const { data } = useStore();
   const start = useStartSession();
   const [topicIds, setTopicIds] = useState<string[]>([]);
@@ -27,21 +33,21 @@ export function SiteTraining() {
   const types: QuestionType[] = [...DIFFICULTY_TYPES[difficulty], ...(platforms.length || calc ? (['fill'] as QuestionType[]) : []), ...(procedures ? (['order'] as QuestionType[]) : [])];
 
   const cfg = siteConfig(
-    `Sítě – ${DIFFICULTY_INFO[difficulty].label.toLowerCase()} obtížnost${topicIds.length === 1 ? ` – téma ${SITE_TOPICS.find((t) => t.id === topicIds[0])?.number}` : ''}`,
+    `${info.short} – ${DIFFICULTY_INFO[difficulty].label.toLowerCase()} obtížnost${topicIds.length === 1 ? ` – téma ${TOPICS.find((t) => t.id === topicIds[0])?.number}` : ''}`,
     { topics: useTopics, topicIds, commands: platforms, procedures: procedures && platforms.length > 0, calc },
-    { difficulty, count, types, mode: `site-${difficulty}` },
+    { difficulty, count, types, mode: `${subject}-${difficulty}`, subject },
   );
   const site = cfg.site;
   const available = useMemo(() => {
     if (nothing) return 0;
     const set = new Set(types);
-    return buildPool([], [], { subject: 'site', site }).filter((q) => set.has(q.type) && (difficulty !== 'maturita' || q.difficulty === 'maturita' || q.difficulty === 'hard')).length;
+    return buildPool([], [], { subject, site }).filter((q) => set.has(q.type) && (difficulty !== 'maturita' || q.difficulty === 'maturita' || q.difficulty === 'hard')).length;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nothing, JSON.stringify(site), types.join(), difficulty]);
+  }, [nothing, JSON.stringify(site), types.join(), difficulty, subject]);
 
   return (
     <div>
-      <PageHeader title="Trénink – sítě" emoji="🏋️" sub="Poskládej si trénink z témat, příkazů, postupů a výpočtů." />
+      <PageHeader title={`Trénink – ${info.short.toLowerCase()}`} emoji="🏋️" sub={subject === 'hw' ? 'Poskládej si trénink z okruhů a převodů.' : 'Poskládej si trénink z témat, příkazů, postupů a výpočtů.'} />
       <div className="space-y-5">
         <Card className="p-5">
           <SectionTitle>Obtížnost</SectionTitle>
@@ -55,14 +61,14 @@ export function SiteTraining() {
 
         <Card className="p-5">
           <SectionTitle
-            sub={useTopics ? (topicIds.length ? `Vybráno ${topicIds.length} témat` : 'Všech 20 témat') : 'Témata vypnuta'}
-            action={<Toggle checked={useTopics} onChange={setUseTopics} label="Ústní témata" />}
+            sub={useTopics ? (topicIds.length ? `Vybráno ${topicIds.length} témat` : `Všech ${TOPICS.length} témat`) : 'Témata vypnuta'}
+            action={<Toggle checked={useTopics} onChange={setUseTopics} label={subject === 'site' ? 'Ústní témata' : 'Okruhy'} />}
           >
             Témata
           </SectionTitle>
           {useTopics && (
             <div className="grid gap-2 sm:grid-cols-2">
-              {SITE_TOPICS.map((t) => (
+              {TOPICS.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setTopicIds((s) => toggle(s, t.id))}
@@ -83,13 +89,13 @@ export function SiteTraining() {
         </Card>
 
         <Card className="p-5">
-          <SectionTitle sub="Praktická část">Příkazy, postupy, výpočty</SectionTitle>
+          <SectionTitle sub="Praktická část">{subject === 'hw' ? 'Převody a výpočty' : subject === 'cloud' ? 'Příkazy a postupy' : 'Příkazy, postupy, výpočty'}</SectionTitle>
           <div className="flex flex-wrap gap-2">
             {PLATFORMS.map((p) => (
               <Toggle key={p} checked={platforms.includes(p)} onChange={() => setPlatforms((s) => toggle(s, p))} label={`Příkazy ${PLATFORM_LABEL[p]}`} />
             ))}
-            <Toggle checked={procedures} onChange={setProcedures} label="Postupy (seřazování)" />
-            <Toggle checked={calc} onChange={setCalc} label="Výpočty (adresace)" />
+            {PLATFORMS.length > 0 && <Toggle checked={procedures} onChange={setProcedures} label="Postupy (seřazování)" />}
+            {CALC_LABEL[subject] && <Toggle checked={calc} onChange={setCalc} label={CALC_LABEL[subject]!} />}
           </div>
           {procedures && !platforms.length && <p className="mt-2 text-sm text-amber-600">Postupy se berou pro vybrané platformy – zapni aspoň jednu.</p>}
         </Card>

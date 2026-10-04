@@ -16,6 +16,7 @@ import {
   topicProgress,
 } from './progress';
 import { SITE_TOPICS } from '../data/site';
+import { SUBJECT_TOPICS } from '../data/subjects';
 
 const DAY = 86400000;
 
@@ -161,6 +162,8 @@ export const BADGES: BadgeDef[] = [
   { id: 'all-books', emoji: '🗺️', label: 'Celý seznam', description: 'Procvič každou knihu ze seznamu.', check: (d) => d.books.length > 0 && d.books.every((b) => bookAttempts(d, b.id) > 0) },
   { id: 'site-topics', emoji: '🌐', label: 'Síťař', description: 'Procvič všech 20 témat z počítačových sítí.', check: (d) => SITE_TOPICS.every((t) => TOPIC_AREAS_ANY(d, t.id)) },
   { id: 'cli-50', emoji: '⌨️', label: 'Příkazová řádka', description: 'Odpověz na 50 otázek z příkazů (Cisco, Linux, Windows).', check: (d) => ['cisco', 'linux', 'windows'].reduce((s, p) => s + (d.mastery[masteryKey(`site-prikazy-${p}`, 'it-prikazy')]?.attempts ?? 0), 0) >= 50 },
+  { id: 'hw-test', emoji: '🖥️', label: 'Hardwarový test', description: 'Napiš cvičný test z hardwaru alespoň na 80 %.', check: (d) => d.sessions.some((s) => s.mode === 'hw-test' && s.score >= 0.8) },
+  { id: 'sloh', emoji: '✍️', label: 'Slohař', description: 'Dokonči 3 slohové práce.', check: (d) => (d.writings ?? []).filter((w) => w.finished).length >= 3 },
   { id: 'hours-5', emoji: '⏱️', label: '5 hodin učení', description: 'Stráv učením celkem 5 hodin.', check: (d) => Object.values(d.activity).reduce((s, a) => s + a.seconds, 0) >= 5 * 3600 },
 ];
 
@@ -184,8 +187,11 @@ export function generatePlan(data: AppData, examDate: string, now = new Date()):
   const weeks: StudyWeek[] = [];
   const extrasCycle = ['Literární pojmy', 'Neumělecký text', 'Literární pojmy – tropy a figury', 'Opakování slabých oblastí'];
   const practicalCycle = ['Sítě: příkazy Cisco', 'Sítě: výpočty adresace', 'Sítě: Linux / Windows Server', 'Sítě: zadání praktické nanečisto'];
-  const topics = [...SITE_TOPICS].sort((a, b) => topicProgress(data, a.id) - topicProgress(data, b.id) || a.number - b.number);
-  const topicsPerWeek = Math.max(1, Math.ceil(topics.length / studyWeeks));
+  const topicLists = Object.values(SUBJECT_TOPICS).map((list) => [...list].sort((a, b) => topicProgress(data, a.id) - topicProgress(data, b.id) || a.number - b.number));
+  const topicsForWeek = (i: number) => topicLists.flatMap((list) => {
+    const per = Math.max(1, Math.ceil(list.length / studyWeeks));
+    return list.slice(i * per, i * per + per).map((t) => t.id);
+  });
   for (let i = 0; i < weeksTotal; i++) {
     const start = new Date(now);
     start.setDate(start.getDate() + i * 7);
@@ -204,7 +210,7 @@ export function generatePlan(data: AppData, examDate: string, now = new Date()):
       index: i + 1,
       start: dayKey(start),
       bookIds,
-      topicIds: isReserve ? [] : topics.slice(i * topicsPerWeek, i * topicsPerWeek + topicsPerWeek).map((t) => t.id),
+      topicIds: isReserve ? [] : topicsForWeek(i),
       extras: isReserve ? ['Celkové opakování', 'Simulace ústní maturity', 'Sítě: simulace ústní a praktické'] : [extrasCycle[i % extrasCycle.length], practicalCycle[i % practicalCycle.length]],
       done: false,
     });

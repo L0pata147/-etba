@@ -1,0 +1,82 @@
+import type { Platform } from '../../types';
+import type { CommandDef } from '../site/commands';
+
+let n = 0;
+const c = (platform: Platform, group: string, task: string, command: string, accepted: string[] = [], note?: string, required?: string[]): CommandDef => ({
+  id: `cmd-${platform}-${++n}`,
+  platform,
+  group,
+  task,
+  command,
+  accepted,
+  note,
+  required,
+});
+
+/** Příkazy k Programovému vybavení cloudu (kontejnery, Hyper-V, Proxmox) */
+export const CLOUD_COMMANDS: CommandDef[] = [
+  // ===== Docker =====
+  c('docker', 'Kontejnery', 'Stáhni z registru image nginx.', 'docker pull nginx', ['docker image pull nginx']),
+  c('docker', 'Kontejnery', 'Spusť na pozadí kontejner „web“ z image nginx a zpřístupni jeho port 80 na portu 8080 hostitele.', 'docker run -d -p 8080:80 --name web nginx', [], '-d = na pozadí, -p hostitel:kontejner.', ['docker run', '-d', '-p 8080:80', '--name web', 'nginx']),
+  c('docker', 'Kontejnery', 'Vypiš běžící kontejnery.', 'docker ps', ['docker container ls']),
+  c('docker', 'Kontejnery', 'Vypiš všechny kontejnery včetně zastavených.', 'docker ps -a', ['docker container ls -a', 'docker ps --all']),
+  c('docker', 'Kontejnery', 'Zastav kontejner „web“.', 'docker stop web', ['docker container stop web']),
+  c('docker', 'Kontejnery', 'Smaž (zastavený) kontejner „web“.', 'docker rm web', ['docker container rm web']),
+  c('docker', 'Kontejnery', 'Otevři interaktivní shell (bash) v běžícím kontejneru „web“.', 'docker exec -it web bash', ['docker exec -it web sh', 'docker exec -it web /bin/bash', 'docker exec -it web /bin/sh']),
+  c('docker', 'Kontejnery', 'Zobraz výpis (logy) kontejneru „web“.', 'docker logs web', ['docker container logs web', 'docker logs -f web']),
+  c('docker', 'Kontejnery', 'Zobraz podrobné informace o kontejneru „web“ (např. jeho IP adresu).', 'docker inspect web'),
+  c('docker', 'Image a sestavení', 'Vypiš stažené image.', 'docker images', ['docker image ls']),
+  c('docker', 'Image a sestavení', 'Sestav z Dockerfile v aktuálním adresáři image „mojeapp“.', 'docker build -t mojeapp .', ['docker image build -t mojeapp .', 'docker build --tag mojeapp .']),
+  c('docker', 'Image a sestavení', 'Smaž image nginx.', 'docker rmi nginx', ['docker image rm nginx']),
+  c('docker', 'Image a sestavení', 'Kterou instrukcí v Dockerfile určíš základní image (např. ubuntu:24.04)?', 'FROM ubuntu:24.04', ['from ubuntu:24.04'], 'Další instrukce: RUN (příkaz při sestavení), COPY, EXPOSE, CMD (výchozí příkaz).', ['from']),
+  c('docker', 'Image a sestavení', 'Kterou instrukcí v Dockerfile zkopíruješ složku „web“ do /usr/share/nginx/html?', 'COPY web /usr/share/nginx/html', ['copy web/ /usr/share/nginx/html', 'copy ./web /usr/share/nginx/html', 'add web /usr/share/nginx/html'], undefined, ['copy', 'web', '/usr/share/nginx/html']),
+  c('docker', 'Svazky a sítě', 'Vytvoř pojmenovaný svazek (volume) „data“.', 'docker volume create data'),
+  c('docker', 'Svazky a sítě', 'Spusť na pozadí kontejner „db“ z image mysql a připoj svazek „data“ do /var/lib/mysql.', 'docker run -d --name db -v data:/var/lib/mysql mysql', [], 'Bez svazku by data zmizela se smazáním kontejneru. MySQL navíc potřebuje proměnnou -e MYSQL_ROOT_PASSWORD=…', ['docker run', '-d', '--name db', '-v data:/var/lib/mysql', 'mysql']),
+  c('docker', 'Svazky a sítě', 'Vytvoř vlastní síť kontejnerů „backend“.', 'docker network create backend'),
+  c('docker', 'Svazky a sítě', 'Vypiš sítě Dockeru.', 'docker network ls'),
+  c('docker', 'Compose', 'Spusť na pozadí všechny služby definované v compose.yaml.', 'docker compose up -d', ['docker-compose up -d']),
+  c('docker', 'Compose', 'Zastav a odstraň kontejnery aplikace z compose.yaml.', 'docker compose down', ['docker-compose down']),
+  c('docker', 'Compose', 'Vypiš stav služeb aplikace z compose.yaml.', 'docker compose ps', ['docker-compose ps']),
+  c('docker', 'Kubernetes', 'Vypiš pody v clusteru Kubernetes.', 'kubectl get pods', ['kubectl get pod', 'kubectl get po']),
+  c('docker', 'Kubernetes', 'Nasaď do clusteru konfiguraci ze souboru deployment.yaml.', 'kubectl apply -f deployment.yaml'),
+  c('docker', 'Kubernetes', 'Zvyš počet replik nasazení „web“ na 3.', 'kubectl scale deployment web --replicas=3', ['kubectl scale deploy web --replicas=3', 'kubectl scale deployment/web --replicas=3']),
+
+  // ===== Hyper-V (PowerShell) =====
+  c('hyperv', 'Instalace a sítě', 'Nainstaluj na Windows Server roli Hyper-V i s nástroji a restartuj.', 'Install-WindowsFeature -Name Hyper-V -IncludeManagementTools -Restart', ['Install-WindowsFeature Hyper-V -IncludeManagementTools -Restart'], undefined, ['install-windowsfeature', 'hyper-v', '-includemanagementtools']),
+  c('hyperv', 'Instalace a sítě', 'Vytvoř interní virtuální přepínač „LAN“ (VM komunikují mezi sebou a s hostitelem).', 'New-VMSwitch -Name LAN -SwitchType Internal', [], 'Typy: External (přes fyzickou síťovku), Internal (VM + hostitel), Private (jen VM).', ['new-vmswitch', '-name lan', '-switchtype internal']),
+  c('hyperv', 'Instalace a sítě', 'Vytvoř externí virtuální přepínač „Externi“ navázaný na síťový adaptér „Ethernet“.', 'New-VMSwitch -Name Externi -NetAdapterName Ethernet', ['New-VMSwitch -Name Externi -NetAdapterName Ethernet -AllowManagementOS $true'], undefined, ['new-vmswitch', '-name externi', '-netadaptername ethernet']),
+  c('hyperv', 'Virtuální počítače', 'Vytvoř VM „SRV1“ 2. generace se 4 GB RAM, novým diskem C:\\VM\\SRV1.vhdx o velikosti 60 GB, připojenou k přepínači LAN.', 'New-VM -Name SRV1 -Generation 2 -MemoryStartupBytes 4GB -NewVHDPath C:\\VM\\SRV1.vhdx -NewVHDSizeBytes 60GB -SwitchName LAN', [], undefined, ['new-vm', '-name srv1', '-generation 2', '-memorystartupbytes 4gb', '-newvhdpath', '-newvhdsizebytes 60gb', '-switchname lan']),
+  c('hyperv', 'Virtuální počítače', 'Nastav VM „SRV1“ 2 virtuální procesory.', 'Set-VMProcessor -VMName SRV1 -Count 2', [], undefined, ['set-vmprocessor', 'srv1', '-count 2']),
+  c('hyperv', 'Virtuální počítače', 'Zapni u VM „SRV1“ dynamickou paměť.', 'Set-VMMemory -VMName SRV1 -DynamicMemoryEnabled $true', [], undefined, ['set-vmmemory', 'srv1', '-dynamicmemoryenabled $true']),
+  c('hyperv', 'Virtuální počítače', 'Připoj k VM „SRV1“ instalační ISO C:\\ISO\\server.iso.', 'Add-VMDvdDrive -VMName SRV1 -Path C:\\ISO\\server.iso', ['Set-VMDvdDrive -VMName SRV1 -Path C:\\ISO\\server.iso'], undefined, ['vmdvddrive', 'srv1', '-path c:\\iso\\server.iso']),
+  c('hyperv', 'Virtuální počítače', 'Spusť VM „SRV1“.', 'Start-VM -Name SRV1', ['Start-VM SRV1']),
+  c('hyperv', 'Virtuální počítače', 'Vypni VM „SRV1“ (korektní vypnutí hostovaného OS).', 'Stop-VM -Name SRV1', ['Stop-VM SRV1']),
+  c('hyperv', 'Virtuální počítače', 'Vypiš všechny virtuální počítače a jejich stav.', 'Get-VM'),
+  c('hyperv', 'Virtuální počítače', 'Vytvoř nový dynamicky se zvětšující disk C:\\VM\\data.vhdx o velikosti 100 GB.', 'New-VHD -Path C:\\VM\\data.vhdx -SizeBytes 100GB -Dynamic', [], undefined, ['new-vhd', '-path c:\\vm\\data.vhdx', '-sizebytes 100gb', '-dynamic']),
+  c('hyperv', 'Virtuální počítače', 'Připoj disk C:\\VM\\data.vhdx k VM „SRV1“.', 'Add-VMHardDiskDrive -VMName SRV1 -Path C:\\VM\\data.vhdx', [], undefined, ['add-vmharddiskdrive', 'srv1', '-path c:\\vm\\data.vhdx']),
+  c('hyperv', 'Kontrolní body a migrace', 'Vytvoř kontrolní bod (snapshot) VM „SRV1“ s názvem PredAktualizaci.', 'Checkpoint-VM -Name SRV1 -SnapshotName PredAktualizaci', [], undefined, ['checkpoint-vm', 'srv1', '-snapshotname predaktualizaci']),
+  c('hyperv', 'Kontrolní body a migrace', 'Vypiš kontrolní body VM „SRV1“.', 'Get-VMSnapshot -VMName SRV1', ['Get-VMCheckpoint -VMName SRV1']),
+  c('hyperv', 'Kontrolní body a migrace', 'Vrať VM „SRV1“ do kontrolního bodu PredAktualizaci.', 'Restore-VMSnapshot -VMName SRV1 -Name PredAktualizaci', ['Restore-VMCheckpoint -VMName SRV1 -Name PredAktualizaci'], undefined, ['restore-vm', 'srv1', 'predaktualizaci']),
+  c('hyperv', 'Kontrolní body a migrace', 'Exportuj VM „SRV1“ do složky D:\\Export.', 'Export-VM -Name SRV1 -Path D:\\Export', [], undefined, ['export-vm', 'srv1', '-path d:\\export']),
+  c('hyperv', 'Kontrolní body a migrace', 'Povol na hostiteli živou migraci virtuálních počítačů.', 'Enable-VMMigration'),
+  c('hyperv', 'Kontrolní body a migrace', 'Přesuň běžící VM „SRV1“ na hostitele HV2 (živá migrace).', 'Move-VM -Name SRV1 -DestinationHost HV2', ['Move-VM SRV1 HV2'], undefined, ['move-vm', 'srv1', 'hv2']),
+  c('hyperv', 'Kontrolní body a migrace', 'Povol vnořenou virtualizaci pro VM „SRV1“ (Hyper-V uvnitř VM).', 'Set-VMProcessor -VMName SRV1 -ExposeVirtualizationExtensions $true', [], 'VM musí být vypnutá.', ['set-vmprocessor', 'srv1', '-exposevirtualizationextensions $true']),
+
+  // ===== Proxmox VE =====
+  c('proxmox', 'Virtuální počítače (qm)', 'Vypiš virtuální počítače na uzlu.', 'qm list'),
+  c('proxmox', 'Virtuální počítače (qm)', 'Vytvoř VM s ID 101, názvem web, 2048 MB RAM, 2 jádry a síťovkou virtio na mostu vmbr0.', 'qm create 101 --name web --memory 2048 --cores 2 --net0 virtio,bridge=vmbr0', [], undefined, ['qm create 101', '--name web', '--memory 2048', '--cores 2', '--net0 virtio,bridge=vmbr0']),
+  c('proxmox', 'Virtuální počítače (qm)', 'Spusť VM 101.', 'qm start 101'),
+  c('proxmox', 'Virtuální počítače (qm)', 'Korektně vypni VM 101 (přes hostovaný OS).', 'qm shutdown 101', [], 'qm stop 101 = tvrdé vypnutí („vytažení ze zásuvky“).'),
+  c('proxmox', 'Virtuální počítače (qm)', 'Naklonuj VM 100 do nové VM 102 s názvem klon.', 'qm clone 100 102 --name klon', [], undefined, ['qm clone 100 102', '--name klon']),
+  c('proxmox', 'Virtuální počítače (qm)', 'Vytvoř snapshot VM 101 s názvem pred-upgrade.', 'qm snapshot 101 pred-upgrade'),
+  c('proxmox', 'Virtuální počítače (qm)', 'Vrať VM 101 do snapshotu pred-upgrade.', 'qm rollback 101 pred-upgrade'),
+  c('proxmox', 'Virtuální počítače (qm)', 'Přesuň běžící VM 101 na uzel pve2 bez výpadku (online migrace).', 'qm migrate 101 pve2 --online', [], undefined, ['qm migrate 101 pve2', '--online']),
+  c('proxmox', 'Kontejnery (pct)', 'Vypiš LXC kontejnery na uzlu.', 'pct list'),
+  c('proxmox', 'Kontejnery (pct)', 'Spusť LXC kontejner 200.', 'pct start 200'),
+  c('proxmox', 'Kontejnery (pct)', 'Otevři konzoli LXC kontejneru 200.', 'pct enter 200', ['pct console 200']),
+  c('proxmox', 'Zálohy a cluster', 'Zazálohuj VM 101 na úložiště local v režimu snapshot (bez vypnutí VM).', 'vzdump 101 --storage local --mode snapshot', [], undefined, ['vzdump 101', '--storage local', '--mode snapshot']),
+  c('proxmox', 'Zálohy a cluster', 'Vytvoř nový cluster s názvem lab.', 'pvecm create lab'),
+  c('proxmox', 'Zálohy a cluster', 'Připoj tento uzel do existujícího clusteru, jehož uzel má adresu 192.168.1.10.', 'pvecm add 192.168.1.10'),
+  c('proxmox', 'Zálohy a cluster', 'Zobraz stav clusteru a kvóra.', 'pvecm status'),
+  c('proxmox', 'Zálohy a cluster', 'Přidej VM 101 pod správu vysoké dostupnosti (HA).', 'ha-manager add vm:101'),
+];

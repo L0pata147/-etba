@@ -21,6 +21,11 @@ import { TopicDetail } from './pages/site/TopicDetail';
 import { SiteOral } from './pages/site/SiteOral';
 import { SitePractical } from './pages/site/SitePractical';
 import { SiteTraining } from './pages/site/SiteTraining';
+import { HwHome } from './pages/hw/HwHome';
+import { HwTest } from './pages/hw/HwTest';
+import { CloudHome } from './pages/cloud/CloudHome';
+import { CloudPractical } from './pages/cloud/CloudPractical';
+import { WritingPage } from './pages/Writing';
 
 const Stats = lazy(() => import('./pages/Stats').then((m) => ({ default: m.Stats })));
 
@@ -51,7 +56,15 @@ export function App() {
         <Route path="/site/tema/:id" element={<TopicDetail />} />
         <Route path="/site/losovani" element={<SiteOral />} />
         <Route path="/site/prakticka" element={<SitePractical />} />
-        <Route path="/site/trenink" element={<SiteTraining />} />
+        <Route path="/site/trenink" element={<SiteTraining key="site" />} />
+        <Route path="/tema/:id" element={<TopicDetail />} />
+        <Route path="/hw" element={<HwHome />} />
+        <Route path="/hw/test" element={<HwTest />} />
+        <Route path="/hw/trenink" element={<SiteTraining key="hw" subject="hw" />} />
+        <Route path="/cloud" element={<CloudHome />} />
+        <Route path="/cloud/prakticka" element={<CloudPractical />} />
+        <Route path="/cloud/trenink" element={<SiteTraining key="cloud" subject="cloud" />} />
+        <Route path="/sloh" element={<WritingPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>

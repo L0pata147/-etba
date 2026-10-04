@@ -3,7 +3,7 @@ import type { StudyWeek } from '../types';
 import { useStore } from '../store';
 import { currentWeek, generatePlan } from '../lib/insights';
 import { bookProgress, daysUntil, topicProgress } from '../lib/progress';
-import { TOPIC_MAP } from '../data/site';
+import { ALL_TOPIC_MAP, SUBJECTS } from '../data/subjects';
 import { topicConfig } from './site/common';
 import { Link } from 'react-router-dom';
 import { useStartSession } from './SessionPage';
@@ -164,17 +164,17 @@ export function Plan() {
                     );
                   })}
                   {(w.topicIds ?? []).map((id) => {
-                    const t = TOPIC_MAP[id];
+                    const t = ALL_TOPIC_MAP[id];
                     if (!t) return null;
                     return (
-                      <Link key={id} to={`/site/tema/${id}`} className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-100">
-                        🌐 {t.number}. {t.title}
+                      <Link key={id} to={`/tema/${id}`} className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-100">
+                        {SUBJECTS[t.subject].emoji} {t.number}. {t.title}
                         <span className="text-xs text-emerald-700 dark:text-emerald-300">{Math.round(topicProgress(data, id) * 100)} %</span>
                       </Link>
                     );
                   })}
                   {(w.topicIds?.length ?? 0) > 0 && (
-                    <Button size="sm" variant="ghost" icon={<Play size={14} />} onClick={() => start(topicConfig(w.topicIds!, `Studijní plán – týden ${w.index} – sítě`))}>
+                    <Button size="sm" variant="ghost" icon={<Play size={14} />} onClick={() => start(topicConfig(w.topicIds!, `Studijní plán – týden ${w.index} – IT předměty`))}>
                       Trénovat témata
                     </Button>
                   )}

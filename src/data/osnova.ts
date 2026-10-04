@@ -18,9 +18,9 @@ export const SECTIONS: Record<SectionId, { label: string; short: string; group: 
   terms: { label: 'Literární pojmy', short: 'Pojmy', group: 'Literární pojmy' },
   nonart1: { label: 'Analýza neuměleckého textu – I. část', short: 'Neumělecký I', group: 'Analýza neuměleckého textu' },
   nonart2: { label: 'Analýza neuměleckého textu – II. část', short: 'Neumělecký II', group: 'Analýza neuměleckého textu' },
-  'it-teorie': { label: 'Sítě – teorie a ústní témata', short: 'Teorie', group: 'Počítačové sítě' },
-  'it-prakticke': { label: 'Sítě – praktické dovednosti (příkazy, postupy)', short: 'Praxe', group: 'Počítačové sítě' },
-  'it-vypocty': { label: 'Sítě – výpočty (adresace, podsítě)', short: 'Výpočty', group: 'Počítačové sítě' },
+  'it-teorie': { label: 'IT předměty – teorie a témata', short: 'Teorie', group: 'IT předměty' },
+  'it-prakticke': { label: 'IT předměty – příkazy a postupy', short: 'Praxe', group: 'IT předměty' },
+  'it-vypocty': { label: 'IT předměty – výpočty a převody', short: 'Výpočty', group: 'IT předměty' },
 };
 
 export const SECTION_ORDER: SectionId[] = ['art1', 'art2', 'art3', 'lhk', 'basics', 'terms', 'nonart1', 'nonart2', 'it-teorie', 'it-prakticke', 'it-vypocty'];

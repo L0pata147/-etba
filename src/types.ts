@@ -41,9 +41,9 @@ export type SectionId =
   | 'it-vypocty';
 
 /** Maturitní předměty */
-export type SubjectId = 'cjl' | 'site';
+export type SubjectId = 'cjl' | 'site' | 'hw' | 'cloud';
 
-export type Platform = 'cisco' | 'linux' | 'windows';
+export type Platform = 'cisco' | 'linux' | 'windows' | 'docker' | 'hyperv' | 'proxmox';
 
 /** Téma ústní zkoušky (IT předměty) */
 export interface Topic {
@@ -397,4 +397,25 @@ export interface AppData {
   badges: Record<string, number>;
   plan: StudyPlan | null;
   settings: Settings;
+  /** Slohové práce (písemná práce z češtiny) */
+  writings: Writing[];
+}
+
+/** Slohová práce */
+export interface Writing {
+  id: string;
+  createdAt: number;
+  updatedAt: number;
+  /** Zadání (text) */
+  prompt: string;
+  /** Slohový útvar */
+  form: string;
+  title: string;
+  text: string;
+  /** Čas psaní v sekundách */
+  seconds: number;
+  finished: boolean;
+  /** Sebehodnocení 0–5 podle kritérií */
+  selfScores?: Record<string, number>;
+  aiFeedback?: string;
 }

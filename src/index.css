@@ -69,3 +69,8 @@ body {
 }
 
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+
+/* Položky mřížky se nesmí roztáhnout podle dlouhého textu (useknutí přes truncate) */
+.grid > * {
+  min-width: 0;
+}
