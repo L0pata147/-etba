@@ -8,7 +8,7 @@ import { ReminderSettings } from '../components/ReminderSettings';
 import { Button, Card, Modal, PageHeader, Segmented, SectionTitle, Toggle } from '../components/ui';
 
 export function SettingsPage() {
-  const { data, updateSettings, replaceAll, resetAll, toast } = useStore();
+  const { data, updateSettings, replaceAll, resetAll, toast, markExported } = useStore();
   const s = data.settings;
   const fileRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<AppData | null>(null);
@@ -116,6 +116,7 @@ export function SettingsPage() {
             icon={<Download size={18} />}
             onClick={() => {
               const where = exportJson({ ...data, settings: { ...data.settings, aiApiKey: '' } });
+              markExported();
               toast(where ? `Záloha uložena: ${where}` : 'Data byla exportována do souboru JSON.', 'success');
             }}
           >

@@ -1,5 +1,5 @@
 import type { AppData } from '../types';
-import { recommendations } from './insights';
+import { itRecommendations, recommendations } from './insights';
 import { AREA_MAP } from '../data/osnova';
 import { dayKey, dueCount, streak } from './progress';
 
@@ -27,6 +27,9 @@ export function buildNativeStatus(data: AppData) {
     .filter((k) => data.activity[k].questions > 0)
     .sort();
   const rec = recommendations(data, 1)[0];
+  const itRec = itRecommendations(data, 1)[0];
+  // Střídej doporučení z literatury a z IT předmětů podle dne
+  const useIt = !!itRec && (!rec || new Date().getDate() % 2 === 0);
   return {
     lastStudyDay: days[days.length - 1] ?? '',
     today: dayKey(),
@@ -35,7 +38,7 @@ export function buildNativeStatus(data: AppData) {
     unknown: Object.keys(data.unknown).length,
     minutes: data.settings.dailyMinutes,
     examDate: data.settings.examDate,
-    rec: rec ? `${rec.book.title} – ${AREA_MAP[rec.area].short.toLowerCase()}` : '',
+    rec: useIt ? itRec.topic.title : rec ? `${rec.book.title} – ${AREA_MAP[rec.area].short.toLowerCase()}` : '',
   };
 }
 

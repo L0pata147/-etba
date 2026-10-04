@@ -1,4 +1,4 @@
-import type { AppData, AreaId, Book, SectionId, StudyPlan, StudyWeek } from '../types';
+import type { AppData, AreaId, Book, SectionId, StudyPlan, StudyWeek, Topic } from '../types';
 import { AREA_MAP, SECTIONS } from '../data/osnova';
 import {
   areaMastery,
@@ -16,7 +16,7 @@ import {
   topicProgress,
 } from './progress';
 import { SITE_TOPICS } from '../data/site';
-import { SUBJECT_TOPICS } from '../data/subjects';
+import { ALL_TOPICS, SUBJECT_TOPICS } from '../data/subjects';
 
 const DAY = 86400000;
 
@@ -58,6 +58,34 @@ export function recommendations(data: AppData, count = 3, now = Date.now()): Rec
     usedBooks.add(c.book.id);
     out.push(c);
     if (out.length >= count) break;
+  }
+  return out;
+}
+
+export interface TopicRecommendation {
+  topic: Topic;
+  mastery: number;
+  reason: string;
+}
+
+/** Doporučená témata z IT předmětů – slabá, dlouho neopakovaná, z aktuálního týdne plánu; střídá předměty */
+export function itRecommendations(data: AppData, count = 2, now = Date.now()): TopicRecommendation[] {
+  const planTopics = new Set(currentWeek(data.plan)?.topicIds ?? []);
+  const scored = ALL_TOPICS.map((topic) => {
+    const v = topicProgress(data, topic.id);
+    const last = bookLastStudied(data, topic.id);
+    const stale = last ? Math.min(2, (now - last) / DAY / 7) : 1.2;
+    const score = (1 - v) * 2 + stale + (planTopics.has(topic.id) ? 1.5 : 0) + Math.random() * 0.4;
+    const reason = !last ? (planTopics.has(topic.id) ? 'podle studijního plánu' : 'zatím neprocvičeno') : v < 0.5 ? `slabé téma (${Math.round(v * 100)} %)` : now - last > 5 * DAY ? 'dlouho neopakováno' : `upevnit (${Math.round(v * 100)} %)`;
+    return { topic, mastery: v, reason, score };
+  }).sort((a, b) => b.score - a.score);
+  const out: TopicRecommendation[] = [];
+  const usedSubjects = new Set<string>();
+  for (const c of scored) {
+    if (out.length >= count) break;
+    if (usedSubjects.has(c.topic.subject) && usedSubjects.size < 3) continue;
+    usedSubjects.add(c.topic.subject);
+    out.push(c);
   }
   return out;
 }

@@ -5,17 +5,19 @@ import type { Platform } from '../../types';
 import { ALL_COMMANDS, COMMAND_GROUPS, PLATFORM_LABEL } from '../../data/site/commands';
 import { ALL_PROCEDURES } from '../../data/site/procedures';
 import { GENERATORS, generateCalcQuestions, generateScenario, type Scenario, type ScenarioTask } from '../../lib/netgen';
-import { generateCommandQuestions } from '../../lib/topicgen';
+import { generateCommandQuestions, generateTroubleQuestions } from '../../lib/topicgen';
+import { TROUBLE } from '../../data/troubleshoot';
 import { sample, shuffle } from '../../lib/random';
 import { Button, Card, PageHeader, Segmented, SectionTitle, Tag, cx } from '../../components/ui';
 import { useStartSession } from '../SessionPage';
+import { Topology } from './Topology';
 import { PLATFORMS, calcConfig, commandsConfig, proceduresConfig, siteConfig } from './common';
 
-type Tab = 'zadani' | 'prikazy' | 'postupy' | 'vypocty';
+type Tab = 'zadani' | 'prikazy' | 'postupy' | 'chyby' | 'vypocty';
 
 export function SitePractical() {
   const [params, setParams] = useSearchParams();
-  const tab = (['zadani', 'prikazy', 'postupy', 'vypocty'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
+  const tab = (['zadani', 'prikazy', 'postupy', 'chyby', 'vypocty'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
   return (
     <div>
       <PageHeader
@@ -31,12 +33,14 @@ export function SitePractical() {
           { value: 'zadani', label: 'Zadání nanečisto' },
           { value: 'prikazy', label: 'Příkazy' },
           { value: 'postupy', label: 'Postupy' },
+          { value: 'chyby', label: 'Najdi chybu' },
           { value: 'vypocty', label: 'Výpočty' },
         ]}
       />
       {tab === 'zadani' && <ScenarioTab />}
       {tab === 'prikazy' && <CommandsTab />}
       {tab === 'postupy' && <ProceduresTab />}
+      {tab === 'chyby' && <TroubleTab />}
       {tab === 'vypocty' && <CalcTab />}
     </div>
   );
@@ -102,9 +106,10 @@ function ScenarioTab() {
                 Splněno {done.size}/{sc.ptTasks.length + (osShown ? sc.osTasks.length : 0)}
               </Tag>
             </div>
-            <pre className="mt-4 overflow-x-auto rounded-xl bg-slate-50 p-4 font-mono text-[13px] leading-relaxed dark:bg-slate-800/60">
-              {`[PC VLAN 10]──┐\n[PC VLAN 20]──┼─ SW1 ─(G0/1 trunk)─ G0/0 R1 G0/1 ── ISP\n              │                       ${sc.ispLink.r1}   ${sc.ispLink.isp}\n              └─ správa VLAN 99`}
-            </pre>
+            <div className="mt-4 rounded-xl bg-slate-50 p-2 dark:bg-slate-800/60">
+              <Topology sc={sc} showAddresses={open.has('adresace')} />
+            </div>
+            {!open.has('adresace') && <p className="mt-1 text-xs text-slate-500">Adresy se ve schématu ukážou, až si otevřeš řešení adresního plánu.</p>}
           </Card>
 
           <section>
@@ -257,9 +262,14 @@ function CalcTab() {
       <Card className="mb-4 p-5">
         <h2 className="font-bold">Příklady se generují pokaždé nové</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Adresy sítí, broadcast, rozsahy, masky, VLSM, IPv6 i převody do dvojkové soustavy. Výsledek píšeš přesně – jako při návrhu adresace v Packet Traceru.</p>
-        <Button className="mt-3" icon={<Calculator size={17} />} onClick={() => start(calcConfig(12))}>
-          Mix všech výpočtů (12 příkladů)
-        </Button>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button icon={<Calculator size={17} />} onClick={() => start(calcConfig(12))}>
+            Mix všech výpočtů (12 příkladů)
+          </Button>
+          <Button variant="secondary" to="/dril?predmet=site">
+            ⚡ Rychlostní dril
+          </Button>
+        </div>
       </Card>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {kinds.map(([kind, g]) => (
@@ -295,6 +305,46 @@ export function TaskCard({ t, i, done, open, onDone, onOpen }: { t: ScenarioTask
           </button>
           {open && <pre className="mt-2 whitespace-pre-wrap break-words rounded-lg bg-slate-900 p-3 font-mono text-[13px] leading-relaxed text-slate-100">{t.solution}</pre>}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** Hledání chyb v konfiguraci */
+export function TroubleTab({ platforms = PLATFORMS }: { platforms?: Platform[] }) {
+  const start = useStartSession();
+  const [shown, setShown] = useState<Set<string>>(new Set());
+  const list = TROUBLE.filter((t) => platforms.includes(t.platform));
+  return (
+    <div>
+      <Card className="mb-4 p-5">
+        <h2 className="font-bold">Najdi chybu v konfiguraci</h2>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">U praktické zkoušky často něco nefunguje a musíš zjistit proč. Prohlédni si výpis, zkus chybu najít sám a teprve pak se podívej na řešení.</p>
+        <Button className="mt-3" onClick={() => start({ ...siteConfig('Najdi chybu v konfiguraci', { topics: false, commands: platforms }, { mode: 'chyby' }), questions: shuffle(generateTroubleQuestions(platforms)) })}>
+          Trénink – {list.length} úloh
+        </Button>
+      </Card>
+      <div className="space-y-3">
+        {list.map((t) => (
+          <Card key={t.id} className="p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Tag>{PLATFORM_LABEL[t.platform]}</Tag>
+              <span className="font-bold">{t.title}</span>
+            </div>
+            <p className="mt-1 text-[15px] text-slate-600 dark:text-slate-300">{t.symptom}</p>
+            <pre className="mt-2 overflow-x-auto whitespace-pre rounded-lg bg-slate-900 p-3 font-mono text-[13px] leading-relaxed text-emerald-300">{t.config}</pre>
+            {shown.has(t.id) ? (
+              <div className="mt-2 rounded-lg bg-emerald-50 p-3 text-sm dark:bg-emerald-500/10">
+                <div className="font-semibold">Chyba: {t.answer}</div>
+                <pre className="mt-1 whitespace-pre-wrap font-sans">{t.fix}</pre>
+              </div>
+            ) : (
+              <button onClick={() => setShown((s) => new Set(s).add(t.id))} className="mt-2 text-sm font-semibold text-brand-600 dark:text-brand-400">
+                Ukázat řešení
+              </button>
+            )}
+          </Card>
+        ))}
       </div>
     </div>
   );

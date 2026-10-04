@@ -56,9 +56,14 @@ export function HwHome() {
             </span>
           </div>
           <ProgressBar value={calc} className="mt-2" height="h-2.5" />
-          <Button size="sm" className="mt-3" icon={<Calculator size={16} />} onClick={() => start(calcConfig(12, 'hw'))}>
-            Mix příkladů
-          </Button>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button size="sm" icon={<Calculator size={16} />} onClick={() => start(calcConfig(12, 'hw'))}>
+              Mix příkladů
+            </Button>
+            <Button size="sm" variant="secondary" to="/dril?predmet=hw">
+              ⚡ Dril na čas
+            </Button>
+          </div>
         </Card>
         <Card className="p-5">
           <div className="flex items-center justify-between">

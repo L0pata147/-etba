@@ -72,6 +72,9 @@ export function SiteHome() {
             <Button size="sm" variant="secondary" icon={<Calculator size={16} />} onClick={() => start(calcConfig())}>
               Výpočty
             </Button>
+            <Button size="sm" variant="secondary" to="/dril?predmet=site">
+              ⚡ Dril na čas
+            </Button>
           </div>
         </Card>
       </div>

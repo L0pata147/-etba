@@ -1,6 +1,6 @@
 import type { AppData, Question, QuestionType } from '../types';
 import { buildSession, questionsForMinutes, typesForMinutes, type SessionConfig } from './session';
-import { recommendations } from './insights';
+import { recommendations, type TopicRecommendation } from './insights';
 import { AREA_MAP } from '../data/osnova';
 import { shuffle } from './random';
 
@@ -62,6 +62,7 @@ export function dueSession(): SessionConfig {
     types: [...ALL_TYPES, 'open'],
     count: 25,
     onlyDue: true,
+    includeSpelling: true,
     subject: 'all',
     includeTerms: true,
     includeNonArt: true,
@@ -73,10 +74,11 @@ export function dueSession(): SessionConfig {
 export function recommendedSession(
   data: AppData,
   items: ReturnType<typeof recommendations> = recommendations(data, 3),
+  itItems: TopicRecommendation[] = [],
 ): { cfg: SessionConfig; items: ReturnType<typeof recommendations> } {
   const minutes = data.settings.dailyMinutes || 15;
   const total = questionsForMinutes(minutes);
-  const per = Math.max(3, Math.floor(total / Math.max(1, items.length + 1)));
+  const per = Math.max(3, Math.floor(total / Math.max(1, items.length + itItems.length + 1)));
   const types = typesForMinutes(minutes);
   const qs: Question[] = [];
   const used = new Set<string>();
@@ -95,9 +97,15 @@ export function recommendedSession(
     const extra = part.length < per ? buildSession(data, { title: '', mode: '', difficulty: 'medium', bookIds: [r.book.id], areas: [], types, count: per - part.length, includeGlobal: false }) : [];
     for (const q of [...part, ...extra]) if (!used.has(q.id)) (used.add(q.id), qs.push(q));
   }
+  // Témata z IT předmětů
+  for (const r of itItems) {
+    const part = buildSession(data, { title: '', mode: '', difficulty: 'medium', bookIds: [], areas: [], types: [...types, 'flashcard', 'abc', 'truefalse', 'identifyTerm'], count: per, subject: r.topic.subject, site: { topicIds: [r.topic.id] } });
+    for (const q of part) if (!used.has(q.id)) (used.add(q.id), qs.push(q));
+  }
   const rest = buildSession(data, { ...dueSession(), count: Math.max(3, total - qs.length), onlyDue: Object.values(data.srs).some((s) => s.due <= Date.now()), types });
   for (const q of rest) if (!used.has(q.id) && qs.length < total) (used.add(q.id), qs.push(q));
-  const title = items.length ? `Dnešní trénink: ${items.map((i) => `${i.book.title} – ${AREA_MAP[i.area].short.toLowerCase()}`).join(', ')}` : 'Dnešní trénink';
+  const parts = [...items.map((i) => `${i.book.title} – ${AREA_MAP[i.area].short.toLowerCase()}`), ...itItems.map((r) => r.topic.title)];
+  const title = parts.length ? `Dnešní trénink: ${parts.join(', ')}` : 'Dnešní trénink';
   return {
     items,
     cfg: { title, mode: 'dnesni', difficulty: 'medium', bookIds: [], areas: [], types, count: qs.length, questions: shuffle(qs) },

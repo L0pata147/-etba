@@ -18,8 +18,10 @@ import {
   Moon,
   Network,
   Newspaper,
+  Search,
   Shuffle,
   Terminal,
+  Zap,
   Settings,
   Sun,
   TriangleAlert,
@@ -40,6 +42,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { to: '/', label: 'Dnes', icon: Home, end: true },
+  { to: '/hledat', label: 'Hledat', icon: Search },
   { to: '/knihy', label: 'Moje knihy', icon: Library, group: 'Čeština – literatura' },
   { to: '/trenink', label: 'Trénink', icon: Dumbbell },
   { to: '/simulace', label: 'Simulace maturity', icon: GraduationCap },
@@ -54,7 +57,8 @@ const NAV: NavItem[] = [
   { to: '/hw/test', label: 'Cvičný test', icon: ClipboardList },
   { to: '/cloud', label: 'Okruhy', icon: Cloud, end: true, group: 'Programové vybavení cloudu' },
   { to: '/cloud/prakticka', label: 'Praktická zkouška', icon: Server },
-  { to: '/doucit', label: 'Musím se doučit', icon: TriangleAlert, group: 'Všechny předměty' },
+  { to: '/dril', label: 'Rychlostní dril', icon: Zap, group: 'Všechny předměty' },
+  { to: '/doucit', label: 'Musím se doučit', icon: TriangleAlert },
   { to: '/pokrok', label: 'Můj pokrok', icon: BarChart3 },
   { to: '/plan', label: 'Studijní plán', icon: CalendarDays },
   { to: '/ai', label: 'AI učitel', icon: Bot },
@@ -159,6 +163,9 @@ export function Layout({ children }: { children: ReactNode }) {
         <Brand compact />
         <div className="flex items-center gap-1">
           <span className="mr-1 text-sm font-semibold text-slate-600 dark:text-slate-300">🔥 {st}</span>
+          <NavLink to="/hledat" className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Hledat">
+            <Search size={20} />
+          </NavLink>
           <button onClick={toggle} className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Přepnout motiv">
             {dark ? <Sun size={20} /> : <Moon size={20} />}
           </button>

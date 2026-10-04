@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff, Mic, Shuffle } from 'lucide-react';
 import { useStore } from '../../store';
@@ -10,7 +10,7 @@ import { Button, Card, EmptyState, PageHeader, Pct, ProgressBar, Segmented, Sect
 import { useStartSession } from '../SessionPage';
 import { siteConfig, topicConfig } from './common';
 
-type Tab = 'vyklad' | 'pojmy' | 'kviz';
+type Tab = 'vyklad' | 'pojmy' | 'kviz' | 'poznamky';
 
 export function TopicDetail() {
   const { id } = useParams();
@@ -96,6 +96,7 @@ function TopicInner({ id }: { id?: string }) {
           { value: 'vyklad', label: 'Osnova výkladu' },
           { value: 'pojmy', label: `Pojmy (${t.terms.length})` },
           { value: 'kviz', label: `Otázky (${t.quiz.length + t.deep.length})` },
+          { value: 'poznamky', label: data.topicNotes[t.id] ? '📝 Poznámky ●' : '📝 Poznámky' },
         ]}
       />
 
@@ -151,6 +152,8 @@ function TopicInner({ id }: { id?: string }) {
         </div>
       )}
 
+      {tab === 'poznamky' && <TopicNotes id={t.id} />}
+
       <div className="mt-6 flex justify-between gap-2">
         {prev ? (
           <Button variant="secondary" size="sm" to={`/tema/${prev.id}`}>
@@ -166,5 +169,33 @@ function TopicInner({ id }: { id?: string }) {
         )}
       </div>
     </div>
+  );
+}
+
+/** Vlastní poznámky k tématu – ukládají se průběžně */
+function TopicNotes({ id }: { id: string }) {
+  const { data, setTopicNote } = useStore();
+  const saved = data.topicNotes[id] ?? '';
+  const [text, setText] = useState(saved);
+  useEffect(() => {
+    if (text === saved) return;
+    const t = setTimeout(() => setTopicNote(id, text), 600);
+    return () => clearTimeout(t);
+  }, [text, saved, id, setTopicNote]);
+  return (
+    <Card className="p-5">
+      <label htmlFor="topic-notes" className="text-sm font-semibold">
+        Co říkal učitel, vlastní příklady, na co nezapomenout
+      </label>
+      <textarea
+        id="topic-notes"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={12}
+        placeholder="Poznámky se ukládají automaticky a najdeš je i přes vyhledávání."
+        className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 text-[15px] dark:border-slate-700 dark:bg-slate-900"
+      />
+      <p className="mt-1 text-xs text-slate-500">{text === saved ? 'Uloženo' : 'Ukládám…'}</p>
+    </Card>
   );
 }

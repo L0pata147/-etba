@@ -7,9 +7,14 @@ import { MIN_WORDS, WRITING_CRITERIA, WRITING_FORMS, WRITING_MINUTES, WRITING_PR
 import { analyzeWriting, countWords } from '../lib/writingcheck';
 import { describeAiError, streamTeacher } from '../lib/ai';
 import { sample, uid } from '../lib/random';
+import { SPELLING, SPELLING_CATEGORIES, type SpellingCategory } from '../data/spelling';
+import { generateSpellingQuestions } from '../lib/spellinggen';
+import { areaMastery } from '../lib/progress';
+import { shuffle } from '../lib/random';
+import { useStartSession } from './SessionPage';
 import { Button, Card, EmptyState, Modal, PageHeader, ProgressBar, Segmented, SectionTitle, Tag, cx, formatDate } from '../components/ui';
 
-type Tab = 'psat' | 'prace' | 'utvary' | 'kriteria';
+type Tab = 'psat' | 'prace' | 'pravopis' | 'utvary' | 'kriteria';
 
 const formName = (id: string) => WRITING_FORMS.find((f) => f.id === id)?.name.split(' (')[0] ?? id;
 
@@ -35,12 +40,14 @@ export function WritingPage() {
         options={[
           { value: 'psat', label: 'Psát' },
           { value: 'prace', label: `Moje práce (${data.writings.length})` },
+          { value: 'pravopis', label: 'Pravopis' },
           { value: 'utvary', label: 'Slohové útvary' },
           { value: 'kriteria', label: 'Kritéria' },
         ]}
       />
       {tab === 'psat' && <NewWriting onOpen={(id) => setParams({ psat: id })} />}
       {tab === 'prace' && <WritingList onOpen={(w) => setParams(w.finished ? { prace: w.id } : { psat: w.id })} />}
+      {tab === 'pravopis' && <Spelling />}
       {tab === 'utvary' && <Forms />}
       {tab === 'kriteria' && <Criteria />}
     </div>
@@ -459,5 +466,34 @@ function Criteria() {
         <li>Na konci si nech 10 minut na kontrolu: i/y, čárky, velká písmena, shoda podmětu s přísudkem, tvary „abychom, byste“.</li>
       </ul>
     </Card>
+  );
+}
+
+function Spelling() {
+  const { data } = useStore();
+  const start = useStartSession();
+  const run = (title: string, cats?: SpellingCategory[]) =>
+    start({ title, mode: 'pravopis', difficulty: 'medium', bookIds: [], areas: [], types: ['abc'], count: 15, questions: shuffle(generateSpellingQuestions(cats)).slice(0, 15) });
+  const mastery = areaMastery(data, 'pravopis', 'pravopis');
+  return (
+    <div className="space-y-4">
+      <Card className="p-5">
+        <h2 className="font-bold">Pravopisná cvičení</h2>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Nejčastější chyby ve slohových pracích: i/y, shoda přísudku s podmětem, mě/mně, s/z, velká písmena, čárky a tvary jako „abychom“. Zvládnutí: {Math.round(mastery * 100)} %.
+        </p>
+        <Button className="mt-3" onClick={() => run('Pravopis – mix')}>
+          Mix ({SPELLING.length} vět) – 15 otázek
+        </Button>
+      </Card>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {(Object.keys(SPELLING_CATEGORIES) as SpellingCategory[]).map((c) => (
+          <button key={c} onClick={() => run(`Pravopis – ${SPELLING_CATEGORIES[c]}`, [c])} className="card p-4 text-left transition hover:-translate-y-0.5 hover:shadow-md">
+            <div className="font-bold">{SPELLING_CATEGORIES[c]}</div>
+            <div className="text-sm text-slate-500">{SPELLING.filter((x) => x.category === c).length} vět</div>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

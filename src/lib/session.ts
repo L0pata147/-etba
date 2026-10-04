@@ -3,6 +3,7 @@ import { AREA_MAP } from '../data/osnova';
 import { generateBookQuestions, generateGlobalQuestions, generateNonArtQuestions, generateTermQuestions } from './generator';
 import { areaMastery, masteryKey, masteryValue } from './progress';
 import { shuffle, weightedSample } from './random';
+import { generateSpellingQuestions } from './spellinggen';
 import { buildSubjectPool, type ItSubject, type SitePoolOptions } from './topicgen';
 
 export const DIFFICULTY_TYPES: Record<Difficulty, QuestionType[]> = {
@@ -50,6 +51,8 @@ export interface SessionConfig {
   includeNonArt?: boolean;
   nonArtIds?: string[];
   includeGlobal?: boolean;
+  /** Pravopisná cvičení (písemná práce) */
+  includeSpelling?: boolean;
   onlyUnknown?: boolean;
   onlyDue?: boolean;
   /** Konkrétní otázky (např. zopakování chyb) */
@@ -85,6 +88,7 @@ export function buildPool(books: Book[], allBooks: Book[], cfg: Partial<SessionC
   for (const b of books) pool.push(...generateBookQuestions(b, allBooks));
   if (cfg.includeGlobal !== false && books.length >= 3) pool.push(...generateGlobalQuestions(books));
   if (cfg.includeTerms) pool.push(...generateTermQuestions(undefined, cfg.termIds));
+  if (cfg.includeSpelling) pool.push(...generateSpellingQuestions());
   if (cfg.includeNonArt) {
     const qs = generateNonArtQuestions();
     pool.push(...(cfg.nonArtIds?.length ? qs.filter((q) => cfg.nonArtIds!.some((id) => q.bookId === `nonart:${id}`)) : qs));
@@ -128,7 +132,8 @@ export function buildSession(data: AppData, cfg: SessionConfig): Question[] {
   const facts = new Set<string>();
   const perBook = new Map<string, number>();
   const perArea = new Map<string, number>();
-  const multiItem = books.length > 1 || (!!cfg.subject && cfg.subject !== 'cjl' && new Set(pool.map((q) => q.bookId)).size > 1);
+  // Limit na jednu knihu / téma jen když je z čeho míchat
+  const multiItem = new Set(pool.map((q) => q.bookId)).size > 1 && (books.length > 1 || (!!cfg.subject && cfg.subject !== 'cjl'));
   const bookCap = multiItem ? Math.max(2, Math.ceil((cfg.count || 20) * 0.45)) : Infinity;
   let budget = cfg.minutes ? cfg.minutes * 60 : Infinity;
   // Dlouhé otázky (vlastní odpověď) smí zabrat nejvýš ~třetinu času, aby trénink nebyl jen ze 2 otázek
@@ -160,8 +165,8 @@ export function buildSession(data: AppData, cfg: SessionConfig): Question[] {
   return result;
 }
 
-const SECTION_RANK: Record<SectionId, number> = { art1: 0, art2: 1, art3: 2, lhk: 3, basics: 4, terms: 5, nonart1: 6, nonart2: 7, 'it-teorie': 8, 'it-prakticke': 9, 'it-vypocty': 10 };
-const AREA_RANK: AreaId[] = ['context', 'theme', 'chronotope', 'composition', 'genre', 'narrator', 'characters', 'narrative', 'speech', 'verse', 'language', 'tropes', 'authorContext', 'litContext', 'basics', 'terms', 'nonart1', 'nonart2', 'it-ustni', 'it-teorie', 'it-pojmy', 'it-prikazy', 'it-postupy', 'it-vypocty'];
+const SECTION_RANK: Record<SectionId, number> = { art1: 0, art2: 1, art3: 2, lhk: 3, basics: 4, terms: 5, nonart1: 6, nonart2: 7, 'it-teorie': 8, 'it-prakticke': 9, 'it-vypocty': 10, sloh: 11 };
+const AREA_RANK: AreaId[] = ['context', 'theme', 'chronotope', 'composition', 'genre', 'narrator', 'characters', 'narrative', 'speech', 'verse', 'language', 'tropes', 'authorContext', 'litContext', 'basics', 'terms', 'nonart1', 'nonart2', 'it-ustni', 'it-teorie', 'it-pojmy', 'it-prikazy', 'it-postupy', 'it-vypocty', 'pravopis'];
 
 export function sortBySyllabus(qs: Question[]): Question[] {
   return [...qs].sort((a, b) => {
@@ -171,7 +176,7 @@ export function sortBySyllabus(qs: Question[]): Question[] {
 }
 
 function weightFor(data: AppData, q: Question, difficulty: Difficulty, now: number): number {
-  const m = q.bookId === 'global' ? 0.5 : q.bookId.startsWith('nonart') || q.bookId === 'terms' ? masteryValue(data.mastery[masteryKey(q.bookId, q.area)]) : areaMastery(data, q.bookId, q.area);
+  const m = q.bookId === 'global' ? 0.5 : q.bookId.startsWith('nonart') || q.bookId === 'terms' || q.bookId === 'pravopis' ? masteryValue(data.mastery[masteryKey(q.bookId, q.area)]) : areaMastery(data, q.bookId, q.area);
   const srs = data.srs[q.id];
   let w = 1 + 2.5 * (1 - m);
   if (srs) {

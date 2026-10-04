@@ -22,6 +22,7 @@ interface Props {
 export function bookLabel(bookId: string, books: { id: string; title: string }[]): string {
   if (bookId === 'global') return 'Více děl';
   if (bookId === 'terms') return 'Literární pojmy';
+  if (bookId === 'pravopis') return 'Pravopis';
   if (bookId.startsWith('nonart')) return 'Neumělecký text';
   if (/^(site|hw|cloud)-/.test(bookId)) return itemLabel(bookId) ?? 'IT předmět';
   return books.find((b) => b.id === bookId)?.title ?? 'Kniha';
@@ -156,7 +157,11 @@ export function SessionRunner({ questions, title, mode, difficulty, showSections
             {q.passage.map((p) => (
               <div key={p.label} className="rounded-xl border-l-4 border-brand-400 bg-slate-50 p-4 dark:bg-slate-800/60">
                 <div className="mb-1 text-xs font-semibold uppercase text-slate-500">{p.label}</div>
-                <p className="whitespace-pre-line text-[15px] leading-relaxed">{p.text}</p>
+                {p.mono ? (
+                  <pre className="overflow-x-auto whitespace-pre rounded-lg bg-slate-900 p-3 font-mono text-[13px] leading-relaxed text-emerald-300">{p.text}</pre>
+                ) : (
+                  <p className="whitespace-pre-line text-[15px] leading-relaxed">{p.text}</p>
+                )}
               </div>
             ))}
           </div>

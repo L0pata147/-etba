@@ -25,6 +25,8 @@ interface Store {
   setPlan: (plan: StudyPlan | null) => void;
   saveWriting: (w: Writing) => void;
   deleteWriting: (id: string) => void;
+  setTopicNote: (id: string, text: string) => void;
+  markExported: () => void;
   replaceAll: (data: AppData) => void;
   resetAll: () => void;
   toasts: Toast[];
@@ -163,6 +165,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setPlan: (plan) => update((d) => ({ ...d, plan })),
       saveWriting: (w) => update((d) => ({ ...d, writings: [w, ...d.writings.filter((x) => x.id !== w.id)].slice(0, 100) })),
       deleteWriting: (id) => update((d) => ({ ...d, writings: d.writings.filter((x) => x.id !== id) })),
+      setTopicNote: (id, text) =>
+        update((d) => {
+          const topicNotes = { ...d.topicNotes };
+          if (text.trim()) topicNotes[id] = text;
+          else delete topicNotes[id];
+          return { ...d, topicNotes };
+        }),
+      markExported: () => update((d) => ({ ...d, lastExport: Date.now() })),
       replaceAll: (next) => update(() => next, true),
       resetAll: () => update(() => defaultData()),
     }),

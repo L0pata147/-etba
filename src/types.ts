@@ -25,7 +25,9 @@ export type AreaId =
   | 'it-ustni'
   | 'it-prikazy'
   | 'it-postupy'
-  | 'it-vypocty';
+  | 'it-vypocty'
+  // Písemná práce
+  | 'pravopis';
 
 export type SectionId =
   | 'art1'
@@ -38,7 +40,8 @@ export type SectionId =
   | 'nonart2'
   | 'it-teorie'
   | 'it-prakticke'
-  | 'it-vypocty';
+  | 'it-vypocty'
+  | 'sloh';
 
 /** Maturitní předměty */
 export type SubjectId = 'cjl' | 'site' | 'hw' | 'cloud';
@@ -237,7 +240,7 @@ interface QuestionBase {
   /** Otázka se týká více knih (např. přiřazování) */
   relatedBookIds?: string[];
   /** Text, který se zobrazí nad otázkou (neumělecký text, výňatek) */
-  passage?: { label: string; text: string }[];
+  passage?: { label: string; text: string; mono?: boolean }[];
 }
 
 export interface FlashcardQuestion extends QuestionBase {
@@ -399,6 +402,10 @@ export interface AppData {
   settings: Settings;
   /** Slohové práce (písemná práce z češtiny) */
   writings: Writing[];
+  /** Vlastní poznámky k tématům IT předmětů (klíč = id tématu) */
+  topicNotes: Record<string, string>;
+  /** Kdy byla data naposledy exportována (záloha) */
+  lastExport?: number;
 }
 
 /** Slohová práce */

@@ -3,14 +3,14 @@ import { useSearchParams } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import { generateCloudScenario, type CloudScenario, type Hypervisor } from '../../lib/cloudgen';
 import { Button, Card, PageHeader, Segmented, SectionTitle, Tag } from '../../components/ui';
-import { CommandsTab, ProceduresTab, TaskCard } from '../site/SitePractical';
+import { CommandsTab, ProceduresTab, TaskCard, TroubleTab } from '../site/SitePractical';
 import { SUBJECT_PLATFORMS } from '../../data/subjects';
 
-type Tab = 'zadani' | 'prikazy' | 'postupy';
+type Tab = 'zadani' | 'prikazy' | 'postupy' | 'chyby';
 
 export function CloudPractical() {
   const [params, setParams] = useSearchParams();
-  const tab = (['zadani', 'prikazy', 'postupy'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
+  const tab = (['zadani', 'prikazy', 'postupy', 'chyby'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
   return (
     <div>
       <PageHeader title="Praktická zkouška – cloud" emoji="🛠️" sub="Virtualizace, virtuální sítě, snapshoty a zálohy, kontejnery." />
@@ -22,11 +22,13 @@ export function CloudPractical() {
           { value: 'zadani', label: 'Zadání nanečisto' },
           { value: 'prikazy', label: 'Příkazy' },
           { value: 'postupy', label: 'Postupy' },
+          { value: 'chyby', label: 'Najdi chybu' },
         ]}
       />
       {tab === 'zadani' && <CloudScenarioTab />}
       {tab === 'prikazy' && <CommandsTab platforms={SUBJECT_PLATFORMS.cloud} />}
       {tab === 'postupy' && <ProceduresTab platforms={SUBJECT_PLATFORMS.cloud} />}
+      {tab === 'chyby' && <TroubleTab platforms={SUBJECT_PLATFORMS.cloud} />}
     </div>
   );
 }

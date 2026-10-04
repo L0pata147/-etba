@@ -21,9 +21,10 @@ export const SECTIONS: Record<SectionId, { label: string; short: string; group: 
   'it-teorie': { label: 'IT předměty – teorie a témata', short: 'Teorie', group: 'IT předměty' },
   'it-prakticke': { label: 'IT předměty – příkazy a postupy', short: 'Praxe', group: 'IT předměty' },
   'it-vypocty': { label: 'IT předměty – výpočty a převody', short: 'Výpočty', group: 'IT předměty' },
+  sloh: { label: 'Písemná práce – pravopis a jazyk', short: 'Pravopis', group: 'Písemná práce' },
 };
 
-export const SECTION_ORDER: SectionId[] = ['art1', 'art2', 'art3', 'lhk', 'basics', 'terms', 'nonart1', 'nonart2', 'it-teorie', 'it-prakticke', 'it-vypocty'];
+export const SECTION_ORDER: SectionId[] = ['art1', 'art2', 'art3', 'lhk', 'basics', 'terms', 'nonart1', 'nonart2', 'it-teorie', 'it-prakticke', 'it-vypocty', 'sloh'];
 
 const isVerse = (b: Book) => b.verse.trim().length > 0;
 const isLyric = (b: Book) => b.kind === 'lyrika' || b.kind === 'lyricko-epika';
@@ -173,6 +174,7 @@ export const AREAS: AreaInfo[] = [
   { id: 'it-prikazy', label: 'Příkazy', short: 'Příkazy', section: 'it-prakticke', examPrompt: () => '' },
   { id: 'it-postupy', label: 'Postupy', short: 'Postupy', section: 'it-prakticke', examPrompt: () => '' },
   { id: 'it-vypocty', label: 'Výpočty', short: 'Výpočty', section: 'it-vypocty', examPrompt: () => '' },
+  { id: 'pravopis', label: 'Pravopis', short: 'Pravopis', section: 'sloh', examPrompt: () => '' },
 ];
 
 export const AREA_MAP = Object.fromEntries(AREAS.map((a) => [a.id, a])) as Record<AreaId, AreaInfo>;

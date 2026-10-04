@@ -5,6 +5,7 @@ import { ALL_TOPIC_MAP, SUBJECT_TOPICS } from '../data/subjects';
 import { ALL_COMMANDS, PLATFORM_LABEL } from '../data/site/commands';
 import { ALL_PROCEDURES } from '../data/site/procedures';
 import { generateHwCalcQuestions } from './hwgen';
+import { TROUBLE } from '../data/troubleshoot';
 import { pick, sample, shuffle, uniqueStrings } from './random';
 import { autoPoints } from './text';
 import { generateCalcQuestions } from './netgen';
@@ -163,6 +164,21 @@ export function generateProcedureQuestions(platforms: Platform[] = ['cisco', 'li
   }));
 }
 
+/** Úlohy „najdi chybu v konfiguraci“ */
+export function generateTroubleQuestions(platforms: Platform[] = ['cisco', 'linux', 'windows']): Question[] {
+  return TROUBLE.filter((t) => platforms.includes(t.platform)).map((t): Question => {
+    const options = shuffle([t.answer, ...t.wrong.slice(0, 3)]);
+    return {
+      ...mk(`${platformSubject(t.platform)}-postupy-${t.platform}`, 'it-postupy', t.id, 'hard', `Najdi chybu – ${t.title}\n${t.symptom}\nCo je špatně?`, t.fix),
+      id: `${t.id}|abc`,
+      type: 'abc',
+      options,
+      correctIndex: options.indexOf(t.answer),
+      passage: [{ label: `Konfigurace (${PLATFORM_LABEL[t.platform]})`, text: t.config, mono: true }],
+    };
+  });
+}
+
 export interface SitePoolOptions {
   topicIds?: string[];
   topics?: boolean;
@@ -184,7 +200,7 @@ export function buildSubjectPool(subject: ItSubject, opts: SitePoolOptions): Que
   }
   const platforms = opts.commands?.filter((p) => platformSubject(p) === subject) ?? [];
   if (platforms.length) out.push(...generateCommandQuestions(platforms));
-  if (opts.procedures && platforms.length) out.push(...generateProcedureQuestions(platforms));
+  if (opts.procedures && platforms.length) out.push(...generateProcedureQuestions(platforms), ...generateTroubleQuestions(platforms));
   if (opts.calc) out.push(...(subject === 'hw' ? generateHwCalcQuestions(3) : subject === 'site' ? generateCalcQuestions(3) : []));
   return out;
 }

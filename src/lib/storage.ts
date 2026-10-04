@@ -35,6 +35,7 @@ export function defaultData(): AppData {
     plan: null,
     settings: { ...DEFAULT_SETTINGS },
     writings: [],
+    topicNotes: {},
   };
 }
 
@@ -69,6 +70,8 @@ export function migrate(raw: unknown): AppData {
     plan: r.plan ?? null,
     settings: { ...base.settings, ...(r.settings ?? {}) },
     writings: Array.isArray(r.writings) ? r.writings : [],
+    topicNotes: r.topicNotes && typeof r.topicNotes === 'object' ? r.topicNotes : {},
+    lastExport: r.lastExport,
   };
 }
 

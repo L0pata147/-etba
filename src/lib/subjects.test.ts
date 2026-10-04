@@ -159,3 +159,50 @@ describe('Písemná práce', () => {
     expect(migrate(old).writings).toEqual([]);
   });
 });
+
+describe('Novinky 1.3', () => {
+  it('úlohy najdi chybu', async () => {
+    const { TROUBLE } = await import('../data/troubleshoot');
+    const { generateTroubleQuestions } = await import('./topicgen');
+    expect(new Set(TROUBLE.map((t) => t.id)).size).toBe(TROUBLE.length);
+    for (const t of TROUBLE) {
+      expect(t.wrong).not.toContain(t.answer);
+      expect(new Set([t.answer, ...t.wrong]).size).toBe(t.wrong.length + 1);
+    }
+    const qs = generateTroubleQuestions(['cisco', 'linux', 'windows', 'docker', 'hyperv', 'proxmox']);
+    expect(qs.length).toBe(TROUBLE.length);
+    qs.forEach(validate);
+    expect(buildSubjectPool('cloud', { commands: ['docker'], procedures: true }).some((q) => q.factKey === 'tr-dk-port')).toBe(true);
+  });
+  it('pravopisná cvičení', async () => {
+    const { SPELLING } = await import('../data/spelling');
+    const { generateSpellingQuestions } = await import('./spellinggen');
+    expect(new Set(SPELLING.map((x) => x.id)).size).toBe(SPELLING.length);
+    for (const x of SPELLING) {
+      expect(x.sentence).toContain('___');
+      expect(x.options).toContain(x.answer);
+      expect(new Set(x.options).size).toBe(x.options.length);
+    }
+    const qs = generateSpellingQuestions();
+    expect(qs.every((q) => q.type === 'abc' && q.options[q.correctIndex] !== undefined)).toBe(true);
+    const pool = buildSession(defaultData(), { title: '', mode: '', difficulty: 'medium', bookIds: [], areas: ['pravopis'], types: ['abc'], count: 10, includeSpelling: true });
+    expect(pool.length).toBe(10);
+  });
+  it('doporučení z IT předmětů a dnešní trénink napříč předměty', async () => {
+    const { itRecommendations, recommendations } = await import('./insights');
+    const { recommendedSession } = await import('./quick');
+    const data = defaultData();
+    const it2 = itRecommendations(data, 2);
+    expect(it2).toHaveLength(2);
+    expect(new Set(it2.map((r) => r.topic.subject)).size).toBe(2);
+    const { cfg } = recommendedSession(data, recommendations(data, 2), it2);
+    const ids = new Set(cfg.questions!.map((q) => q.bookId));
+    expect(it2.some((r) => ids.has(r.topic.id))).toBe(true);
+    expect(cfg.title).toContain(it2[0].topic.title);
+  });
+  it('migrace doplní poznámky k tématům', () => {
+    const old = { ...defaultData() } as Record<string, unknown>;
+    delete old.topicNotes;
+    expect(migrate(old).topicNotes).toEqual({});
+  });
+});

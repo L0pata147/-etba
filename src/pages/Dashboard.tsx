@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Dices, GraduationCap, Play, RefreshCw, Timer, TriangleAlert } from 'lucide-react';
 import { useStore } from '../store';
 import { AREA_MAP, CATEGORIES } from '../data/osnova';
-import { areaStats, BADGES, currentWeek, overview, recommendations, staleBooks } from '../lib/insights';
+import { areaStats, BADGES, currentWeek, itRecommendations, overview, recommendations, staleBooks } from '../lib/insights';
+import { SUBJECTS } from '../data/subjects';
+import { exportJson } from '../lib/storage';
 import { areaMastery, bookProgress, cloudPracticalProgress, daysUntil, levelFromXp, levelName, sitePracticalProgress, subjectTopicsProgress, topicProgress } from '../lib/progress';
 import { HW_TOPICS } from '../data/hw/topics';
 import { CLOUD_TOPICS } from '../data/cloud/topics';
@@ -17,7 +19,8 @@ export function Dashboard() {
   const { data } = useStore();
   const start = useStartSession();
   const ov = useMemo(() => overview(data), [data]);
-  const recs = useMemo(() => recommendations(data, 3), [data]);
+  const recs = useMemo(() => recommendations(data, 2), [data]);
+  const itRecs = useMemo(() => itRecommendations(data, 2), [data]);
   const stale = useMemo(() => staleBooks(data, 4), [data]);
   const weakest = useMemo(
     () =>
@@ -71,6 +74,8 @@ export function Dashboard() {
         <Stat icon="⚠️" label="Zopakovat" value={`${ov.review} ${plural(ov.review, 'kniha', 'knihy', 'knih')}`} tone="rose" />
       </div>
 
+      <BackupReminder />
+
       <SubjectCards />
 
       {/* Doporučení */}
@@ -90,9 +95,21 @@ export function Dashboard() {
                 </div>
               </li>
             ))}
+            {itRecs.map((r, i) => (
+              <li key={r.topic.id} className="flex items-center gap-3">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/15 text-sm font-bold">{recs.length + i + 1}</span>
+                <div className="min-w-0">
+                  <Link to={`/tema/${r.topic.id}`} className="font-bold hover:underline">
+                    {r.topic.title}
+                  </Link>{' '}
+                  <span className="text-brand-100">– {SUBJECTS[r.topic.subject].short.toLowerCase()}</span>
+                  <div className="text-xs text-brand-200">{r.reason}</div>
+                </div>
+              </li>
+            ))}
           </ol>
           <div className="mt-5 flex flex-wrap items-center gap-3">
-            <Button size="lg" className="bg-white !text-brand-800 hover:bg-brand-50" icon={<Play size={18} />} onClick={() => start(recommendedSession(data, recs).cfg)}>
+            <Button size="lg" className="bg-white !text-brand-800 hover:bg-brand-50" icon={<Play size={18} />} onClick={() => start(recommendedSession(data, recs, itRecs).cfg)}>
               Začít dnešní trénink
             </Button>
             <span className="flex items-center gap-1.5 text-sm text-brand-100">
@@ -364,5 +381,33 @@ function SubjectCards() {
         </>,
       )}
     </div>
+  );
+}
+
+/** Připomínka zálohy – data jsou jen v zařízení */
+function BackupReminder() {
+  const { data, markExported, toast } = useStore();
+  const now = Date.now();
+  const first = data.sessions.length ? Math.min(...data.sessions.map((s) => s.date)) : now;
+  const since = data.lastExport ?? first;
+  if (data.sessions.length < 5 || now - since < 14 * 86400000) return null;
+  return (
+    <Card className="flex flex-wrap items-center gap-3 border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-500/10">
+      <span className="text-2xl">💾</span>
+      <div className="min-w-0 flex-1 text-sm">
+        <div className="font-semibold">{data.lastExport ? `Poslední záloha ${relativeDays(data.lastExport)}` : 'Data ještě nemáš zálohovaná'}</div>
+        <div className="text-slate-600 dark:text-slate-300">Pokrok je uložený jen v tomto zařízení. Záloha do souboru tě ochrání při ztrátě nebo výměně telefonu.</div>
+      </div>
+      <Button
+        size="sm"
+        onClick={() => {
+          const where = exportJson({ ...data, settings: { ...data.settings, aiApiKey: '' } });
+          markExported();
+          toast(where ? `Záloha uložena: ${where}` : 'Data byla exportována do souboru JSON.', 'success');
+        }}
+      >
+        Zálohovat teď
+      </Button>
+    </Card>
   );
 }
