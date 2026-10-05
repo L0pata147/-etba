@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, Play } from 'lucide-react';
 import type { NonArtText } from '../types';
 import { NONART_TEXTS } from '../data/nonart';
+import { FUNCTIONAL_STYLES } from '../data/styles';
 import type { SessionConfig } from '../lib/session';
 import { useStartSession } from './SessionPage';
 import { Button, Card, PageHeader, Tag, cx } from '../components/ui';
@@ -13,7 +14,7 @@ export function nonArtConfig(title: string, ids?: string[], count = 10): Session
     difficulty: 'medium',
     bookIds: ['__none__'],
     areas: ['nonart1', 'nonart2'],
-    types: ['abc', 'truefalse', 'open', 'flashcard'],
+    types: ['abc', 'truefalse', 'open', 'flashcard', 'match'],
     count,
     includeNonArt: true,
     nonArtIds: ids,
@@ -59,6 +60,7 @@ export function NonArt() {
           </ul>
         </div>
       </Card>
+      <StylesCard onPractice={() => start(nonArtConfig('Funkční styly', ['styly'], 15))} />
       <div className="space-y-4">
         {NONART_TEXTS.map((t) => (
           <TextCard key={t.id} t={t} onPractice={() => start(nonArtConfig(t.title, [t.id], 10))} />
@@ -123,5 +125,51 @@ function Item({ label, v }: { label: string; v: string }) {
       <dt className="text-xs font-semibold uppercase text-slate-500">{label}</dt>
       <dd className="mt-0.5 whitespace-pre-line">{v}</dd>
     </div>
+  );
+}
+
+/** Tahák k funkčním stylům (podle školní tabulky) */
+function StylesCard({ onPractice }: { onPractice: () => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Card className="mb-5 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h2 className="text-lg font-bold">Funkční styly – tahák</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Rysy, převažující slohový postup a nejčastější útvary – podle tabulky ze školy.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" variant="secondary" onClick={() => setOpen(!open)}>
+            {open ? 'Skrýt' : 'Zobrazit'}
+          </Button>
+          <Button size="sm" icon={<Play size={14} />} onClick={onPractice}>
+            Procvičit
+          </Button>
+        </div>
+      </div>
+      {open && (
+        <div className="animate-fade-up mt-4 grid gap-3 md:grid-cols-2">
+          {FUNCTIONAL_STYLES.map((s) => (
+            <div key={s.id} className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/60">
+              <div className="font-bold">{s.name.charAt(0).toUpperCase() + s.name.slice(1)}</div>
+              <dl className="mt-2 space-y-1.5 text-sm">
+                <div>
+                  <dt className="text-xs font-semibold uppercase text-slate-500">Rysy a jazykové prostředky</dt>
+                  <dd>{s.features.join(', ')}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase text-slate-500">Převažující slohový postup</dt>
+                  <dd>{s.procedures.join(', ')}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase text-slate-500">Nejčastější útvary</dt>
+                  <dd>{s.forms.join(', ')}</dd>
+                </div>
+              </dl>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
   );
 }

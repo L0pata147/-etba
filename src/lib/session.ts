@@ -4,6 +4,7 @@ import { generateBookQuestions, generateGlobalQuestions, generateNonArtQuestions
 import { areaMastery, masteryKey, masteryValue } from './progress';
 import { shuffle, weightedSample } from './random';
 import { generateSpellingQuestions } from './spellinggen';
+import { generateStyleQuestions } from './stylegen';
 import { buildSubjectPool, type ItSubject, type SitePoolOptions } from './topicgen';
 
 export const DIFFICULTY_TYPES: Record<Difficulty, QuestionType[]> = {
@@ -90,7 +91,7 @@ export function buildPool(books: Book[], allBooks: Book[], cfg: Partial<SessionC
   if (cfg.includeTerms) pool.push(...generateTermQuestions(undefined, cfg.termIds));
   if (cfg.includeSpelling) pool.push(...generateSpellingQuestions());
   if (cfg.includeNonArt) {
-    const qs = generateNonArtQuestions();
+    const qs = [...generateNonArtQuestions(), ...generateStyleQuestions()];
     pool.push(...(cfg.nonArtIds?.length ? qs.filter((q) => cfg.nonArtIds!.some((id) => q.bookId === `nonart:${id}`)) : qs));
   }
   return pool;

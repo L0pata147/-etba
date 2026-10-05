@@ -8,6 +8,7 @@ import { ALL_COMMANDS, PLATFORM_LABEL } from '../data/site/commands';
 import { ALL_PROCEDURES } from '../data/site/procedures';
 import { TROUBLE } from '../data/troubleshoot';
 import { WRITING_FORMS } from '../data/writing';
+import { FUNCTIONAL_STYLES } from '../data/styles';
 import { platformSubject } from '../lib/topicgen';
 import { Card, EmptyState, PageHeader, Tag } from '../components/ui';
 
@@ -61,6 +62,7 @@ export function SearchPage() {
       ...ALL_COMMANDS.map((c) => ({ group: '⌨️ Příkazy', title: c.command, to: practicalPath(c.platform, 'prikazy'), fields: [c.command, `${c.task} ${PLATFORM_LABEL[c.platform]} ${c.note ?? ''}`] })),
       ...ALL_PROCEDURES.map((p) => ({ group: '🧭 Postupy', title: `${p.title} (${PLATFORM_LABEL[p.platform]})`, to: practicalPath(p.platform, 'postupy'), fields: [p.title, `${p.goal} ${p.steps.map((s) => `${s.text} ${s.cmd ?? ''}`).join(' ')}`] })),
       ...TROUBLE.map((t) => ({ group: '🔧 Najdi chybu', title: t.title, to: practicalPath(t.platform, 'chyby'), fields: [t.title, `${t.symptom} ${t.answer} ${t.fix}`] })),
+      ...FUNCTIONAL_STYLES.map((f) => ({ group: '📰 Funkční styly', title: `Styl ${f.name}`, to: '/neumelecky', fields: [`styl ${f.name}`, `${f.features.join(' ')} ${f.procedures.join(' ')} ${f.forms.join(' ')}`] })),
       ...WRITING_FORMS.map((f) => ({ group: '✍️ Slohové útvary', title: f.name, to: '/sloh?tab=utvary', fields: [f.name, `${f.purpose} ${f.structure.join(' ')} ${f.language.join(' ')}`] })),
       ...data.writings.map((w) => ({ group: '✍️ Moje slohovky', title: w.title, to: `/sloh?prace=${w.id}`, fields: [w.title, w.text] })),
     ],

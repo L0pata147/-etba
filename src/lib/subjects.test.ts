@@ -232,3 +232,21 @@ describe('Podle školního cvičení – Windows Server ve VirtualBoxu', () => {
     expect(buildSubjectPool('cloud', { commands: ['virtualbox'], procedures: true }).some((q) => q.factKey === 'tr-vb-intnet')).toBe(true);
   });
 });
+
+describe('Funkční styly (školní tabulka)', () => {
+  it('otázky jsou platné a útvary jednoznačné', async () => {
+    const { generateStyleQuestions } = await import('./stylegen');
+    const qs = generateStyleQuestions();
+    expect(new Set(qs.map((q) => q.id)).size).toBe(qs.length);
+    for (const q of qs) {
+      validate(q);
+      if (q.type === 'abc' && q.factKey.startsWith('utvar-')) {
+        expect(q.prompt).not.toMatch(/„(recenze|kritika)“/);
+      }
+      if (q.type === 'match') expect(q.pairs).toHaveLength(5);
+    }
+    const s = buildSession(defaultData(), { title: '', mode: '', difficulty: 'medium', bookIds: ['__none__'], areas: ['nonart2'], types: ['abc', 'flashcard', 'match'], count: 15, includeNonArt: true, nonArtIds: ['styly'], includeGlobal: false });
+    expect(s.length).toBeGreaterThan(10);
+    expect(s.every((q) => q.bookId === 'nonart:styly')).toBe(true);
+  });
+});
