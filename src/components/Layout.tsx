@@ -1,74 +1,20 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import {
-  BarChart3,
-  BookOpen,
-  Bot,
-  CalendarDays,
-  ClipboardList,
-  Cloud,
-  Cpu,
-  PenLine,
-  Server,
-  Dumbbell,
-  GraduationCap,
-  Home,
-  Library,
-  Menu,
-  Moon,
-  Network,
-  Newspaper,
-  Search,
-  SquareTerminal,
-  Shuffle,
-  Terminal,
-  Zap,
-  Settings,
-  Sun,
-  TriangleAlert,
-  X,
-} from 'lucide-react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { ChevronDown, GraduationCap, Home, Menu, Moon, Search, BarChart3, Sun, X } from 'lucide-react';
 import { useStore } from '../store';
 import { cx } from './ui';
 import { StorageWarning } from './StorageWarning';
 import { levelFromXp, streak } from '../lib/progress';
+import { NAV_BOTTOM, NAV_SUBJECTS, NAV_TOP, activeNavItem, type NavItem } from './navData';
 
-interface NavItem {
-  to: string;
-  label: string;
-  icon: typeof Home;
-  end?: boolean;
-  group?: string;
-}
-
-const NAV: NavItem[] = [
-  { to: '/', label: 'Dnes', icon: Home, end: true },
+const MOBILE: NavItem[] = [
+  { to: '/', label: 'Dnes', icon: Home },
+  { to: '/zkousky', label: 'Zkoušky', icon: GraduationCap },
   { to: '/hledat', label: 'Hledat', icon: Search },
-  { to: '/knihy', label: 'Moje knihy', icon: Library, group: 'Čeština – literatura' },
-  { to: '/trenink', label: 'Trénink', icon: Dumbbell },
-  { to: '/simulace', label: 'Simulace maturity', icon: GraduationCap },
-  { to: '/pojmy', label: 'Literární pojmy', icon: BookOpen },
-  { to: '/neumelecky', label: 'Neumělecký text', icon: Newspaper },
-  { to: '/sloh', label: 'Písemná práce', icon: PenLine },
-  { to: '/site', label: 'Ústní témata', icon: Network, end: true, group: 'Počítačové sítě' },
-  { to: '/site/losovani', label: 'Simulace ústní', icon: Shuffle },
-  { to: '/site/prakticka', label: 'Praktická zkouška', icon: Terminal },
-  { to: '/terminal', label: 'Terminál (Cisco, Linux)', icon: SquareTerminal },
-  { to: '/site/trenink', label: 'Trénink sítí', icon: Dumbbell },
-  { to: '/hw', label: 'Okruhy a převody', icon: Cpu, end: true, group: 'Technické vybavení PC' },
-  { to: '/hw/test', label: 'Cvičný test', icon: ClipboardList },
-  { to: '/cloud', label: 'Okruhy', icon: Cloud, end: true, group: 'Programové vybavení cloudu' },
-  { to: '/cloud/prakticka', label: 'Praktická zkouška', icon: Server },
-  { to: '/dril', label: 'Rychlostní dril', icon: Zap, group: 'Všechny předměty' },
-  { to: '/doucit', label: 'Musím se doučit', icon: TriangleAlert },
-  { to: '/pokrok', label: 'Můj pokrok', icon: BarChart3 },
-  { to: '/plan', label: 'Studijní plán', icon: CalendarDays },
-  { to: '/ai', label: 'AI učitel', icon: Bot },
-  { to: '/nastaveni', label: 'Nastavení', icon: Settings },
+  { to: '/pokrok', label: 'Pokrok', icon: BarChart3 },
 ];
 
-const byPath = (to: string) => NAV.find((n) => n.to === to)!;
-const MOBILE: NavItem[] = [byPath('/'), byPath('/knihy'), { ...byPath('/site'), label: 'Sítě', end: false }, byPath('/pokrok')];
+const OPEN_KEY = 'maturitni-trener:nav-open';
 
 export function useTheme() {
   const { data, updateSettings } = useStore();
@@ -105,34 +51,94 @@ export function Layout({ children }: { children: ReactNode }) {
     window.scrollTo(0, 0);
   }, [loc.pathname]);
 
+  const active = activeNavItem(loc.pathname, loc.search);
+  const [open, setOpen] = useState<Set<string>>(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(OPEN_KEY) ?? '[]') as string[]);
+    } catch {
+      return new Set();
+    }
+  });
+  // předmět s aktivní stránkou je vždy rozbalený
+  useEffect(() => {
+    const subj = active?.subject;
+    if (subj && !open.has(subj)) setOpen((o) => new Set(o).add(subj));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.subject]);
+  const toggleSubject = (id: string) =>
+    setOpen((o) => {
+      const n = new Set(o);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      try {
+        localStorage.setItem(OPEN_KEY, JSON.stringify([...n]));
+      } catch {
+        /* nevadí */
+      }
+      return n;
+    });
+
+  const link = (n: NavItem, small = false) => {
+    const isActive = active?.to === n.to;
+    return (
+      <Link
+        key={n.to}
+        to={n.to}
+        aria-current={isActive ? 'page' : undefined}
+        className={cx(
+          'flex items-center gap-3 rounded-xl px-3 font-medium transition',
+          small ? 'py-1.5 text-[14px]' : 'py-2.5 text-[15px]',
+          isActive
+            ? 'bg-brand-600 text-white shadow-sm shadow-brand-600/30'
+            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white',
+        )}
+      >
+        <n.icon size={small ? 16 : 19} />
+        <span className="flex-1">{n.label}</span>
+        {n.to === '/doucit' && unknownCount > 0 && <span className="rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white">{unknownCount}</span>}
+      </Link>
+    );
+  };
+
   const navList = (
-    <nav className="flex flex-col gap-0.5">
-      {NAV.map((n) => [
-        n.group && (
-          <div key={`g-${n.group}`} className="mt-4 px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            {n.group}
+    <nav className="flex flex-col gap-0.5" aria-label="Hlavní menu">
+      {NAV_TOP.map((n) => link(n))}
+      <div className="mt-4 px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Předměty a zkoušky</div>
+      {NAV_SUBJECTS.map((subj) => {
+        const isOpen = open.has(subj.id);
+        const hasActive = active?.subject === subj.id;
+        return (
+          <div key={subj.id}>
+            <button
+              onClick={() => toggleSubject(subj.id)}
+              aria-expanded={isOpen}
+              className={cx(
+                'flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-[15px] font-semibold transition hover:bg-slate-100 dark:hover:bg-slate-800',
+                hasActive ? 'text-brand-700 dark:text-brand-300' : 'text-slate-700 dark:text-slate-200',
+              )}
+            >
+              <span className="w-5 text-center">{subj.emoji}</span>
+              <span className="flex-1">{subj.label}</span>
+              <ChevronDown size={16} className={cx('shrink-0 text-slate-400 transition', isOpen && 'rotate-180')} />
+            </button>
+            {isOpen && (
+              <div className="mb-1 ml-4 border-l border-slate-200 pl-2 dark:border-slate-800">
+                {subj.exams.map((ex) => (
+                  <div key={ex.id} className="mt-1">
+                    <div className="px-3 pb-0.5 pt-1.5">
+                      <div className="text-[12px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{ex.label}</div>
+                      <div className="text-[11px] text-slate-400 dark:text-slate-500">{ex.format}</div>
+                    </div>
+                    {ex.items.map((n) => link(n, true))}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        ),
-        <NavLink
-          key={n.to}
-          to={n.to}
-          end={n.end}
-          className={({ isActive }) =>
-            cx(
-              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition',
-              isActive
-                ? 'bg-brand-600 text-white shadow-sm shadow-brand-600/30'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white',
-            )
-          }
-        >
-          <n.icon size={19} />
-          <span className="flex-1">{n.label}</span>
-          {n.to === '/doucit' && unknownCount > 0 && (
-            <span className="rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white">{unknownCount}</span>
-          )}
-        </NavLink>,
-      ])}
+        );
+      })}
+      <div className="mt-4 px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Moje příprava</div>
+      {NAV_BOTTOM.map((n) => link(n))}
     </nav>
   );
 
@@ -207,13 +213,16 @@ export function Layout({ children }: { children: ReactNode }) {
               <NavLink
                 key={n.to}
                 to={n.to}
-                end={n.end}
+                end={n.to === "/"}
                 className={({ isActive }) =>
-                  cx('flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium', isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-500 dark:text-slate-400')
+                  cx(
+                    'flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium',
+                    isActive || (n.to === '/zkousky' && !!active?.subject) ? 'text-brand-600 dark:text-brand-400' : 'text-slate-500 dark:text-slate-400',
+                  )
                 }
               >
                 <n.icon size={22} />
-                {n.label === 'Moje knihy' ? 'Knihy' : n.label === 'Můj pokrok' ? 'Pokrok' : n.label}
+                {n.label}
               </NavLink>
             ))}
             <button onClick={() => setMenuOpen(true)} className="flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
