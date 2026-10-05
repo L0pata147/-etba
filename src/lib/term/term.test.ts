@@ -73,25 +73,24 @@ describe('Cisco – parser', () => {
 });
 
 describe('Linux – úlohy', () => {
-  it('netplan', () => {
-    const t = LINUX_TASKS.find((x) => x.id === 'lx-netplan')!;
+  it('druhá síťovka ve vnitřní síti', () => {
+    const t = LINUX_TASKS.find((x) => x.id === 'lx-intnet')!;
     const s = t.create();
-    expect(s.saveFile('/etc/netplan/01-netcfg.yaml', 'network:\n  version: 2\n  ethernets:\n    ens33:\n      dhcp4: false\n      addresses: [192.168.100.10/24]\n      routes:\n        - to: default\n          via: 192.168.100.1\n      nameservers:\n        addresses: [192.168.100.1]\n')).toBeNull();
-    expect(allOk(t.check(s))).toEqual(['konfigurace je uplatněná (netplan apply)']);
-    s.exec('netplan apply');
+    expect(s.exec('cat /etc/network/interfaces').out.join('\n')).toMatch(/iface enp0s3 inet dhcp/);
+    s.saveFile('/etc/network/interfaces', (s.read('/etc/network/interfaces') ?? '') + '\nauto enp0s8\niface enp0s8 inet static\n    address 192.168.100.1/24\n');
+    expect(allOk(t.check(s))).toEqual(['enp0s8 je zapnuté s adresou 192.168.100.1/24']);
+    s.exec('ifup enp0s8');
     expect(allOk(t.check(s))).toEqual([]);
-    expect(s.exec('ping 192.168.100.1').out.join()).toMatch(/4 received/);
-    expect(s.exec('ip -br a').out.join()).toMatch(/192\.168\.100\.10\/24/);
-  });
-  it('netplan s tabulátorem selže', () => {
-    const s = LINUX_TASKS[0].create();
-    s.saveFile('/etc/netplan/01-netcfg.yaml', 'network:\n\tethernets:\n');
-    expect(s.exec('netplan apply').out.join()).toMatch(/tabs/);
+    expect(s.ifaces[0].addr).toBe('10.0.2.15/24');
+    expect(s.exec('ping 192.168.100.20').out.join()).toMatch(/4 received/);
+    expect(s.exec('netplan apply').out.join()).toMatch(/nenalezen/);
+    expect(s.exec('ifconfig').out.join()).toMatch(/net-tools/);
+    expect(s.exec('hostnamectl').out.join()).toMatch(/Debian GNU\/Linux 13/);
   });
   it('interfaces (Debian)', () => {
     const t = LINUX_TASKS.find((x) => x.id === 'lx-interfaces')!;
     const s = t.create();
-    s.saveFile('/etc/network/interfaces', 'auto lo\niface lo inet loopback\n\nauto ens33\niface ens33 inet static\n    address 192.168.100.20\n    netmask 255.255.255.0\n    gateway 192.168.100.1\n');
+    s.saveFile('/etc/network/interfaces', 'auto lo\niface lo inet loopback\n\nauto enp0s3\niface enp0s3 inet static\n    address 192.168.100.20\n    netmask 255.255.255.0\n    gateway 192.168.100.1\n');
     s.exec('systemctl restart networking');
     expect(allOk(t.check(s))).toEqual([]);
   });
@@ -124,7 +123,7 @@ describe('Linux – úlohy', () => {
     const s = t.create();
     s.exec('apt install isc-dhcp-server');
     expect(s.exec('systemctl restart isc-dhcp-server').out.join()).toMatch(/failed/);
-    s.saveFile('/etc/default/isc-dhcp-server', 'INTERFACESv4="ens33"\n');
+    s.saveFile('/etc/default/isc-dhcp-server', 'INTERFACESv4="enp0s3"\n');
     s.saveFile('/etc/dhcp/dhcpd.conf', 'subnet 192.168.100.0 netmask 255.255.255.0 {\n  range 192.168.2.100 192.168.2.200;\n}\n');
     expect(s.exec('systemctl restart isc-dhcp-server').out.join()).toMatch(/failed/);
     expect(s.exec('systemctl status isc-dhcp-server').out.join('\n')).toMatch(/not on net/);
@@ -133,7 +132,7 @@ describe('Linux – úlohy', () => {
     expect(allOk(t.check(s))).toEqual([]);
   });
   it('základní příkazy', () => {
-    const s = new LinuxSim({ distro: 'debian' });
+    const s = new LinuxSim({});
     expect(s.exec('cd /etc').out).toEqual([]);
     expect(s.prompt()).toBe('root@server:/etc#');
     expect(s.exec('cat hostname').out).toEqual(['server']);

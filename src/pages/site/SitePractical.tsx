@@ -23,7 +23,7 @@ export function SitePractical() {
       <PageHeader
         title="Praktická zkouška – sítě"
         emoji="🛠️"
-        sub="Nejdřív Packet Tracer (Cisco), potom se losuje Linux, nebo Windows Server."
+        sub="Nejdřív Packet Tracer (Cisco), potom se losuje Linux (Debian 13), nebo Windows Server."
       />
       <Segmented
         className="mb-5"
@@ -85,7 +85,7 @@ function ScenarioTab() {
             onChange={setOsMode}
             options={[
               { value: 'los', label: '🎲 Losovat OS' },
-              { value: 'linux', label: 'Linux' },
+              { value: 'linux', label: 'Linux (Debian 13)' },
               { value: 'windows', label: 'Windows Server' },
             ]}
           />
@@ -118,7 +118,7 @@ function ScenarioTab() {
           </section>
 
           <section>
-            <SectionTitle sub="Server ve virtuálce">Část 2: {osShown ? (sc.os === 'linux' ? 'Linux' : 'Windows Server') : 'losovaný operační systém'}</SectionTitle>
+            <SectionTitle sub="Server ve virtuálce">Část 2: {osShown ? (sc.os === 'linux' ? 'Linux (Debian 13)' : 'Windows Server') : 'losovaný operační systém'}</SectionTitle>
             {osShown ? (
               <>
                 <Card className="mb-3 p-4 text-sm">
@@ -129,7 +129,7 @@ function ScenarioTab() {
                     </>
                   ) : (
                     <>
-                      Server <b>{sc.server.host}</b> · síť {sc.server.net} · adresa {sc.server.ip} · brána {sc.server.gateway}
+                      Debian 13 ve VirtualBoxu · server <b>{sc.server.host}</b> · síťovka enp0s3 · síť {sc.server.net} · adresa {sc.server.ip} · brána {sc.server.gateway}
                     </>
                   )}
                 </Card>

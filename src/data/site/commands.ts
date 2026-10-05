@@ -23,7 +23,7 @@ const c = (platform: Platform, group: string, task: string, command: string, acc
 
 export const PLATFORM_LABEL: Record<Platform, string> = {
   cisco: 'Cisco IOS (Packet Tracer)',
-  linux: 'Linux (Debian/Ubuntu)',
+  linux: 'Linux (Debian 13)',
   windows: 'Windows Server (PowerShell)',
   docker: 'Docker a kontejnery',
   hyperv: 'Hyper-V (PowerShell)',
@@ -107,15 +107,15 @@ export const COMMANDS: CommandDef[] = [
 
   // ===== Linux =====
   c('linux', 'Síť', 'Zobraz IP adresy všech rozhraní.', 'ip a', ['ip addr', 'ip address', 'ip addr show', 'ip a s', 'ip address show']),
-  c('linux', 'Síť', 'Přidej na rozhraní ens33 adresu 192.168.10.10/24.', 'ip addr add 192.168.10.10/24 dev ens33', ['ip a add 192.168.10.10/24 dev ens33', 'ip address add 192.168.10.10/24 dev ens33']),
-  c('linux', 'Síť', 'Zapni rozhraní ens33.', 'ip link set ens33 up', ['ip link set dev ens33 up']),
+  c('linux', 'Síť', 'Přidej na rozhraní enp0s3 adresu 192.168.10.10/24.', 'ip addr add 192.168.10.10/24 dev enp0s3', ['ip a add 192.168.10.10/24 dev enp0s3', 'ip address add 192.168.10.10/24 dev enp0s3']),
+  c('linux', 'Síť', 'Zapni rozhraní enp0s3.', 'ip link set enp0s3 up', ['ip link set dev enp0s3 up']),
   c('linux', 'Síť', 'Nastav výchozí bránu 192.168.10.1.', 'ip route add default via 192.168.10.1', ['ip r add default via 192.168.10.1', 'ip route add 0.0.0.0/0 via 192.168.10.1']),
   c('linux', 'Síť', 'Zobraz směrovací tabulku.', 'ip route', ['ip r', 'ip route show', 'route -n']),
-  c('linux', 'Síť', 'Použij novou konfiguraci sítě z netplanu (Ubuntu).', 'netplan apply'),
+  c('linux', 'Síť', 'Uplatni změny v /etc/network/interfaces (restart sítě v Debianu).', 'systemctl restart networking', ['service networking restart']),
   c('linux', 'Síť', 'Restartuj síťování na Debianu (/etc/network/interfaces).', 'systemctl restart networking'),
   c('linux', 'Síť', 'Nastav název počítače na server1.', 'hostnamectl set-hostname server1'),
   c('linux', 'Síť', 'Zapni (dočasně) přeposílání IPv4 paketů – Linux jako router.', 'sysctl -w net.ipv4.ip_forward=1', ['echo 1 > /proc/sys/net/ipv4/ip_forward'], 'Trvale: řádek net.ipv4.ip_forward=1 v /etc/sysctl.conf a příkaz sysctl -p.'),
-  c('linux', 'Síť', 'Zapni NAT (maškarádu) pro provoz odcházející rozhraním ens33.', 'iptables -t nat -A POSTROUTING -o ens33 -j MASQUERADE'),
+  c('linux', 'Síť', 'Zapni NAT (maškarádu) pro provoz odcházející rozhraním enp0s3.', 'iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE'),
   c('linux', 'Síť', 'Otestuj překlad jména www.firma.local.', 'nslookup www.firma.local', ['dig www.firma.local', 'host www.firma.local']),
   c('linux', 'Balíčky a služby', 'Aktualizuj seznam balíčků.', 'apt update', ['apt-get update']),
   c('linux', 'Balíčky a služby', 'Nainstaluj DHCP server (ISC).', 'apt install isc-dhcp-server', ['apt-get install isc-dhcp-server', 'apt install -y isc-dhcp-server', 'apt-get install -y isc-dhcp-server']),

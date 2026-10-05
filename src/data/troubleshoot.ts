@@ -162,7 +162,7 @@ export const TROUBLE: TroubleItem[] = [
     platform: 'linux',
     title: 'Linux jako router',
     symptom: 'Linux má dvě síťovky a PC z obou sítí se na něj pingnou, ale navzájem ne.',
-    config: '$ ip -br addr\nens33  UP  192.168.1.1/24\nens34  UP  192.168.2.1/24\n$ sysctl net.ipv4.ip_forward\nnet.ipv4.ip_forward = 0',
+    config: '$ ip -br addr\nenp0s3  UP  192.168.1.1/24\nenp0s8  UP  192.168.2.1/24\n$ sysctl net.ipv4.ip_forward\nnet.ipv4.ip_forward = 0',
     answer: 'je vypnuté přeposílání paketů (ip_forward = 0)',
     wrong: ['obě síťovky nesmějí mít adresu .1', 'chybí DNS server', 'je potřeba nainstalovat isc-dhcp-server'],
     fix: 'Zapnout směrování (trvale v /etc/sysctl.conf):\nnet.ipv4.ip_forward=1\nsysctl -p',

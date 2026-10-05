@@ -50,7 +50,7 @@ export function generateCloudScenario(hv?: Hypervisor): CloudScenario {
       id: 'vb-vm',
       title: 'Virtuální server SRV1',
       detail: `Vytvoř VM srv1: ${ram} GB RAM, ${cores} CPU, dynamicky alokovaný disk VDI ${disk} GB, karta 1 v síti ${company}-NAT, karta 2 ve vnitřní síti backend.`,
-      solution: `VBoxManage createvm --name srv1 --ostype Ubuntu_64 --register\nVBoxManage modifyvm srv1 --memory ${ram * 1024} --cpus ${cores} --nic1 natnetwork --nat-network1 ${company}-NAT --nic2 intnet --intnet2 backend\nVBoxManage createmedium disk --filename srv1.vdi --size ${disk * 1024} --variant Standard\nVBoxManage storagectl srv1 --name SATA --add sata\nVBoxManage storageattach srv1 --storagectl SATA --port 0 --device 0 --type hdd --medium srv1.vdi\nVBoxManage storageattach srv1 --storagectl SATA --port 1 --device 0 --type dvddrive --medium server.iso\n(GUI: Nový → paměť, CPU, disk dynamicky alokovaný; Nastavení → Síť → Karta 1 a 2)`,
+      solution: `VBoxManage createvm --name srv1 --ostype Debian_64 --register\nVBoxManage modifyvm srv1 --memory ${ram * 1024} --cpus ${cores} --nic1 natnetwork --nat-network1 ${company}-NAT --nic2 intnet --intnet2 backend\nVBoxManage createmedium disk --filename srv1.vdi --size ${disk * 1024} --variant Standard\nVBoxManage storagectl srv1 --name SATA --add sata\nVBoxManage storageattach srv1 --storagectl SATA --port 0 --device 0 --type hdd --medium srv1.vdi\nVBoxManage storageattach srv1 --storagectl SATA --port 1 --device 0 --type dvddrive --medium server.iso\n(GUI: Nový → paměť, CPU, disk dynamicky alokovaný; Nastavení → Síť → Karta 1 a 2)`,
     },
     {
       id: 'vb-os',
@@ -158,7 +158,7 @@ export function generateCloudScenario(hv?: Hypervisor): CloudScenario {
       id: 'dk-host',
       title: 'Docker host',
       detail: `Vytvoř druhou VM s Linuxem (adresa ${dockerIp}/24) a nainstaluj do ní Docker.`,
-      solution: 'apt update\napt install docker.io docker-compose-v2   (Ubuntu; jinde podle návodu docs.docker.com)\nsystemctl enable --now docker\ndocker run hello-world',
+      solution: 'apt update\napt install docker.io docker-compose   (Debian 13; novější verze z repozitáře docs.docker.com)\nsystemctl enable --now docker\ndocker run hello-world',
     },
     {
       id: 'dk-web',

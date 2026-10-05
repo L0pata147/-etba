@@ -32,7 +32,7 @@ ${books}
 2) Počítačové sítě a síťové operační systémy:
 - Ústní zkouška: losuje se jedno z 20 témat (15 min příprava, 15 min zkoušení):
 ${topics}
-- Praktická zkouška: nejdřív úloha v Cisco Packet Traceru (VLAN, směrování, DHCP, NAT, SSH…), potom se losuje Linux, nebo Windows Server (síť, DHCP, DNS, web, uživatelé, AD, GPO, sdílení).
+- Praktická zkouška: nejdřív úloha v Cisco Packet Traceru (VLAN, směrování, DHCP, NAT, SSH…), potom se losuje Linux (Debian 13), nebo Windows Server (síť, DHCP, DNS, web, uživatelé, AD, GPO, sdílení).
 
 3) Technické vybavení počítačů – písemný test v Moodlu (60 min): procesor, paměti, základní deska a UEFI, rozhraní, disky a RAID, grafika a monitory, periferie, napájení, servery, číselné soustavy a jednotky.
 

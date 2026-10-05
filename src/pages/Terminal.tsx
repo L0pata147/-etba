@@ -36,13 +36,13 @@ export function TerminalPage() {
         onChange={(v) => setParams({ os: v })}
         options={[
           { value: 'cisco', label: '🛜 Cisco IOS (Packet Tracer)' },
-          { value: 'linux', label: '🐧 Linux' },
+          { value: 'linux', label: '🐧 Linux (Debian 13)' },
         ]}
       />
       <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
         {platform === 'cisco'
           ? 'Funguje jako CLI v Packet Traceru: režimy Router> / # / (config)#, zkratky (en, conf t, int g0/0, sh ip int br), „do“ v konfiguraci, ? pro nápovědu.'
-          : 'Ubuntu/Debian jako root: soubory upravuješ v editoru (nano / vim), služby přes systemctl, balíčky přes apt. Napiš help pro seznam příkazů.'}
+          : 'Debian 13 ve VirtualBoxu jako root (síťovky enp0s3, enp0s8): soubory upravuješ v editoru (nano / vim), síť v /etc/network/interfaces, služby přes systemctl, balíčky přes apt. Napiš help pro seznam příkazů.'}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {TASKS[platform].map((t) => (
@@ -294,7 +294,7 @@ function TerminalRun({ task, platform, onBack }: { task: TermTask; platform: Pla
                   if (editor.content === editor.original) setEditor(null);
                   else saveEditor(true);
                 } else if (e.key === 'Tab') {
-                  // tabulátor vloží mezery – v YAML (netplan) se tabulátor nesmí používat
+                  // tabulátor vloží dvě mezery (odsazení v konfiguračních souborech)
                   e.preventDefault();
                   const t = e.currentTarget;
                   const pos = t.selectionStart;

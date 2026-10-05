@@ -128,9 +128,7 @@ export const PROCEDURES: Procedure[] = [
     goal: 'Nastavit serveru pevnou adresu, bránu a DNS tak, aby vydržely restart.',
     steps: [
       { text: 'Zjistit název rozhraní', cmd: 'ip a' },
-      { text: 'Ubuntu – netplan: upravit /etc/netplan/01-netcfg.yaml', cmd: 'network:\n  version: 2\n  ethernets:\n    ens33:\n      addresses: [192.168.10.10/24]\n      routes:\n        - to: default\n          via: 192.168.10.1\n      nameservers:\n        addresses: [192.168.10.10]' },
-      { text: 'Ubuntu – použít konfiguraci', cmd: 'netplan apply' },
-      { text: 'Debian – /etc/network/interfaces', cmd: 'auto ens33\niface ens33 inet static\n  address 192.168.10.10/24\n  gateway 192.168.10.1\n  dns-nameservers 192.168.10.10' },
+      { text: 'Upravit /etc/network/interfaces (Debian 13)', cmd: 'auto enp0s3\niface enp0s3 inet static\n  address 192.168.10.10/24\n  gateway 192.168.10.1\n  dns-nameservers 192.168.10.10' },
       { text: 'Debian – restart sítě a ověření', cmd: 'systemctl restart networking\nip a\nip route' },
     ],
   },
@@ -142,7 +140,7 @@ export const PROCEDURES: Procedure[] = [
     steps: [
       { text: 'Zapnout přeposílání trvale – v /etc/sysctl.conf odkomentovat', cmd: 'net.ipv4.ip_forward=1' },
       { text: 'Načíst nastavení', cmd: 'sysctl -p' },
-      { text: 'NAT (maškaráda) na vnějším rozhraní', cmd: 'iptables -t nat -A POSTROUTING -o ens33 -j MASQUERADE' },
+      { text: 'NAT (maškaráda) na vnějším rozhraní', cmd: 'iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE' },
       { text: 'Uložit pravidla (balíček iptables-persistent)', cmd: 'apt install iptables-persistent\nnetfilter-persistent save' },
     ],
   },

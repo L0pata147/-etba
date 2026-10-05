@@ -473,13 +473,13 @@ export function generateScenario(os?: 'linux' | 'windows'): Scenario {
             id: 'lx-ip',
             title: 'Síť a název serveru',
             detail: `Nastav serveru trvale adresu ${server.ip}/24, bránu ${server.gateway}, DNS sám na sebe a název ${server.host}.`,
-            solution: `hostnamectl set-hostname ${server.host}\n# Ubuntu – /etc/netplan/01-netcfg.yaml\nnetwork:\n  version: 2\n  ethernets:\n    ens33:\n      addresses: [${server.ip}/24]\n      routes:\n        - to: default\n          via: ${server.gateway}\n      nameservers:\n        addresses: [${server.ip}]\nnetplan apply\n# Debian – /etc/network/interfaces\nauto ens33\niface ens33 inet static\n  address ${server.ip}/24\n  gateway ${server.gateway}`,
+            solution: `Debian 13 ve VirtualBoxu – síťovka enp0s3\nhostnamectl set-hostname ${server.host}\nnano /etc/hosts   (127.0.1.1  ${server.host})\nnano /etc/network/interfaces\n\nauto enp0s3\niface enp0s3 inet static\n    address ${server.ip}/24\n    gateway ${server.gateway}\n\nnano /etc/resolv.conf   (nameserver ${server.ip})\nsystemctl restart networking\nip a`,
           },
           {
             id: 'lx-dhcp',
             title: 'DHCP server',
             detail: `Nainstaluj isc-dhcp-server a přiděluj adresy ${server.dhcpFrom}–${server.dhcpTo}, brána ${server.gateway}, DNS ${server.ip}, doména ${domain}.`,
-            solution: `apt install isc-dhcp-server\n# /etc/default/isc-dhcp-server\nINTERFACESv4="ens33"\n# /etc/dhcp/dhcpd.conf\noption domain-name "${domain}";\noption domain-name-servers ${server.ip};\nauthoritative;\nsubnet ${netAddr} netmask 255.255.255.0 {\n  range ${server.dhcpFrom} ${server.dhcpTo};\n  option routers ${server.gateway};\n}\nsystemctl restart isc-dhcp-server`,
+            solution: `apt install isc-dhcp-server\n# /etc/default/isc-dhcp-server\nINTERFACESv4="enp0s3"\n# /etc/dhcp/dhcpd.conf\noption domain-name "${domain}";\noption domain-name-servers ${server.ip};\nauthoritative;\nsubnet ${netAddr} netmask 255.255.255.0 {\n  range ${server.dhcpFrom} ${server.dhcpTo};\n  option routers ${server.gateway};\n}\nsystemctl restart isc-dhcp-server`,
           },
           {
             id: 'lx-dns',
