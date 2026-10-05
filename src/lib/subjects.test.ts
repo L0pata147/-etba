@@ -250,3 +250,31 @@ describe('Funkční styly (školní tabulka)', () => {
     expect(s.every((q) => q.bookId === 'nonart:styly')).toBe(true);
   });
 });
+
+describe('Verze 1.6 – otázka dne a statistiky po předmětech', () => {
+  it('otázka dne je stabilní pro den a liší se mezi dny', async () => {
+    const { questionOfDay, questionOfDayText } = await import('./qotd');
+    const data = defaultData();
+    const a = questionOfDay(data, '2026-10-05');
+    expect(a).toBeTruthy();
+    expect(questionOfDay(data, '2026-10-05')?.id).toBe(a!.id);
+    const ids = new Set(['2026-10-06', '2026-10-07', '2026-10-08', '2026-10-09'].map((d) => questionOfDay(data, d)?.id));
+    expect(ids.size).toBeGreaterThan(1);
+    expect(questionOfDayText(a).length).toBeGreaterThan(5);
+  });
+  it('pokrok po předmětech a odhad', async () => {
+    const { subjectForecast, subjectProgress, subjectOfItem } = await import('./insights');
+    const data = defaultData();
+    expect(Object.keys(subjectProgress(data)).sort()).toEqual(['cjl', 'cloud', 'hw', 'site']);
+    expect(subjectOfItem('site-ipv4')).toBe('site');
+    expect(subjectOfItem('promena')).toBe('cjl');
+    expect(subjectForecast(data, 'site').kind).toBe('wait');
+    // rostoucí historie → odhad data
+    const now = new Date('2026-10-10T12:00:00');
+    data.progressHistory = { '2026-10-01': { site: 0 }, '2026-10-05': { site: 0 }, '2026-10-08': { site: 0 } };
+    data.mastery['site-ipv4|it-pojmy'] = { c: 5, n: 5, attempts: 5, correct: 5, last: now.getTime() };
+    const f = subjectForecast(data, 'site', now);
+    expect(f.kind).toBe('date');
+    expect(f.days).toBeGreaterThan(0);
+  });
+});

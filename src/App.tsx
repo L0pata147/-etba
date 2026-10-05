@@ -28,6 +28,8 @@ import { CloudPractical } from './pages/cloud/CloudPractical';
 import { WritingPage } from './pages/Writing';
 import { Drill } from './pages/Drill';
 import { SearchPage } from './pages/Search';
+import { TerminalPage } from './pages/Terminal';
+import { QuestionOfDay } from './pages/QuestionOfDay';
 
 const Stats = lazy(() => import('./pages/Stats').then((m) => ({ default: m.Stats })));
 
@@ -69,6 +71,8 @@ export function App() {
         <Route path="/sloh" element={<WritingPage />} />
         <Route path="/dril" element={<Drill />} />
         <Route path="/hledat" element={<SearchPage />} />
+        <Route path="/terminal" element={<TerminalPage />} />
+        <Route path="/otazka-dne" element={<QuestionOfDay />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>

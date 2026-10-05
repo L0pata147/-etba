@@ -19,6 +19,7 @@ import {
   Network,
   Newspaper,
   Search,
+  SquareTerminal,
   Shuffle,
   Terminal,
   Zap,
@@ -52,6 +53,7 @@ const NAV: NavItem[] = [
   { to: '/site', label: 'Ústní témata', icon: Network, end: true, group: 'Počítačové sítě' },
   { to: '/site/losovani', label: 'Simulace ústní', icon: Shuffle },
   { to: '/site/prakticka', label: 'Praktická zkouška', icon: Terminal },
+  { to: '/terminal', label: 'Terminál (Cisco, Linux)', icon: SquareTerminal },
   { to: '/site/trenink', label: 'Trénink sítí', icon: Dumbbell },
   { to: '/hw', label: 'Okruhy a převody', icon: Cpu, end: true, group: 'Technické vybavení PC' },
   { to: '/hw/test', label: 'Cvičný test', icon: ClipboardList },
@@ -94,7 +96,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const lvl = levelFromXp(data.xp);
   const st = streak(data);
   const unknownCount = Object.keys(data.unknown).length;
-  const inSession = loc.pathname.startsWith('/trenink/relace') || loc.pathname.startsWith('/simulace/');
+  const inSession = loc.pathname.startsWith('/trenink/relace') || loc.pathname.startsWith('/simulace/') || (loc.pathname === '/terminal' && loc.search.includes('uloha='));
 
   useEffect(() => {
     setMenuOpen(false);

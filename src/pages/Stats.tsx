@@ -1,4 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import type { SubjectId } from '../types';
+import { SUBJECTS, SUBJECT_TOPICS } from '../data/subjects';
+import { LEARNED_TARGET, subjectAnswers, subjectForecast, subjectProgress } from '../lib/insights';
+import { topicProgress } from '../lib/progress';
+import { Segmented } from '../components/ui';
 import { Link } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useStore } from '../store';
@@ -67,6 +72,8 @@ export function Stats() {
         <Stat icon="🏁" label="Dokončené testy" value={ov.sessions} />
         <Stat icon="🔥" label="Série dní" value={`${ov.streak} ${plural(ov.streak, 'den', 'dny', 'dní')}`} sub={`nejdelší: ${longestStreak(data)}`} tone="amber" />
       </div>
+
+      <SubjectStats color={color} grid={grid} axis={axis} tooltipStyle={tooltipStyle} />
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Card className="p-5">
@@ -200,5 +207,91 @@ function AreaList({ items }: { items: { area: keyof typeof AREA_MAP; mastery: nu
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Pokrok po předmětech – vývoj, úspěšnost, nejslabší části a odhad */
+function SubjectStats({ color, grid, axis, tooltipStyle }: { color: string; grid: string; axis: string; tooltipStyle: Record<string, string | number> }) {
+  const { data } = useStore();
+  const [subject, setSubject] = useState<SubjectId>('site');
+  const progress = useMemo(() => subjectProgress(data), [data]);
+  const answers = useMemo(() => subjectAnswers(data, subject), [data, subject]);
+  const forecast = useMemo(() => subjectForecast(data, subject), [data, subject]);
+  const history = useMemo(
+    () =>
+      Object.keys(data.progressHistory)
+        .sort()
+        .filter((d) => data.progressHistory[d][subject] !== undefined)
+        .slice(-60)
+        .map((d) => ({ label: `${Number(d.slice(8))}. ${Number(d.slice(5, 7))}.`, zvladnuti: Math.round((data.progressHistory[d][subject] ?? 0) * 100) })),
+    [data.progressHistory, subject],
+  );
+  const parts = useMemo(() => {
+    const rows =
+      subject === 'cjl'
+        ? data.books.map((b) => ({ id: b.id, label: b.title, p: bookProgress(data, b), to: `/knihy/${b.id}` }))
+        : SUBJECT_TOPICS[subject].map((t) => ({ id: t.id, label: `${t.number}. ${t.title}`, p: topicProgress(data, t.id), to: `/tema/${t.id}` }));
+    return rows.sort((a, b) => a.p - b.p);
+  }, [data, subject]);
+  const mastered = parts.filter((r) => r.p >= LEARNED_TARGET).length;
+  const fc =
+    forecast.kind === 'done'
+      ? 'Zvládnuto 🎉'
+      : forecast.kind === 'wait'
+        ? 'Odhad po 3 dnech učení'
+        : forecast.kind === 'flat'
+          ? 'Zatím bez zlepšení'
+          : `${forecast.date!.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })} (za ${forecast.days} ${plural(forecast.days!, 'den', 'dny', 'dní')})`;
+
+  return (
+    <Card className="p-5">
+      <SectionTitle sub="Zvládnutí, úspěšnost a odhad, kdy budeš mít předmět naučený (cíl 85 %).">Pokrok po předmětech</SectionTitle>
+      <Segmented
+        className="mb-4"
+        value={subject}
+        onChange={setSubject}
+        options={(Object.keys(SUBJECTS) as SubjectId[]).map((s) => ({ value: s, label: `${SUBJECTS[s].emoji} ${SUBJECTS[s].short}` }))}
+      />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Stat icon="📈" label="Zvládnutí" value={`${Math.round(progress[subject] * 100)} %`} tone="violet" />
+        <Stat icon="❓" label="Odpovědí" value={answers.attempts} />
+        <Stat icon="🎯" label="Úspěšnost" value={answers.attempts ? `${Math.round((answers.correct / answers.attempts) * 100)} %` : '–'} tone="emerald" />
+        <Stat icon="🏁" label="Odhad naučení" value={fc} sub={`${mastered}/${parts.length} ${subject === 'cjl' ? 'knih' : 'témat'} zvládnuto`} tone="amber" />
+      </div>
+      <div className="mt-5">
+        <div className="mb-2 text-sm font-semibold">Vývoj zvládnutí</div>
+        {history.length >= 2 ? (
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={history} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                <CartesianGrid stroke={grid} vertical={false} />
+                <XAxis dataKey="label" stroke={axis} tick={{ fontSize: 12 }} tickLine={false} />
+                <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} stroke={axis} tick={{ fontSize: 12 }} tickLine={false} unit=" %" width={56} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v} %`, 'Zvládnutí']} />
+                <Line type="monotone" dataKey="zvladnuti" stroke={color} strokeWidth={2} dot={{ r: 4, fill: color }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500">Graf se ukáže, až budeš trénovat aspoň dva různé dny – každý den se uloží snímek pokroku.</p>
+        )}
+      </div>
+      <div className="mt-5">
+        <div className="mb-2 text-sm font-semibold">Nejslabší {subject === 'cjl' ? 'knihy' : 'témata'}</div>
+        <ul className="space-y-2">
+          {parts.slice(0, 6).map((r) => (
+            <li key={r.id}>
+              <Link to={r.to} className="block hover:opacity-80">
+                <div className="mb-1 flex justify-between gap-2 text-sm">
+                  <span className="truncate">{r.label}</span>
+                  <span className="shrink-0 tabular-nums text-slate-500">{Math.round(r.p * 100)} %</span>
+                </div>
+                <ProgressBar value={r.p} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Card>
   );
 }

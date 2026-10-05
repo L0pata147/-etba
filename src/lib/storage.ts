@@ -36,6 +36,7 @@ export function defaultData(): AppData {
     settings: { ...DEFAULT_SETTINGS },
     writings: [],
     topicNotes: {},
+    progressHistory: {},
   };
 }
 
@@ -72,6 +73,7 @@ export function migrate(raw: unknown): AppData {
     writings: Array.isArray(r.writings) ? r.writings : [],
     topicNotes: r.topicNotes && typeof r.topicNotes === 'object' ? r.topicNotes : {},
     lastExport: r.lastExport,
+    progressHistory: r.progressHistory && typeof r.progressHistory === 'object' ? r.progressHistory : {},
   };
 }
 

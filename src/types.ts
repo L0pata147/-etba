@@ -406,6 +406,8 @@ export interface AppData {
   topicNotes: Record<string, string>;
   /** Kdy byla data naposledy exportována (záloha) */
   lastExport?: number;
+  /** Denní snímky zvládnutí předmětů (klíč = den YYYY-MM-DD) */
+  progressHistory: Record<string, Partial<Record<SubjectId, number>>>;
 }
 
 /** Slohová práce */

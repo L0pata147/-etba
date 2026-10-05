@@ -76,6 +76,15 @@ export function Dashboard() {
 
       <BackupReminder />
 
+      <Link to="/otazka-dne" className="card flex items-center gap-3 p-4 transition hover:-translate-y-0.5 hover:shadow-md">
+        <span className="text-2xl">❓</span>
+        <div className="min-w-0 flex-1">
+          <div className="font-bold">Otázka dne</div>
+          <div className="text-sm text-slate-500 dark:text-slate-400">Jedna rychlá otázka ze všech předmětů – stejná jako v upozornění na telefonu.</div>
+        </div>
+        <ArrowRight size={18} className="shrink-0 text-slate-400" />
+      </Link>
+
       <SubjectCards />
 
       {/* Doporučení */}

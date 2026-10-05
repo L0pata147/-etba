@@ -82,6 +82,7 @@ final class Reminders {
         int due = s.optInt("due", 0);
         int minutes = s.optInt("minutes", 15);
         String rec = s.optString("rec", "");
+        String qotd = s.optString("qotd", "");
 
         long examDays = -1;
         String exam = s.optString("examDate", "");
@@ -113,10 +114,12 @@ final class Reminders {
             text.append("Dnes doporučeno: ").append(rec.isEmpty() ? "dnešní trénink" : rec).append(" · ").append(minutes).append(" min");
         }
         if (due > 0) text.append(" · ").append(due).append(due == 1 ? " otázka čeká" : due <= 4 ? " otázky čekají" : " otázek čeká").append(" na zopakování");
+        String shortText = text.toString();
+        if (!qotd.isEmpty()) text.append("\n\n❓ Otázka dne:\n").append(qotd).append("\n\nKlepni a odpověz.");
 
         Intent open = new Intent(ctx, MainActivity.class);
         open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        open.putExtra("route", "/");
+        open.putExtra("route", qotd.isEmpty() ? "/" : "/otazka-dne");
         PendingIntent pi = PendingIntent.getActivity(ctx, 1, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         ensureChannel(ctx);
@@ -124,7 +127,7 @@ final class Reminders {
                 .setSmallIcon(notificationIcon(ctx))
                 .setColor(0xFF1D4ED8)
                 .setContentTitle(title)
-                .setContentText(text.toString())
+                .setContentText(qotd.isEmpty() ? shortText : "❓ Otázka dne – rozbal upozornění")
                 .setStyle(new Notification.BigTextStyle().bigText(text.toString()))
                 .setContentIntent(pi)
                 .setAutoCancel(true)

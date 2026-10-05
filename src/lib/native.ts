@@ -1,5 +1,6 @@
 import type { AppData } from '../types';
 import { itRecommendations, recommendations } from './insights';
+import { questionOfDay, questionOfDayText } from './qotd';
 import { AREA_MAP } from '../data/osnova';
 import { dayKey, dueCount, streak } from './progress';
 
@@ -39,6 +40,7 @@ export function buildNativeStatus(data: AppData) {
     minutes: data.settings.dailyMinutes,
     examDate: data.settings.examDate,
     rec: useIt ? itRec.topic.title : rec ? `${rec.book.title} – ${AREA_MAP[rec.area].short.toLowerCase()}` : '',
+    qotd: questionOfDayText(questionOfDay(data)),
   };
 }
 

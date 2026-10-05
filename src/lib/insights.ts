@@ -1,4 +1,4 @@
-import type { AppData, AreaId, Book, SectionId, StudyPlan, StudyWeek, Topic } from '../types';
+import type { AppData, AreaId, Book, SectionId, StudyPlan, StudyWeek, SubjectId, Topic } from '../types';
 import { AREA_MAP, SECTIONS } from '../data/osnova';
 import {
   areaMastery,
@@ -14,6 +14,8 @@ import {
   masteryValue,
   streak,
   topicProgress,
+  sitePracticalProgress,
+  cloudPracticalProgress,
 } from './progress';
 import { SITE_TOPICS } from '../data/site';
 import { ALL_TOPICS, SUBJECT_TOPICS } from '../data/subjects';
@@ -247,3 +249,54 @@ export function generatePlan(data: AppData, examDate: string, now = new Date()):
 }
 
 export { areaMastery };
+
+// ---------- pokrok po předmětech ----------
+
+/** Zvládnutí jednotlivých předmětů (0–1) */
+export function subjectProgress(data: AppData): Record<SubjectId, number> {
+  const topicsAvg = (ids: string[]) => (ids.length ? ids.reduce((s, id) => s + topicProgress(data, id), 0) / ids.length : 0);
+  const prac = sitePracticalProgress(data);
+  const sitePrac = (prac.cisco + (prac.linux + prac.windows) / 2 + prac.postupy + prac.vypocty) / 4;
+  return {
+    cjl: overview(data).progress,
+    site: (topicsAvg(SUBJECT_TOPICS.site.map((t) => t.id)) + sitePrac) / 2,
+    hw: (topicsAvg(SUBJECT_TOPICS.hw.map((t) => t.id)) + areaMastery(data, 'hw-vypocty', 'it-vypocty')) / 2,
+    cloud: (topicsAvg(SUBJECT_TOPICS.cloud.map((t) => t.id)) + cloudPracticalProgress(data)) / 2,
+  };
+}
+
+/** Předmět, ke kterému patří klíč „knihy“ (bookId) */
+export const subjectOfItem = (bookId: string): SubjectId => (bookId.startsWith('site-') ? 'site' : bookId.startsWith('hw-') ? 'hw' : bookId.startsWith('cloud-') ? 'cloud' : 'cjl');
+
+/** Odpovědi a úspěšnost v předmětu podle záznamů zvládnutí */
+export function subjectAnswers(data: AppData, subject: SubjectId): { attempts: number; correct: number } {
+  let attempts = 0;
+  let correct = 0;
+  for (const [k, m] of Object.entries(data.mastery)) {
+    if (subjectOfItem(k.split('|')[0]) !== subject) continue;
+    attempts += m.attempts;
+    correct += m.correct;
+  }
+  return { attempts, correct };
+}
+
+export const LEARNED_TARGET = 0.85;
+
+/** Odhad, kdy bude předmět zvládnutý (podle tempa za posledních až 21 dní) */
+export function subjectForecast(data: AppData, subject: SubjectId, now = new Date()): { kind: 'done' | 'wait' | 'flat' | 'date'; days?: number; date?: Date } {
+  const days = Object.keys(data.progressHistory)
+    .filter((d) => data.progressHistory[d][subject] !== undefined)
+    .sort();
+  const current = subjectProgress(data)[subject];
+  if (current >= LEARNED_TARGET) return { kind: 'done' };
+  if (days.length < 3) return { kind: 'wait' };
+  const recent = days.filter((d) => (now.getTime() - new Date(d + 'T12:00:00').getTime()) / DAY <= 21);
+  const first = recent[0] ?? days[days.length - 3];
+  const span = Math.max(1, (now.getTime() - new Date(first + 'T12:00:00').getTime()) / DAY);
+  const rate = (current - (data.progressHistory[first][subject] ?? 0)) / span;
+  if (rate <= 0.0005) return { kind: 'flat' };
+  const need = Math.ceil((LEARNED_TARGET - current) / rate);
+  const date = new Date(now);
+  date.setDate(date.getDate() + need);
+  return { kind: 'date', days: need, date };
+}

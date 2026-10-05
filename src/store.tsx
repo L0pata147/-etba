@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { AnswerResult, AppData, Book, Question, SessionRecord, Settings, StudyPlan, Writing } from './types';
 import { defaultData, loadData, saveData } from './lib/storage';
 import { dayKey, gradeFromScore, masteryKey, questionBookIds, updateMastery, updateSrs } from './lib/progress';
-import { BADGES } from './lib/insights';
+import { BADGES, subjectProgress } from './lib/insights';
 import { applyReminder, syncNative } from './lib/native';
 
 export interface Toast {
@@ -152,7 +152,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             xp: d.xp + 2 + Math.round(8 * score),
           };
         }),
-      recordSession: (rec, bonusXp = 20) => update((d) => ({ ...d, sessions: [rec, ...d.sessions].slice(0, 300), xp: d.xp + bonusXp }), true),
+      recordSession: (rec, bonusXp = 20) =>
+        update((d) => {
+          const next = { ...d, sessions: [rec, ...d.sessions].slice(0, 300), xp: d.xp + bonusXp };
+          // denní snímek zvládnutí předmětů (pro graf a odhad)
+          return { ...next, progressHistory: { ...d.progressHistory, [dayKey()]: subjectProgress(next) } };
+        }, true),
       addUnknown: (q) =>
         update((d) => ({ ...d, unknown: { ...d.unknown, [q.id]: { question: q, addedAt: Date.now(), correctStreak: 0 } } })),
       removeUnknown: (id) =>
