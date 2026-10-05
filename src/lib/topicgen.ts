@@ -119,7 +119,7 @@ export function generateTopicQuestions(t: Topic, all: Topic[] = t.subject === 'c
   return qs;
 }
 
-const CLOUD_PLATFORMS: Platform[] = ['docker', 'hyperv', 'proxmox'];
+const CLOUD_PLATFORMS: Platform[] = ['virtualbox', 'docker', 'hyperv', 'proxmox'];
 /** Předmět, ke kterému platforma patří */
 export const platformSubject = (p: Platform): 'site' | 'cloud' => (CLOUD_PLATFORMS.includes(p) ? 'cloud' : 'site');
 

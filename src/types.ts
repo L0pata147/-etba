@@ -46,7 +46,7 @@ export type SectionId =
 /** Maturitní předměty */
 export type SubjectId = 'cjl' | 'site' | 'hw' | 'cloud';
 
-export type Platform = 'cisco' | 'linux' | 'windows' | 'docker' | 'hyperv' | 'proxmox';
+export type Platform = 'cisco' | 'linux' | 'windows' | 'docker' | 'hyperv' | 'proxmox' | 'virtualbox';
 
 /** Téma ústní zkoušky (IT předměty) */
 export interface Topic {

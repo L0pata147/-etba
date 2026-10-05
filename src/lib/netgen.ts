@@ -453,15 +453,16 @@ export function generateScenario(os?: 'linux' | 'windows'): Scenario {
     },
   ];
 
-  const srvNet = ipToInt(`10.${rnd(1, 250)}.${rnd(1, 250)}.0`);
+  // Windows podle školního cvičení: VirtualBox, vnitřní síť 192.168.100.0/24, server „ds“
+  const srvNet = chosen === 'windows' ? ipToInt('192.168.100.0') : ipToInt(`10.${rnd(1, 250)}.${rnd(1, 250)}.0`);
   const server = {
     net: `${intToIp(srvNet)}/24`,
-    ip: intToIp(srvNet + 10),
+    ip: intToIp(srvNet + (chosen === 'windows' ? rnd(2, 20) : 10)),
     prefix: 24,
     gateway: intToIp(srvNet + 1),
     dhcpFrom: intToIp(srvNet + 100),
     dhcpTo: intToIp(srvNet + 200),
-    host: chosen === 'linux' ? 'srv1' : 'DC1',
+    host: chosen === 'linux' ? 'srv1' : 'ds',
   };
   const netAddr = intToIp(srvNet);
 
@@ -505,56 +506,61 @@ export function generateScenario(os?: 'linux' | 'windows'): Scenario {
             solution: 'apt install openssh-server\n# /etc/ssh/sshd_config\nPermitRootLogin no\nsystemctl restart ssh\nusermod -aG sudo jan',
           },
         ]
-      : [
-          {
-            id: 'win-ip',
-            title: 'Síť a název serveru',
-            detail: `Nastav serveru adresu ${server.ip}/24, bránu ${server.gateway}, DNS ${server.ip} a název ${server.host}.`,
-            solution: `New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress ${server.ip} -PrefixLength 24 -DefaultGateway ${server.gateway}\nSet-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses ${server.ip}\nRename-Computer -NewName ${server.host} -Restart`,
-          },
-          {
-            id: 'win-ad',
-            title: 'Doména Active Directory',
-            detail: `Nainstaluj AD DS a vytvoř novou doménu ${domain}.`,
-            solution: `Install-WindowsFeature AD-Domain-Services -IncludeManagementTools\nInstall-ADDSForest -DomainName ${domain}`,
-          },
-          {
-            id: 'win-users',
-            title: 'OU, uživatelé a skupiny',
-            detail: 'Vytvoř OU Ucetni a Vyroba, v nich uživatele (jnovak v Ucetni, pdvorak ve Vyroba) a globální skupiny Ucetni a Vyroba s těmito členy.',
-            solution: `New-ADOrganizationalUnit -Name Ucetni\nNew-ADOrganizationalUnit -Name Vyroba\nNew-ADUser -Name "Jan Novak" -SamAccountName jnovak -Path "OU=Ucetni,${domain.split('.').map((d) => `DC=${d}`).join(',')}" -AccountPassword (Read-Host -AsSecureString) -Enabled $true\nNew-ADUser -Name "Petr Dvorak" -SamAccountName pdvorak -Path "OU=Vyroba,${domain.split('.').map((d) => `DC=${d}`).join(',')}" -AccountPassword (Read-Host -AsSecureString) -Enabled $true\nNew-ADGroup -Name Ucetni -GroupScope Global\nNew-ADGroup -Name Vyroba -GroupScope Global\nAdd-ADGroupMember -Identity Ucetni -Members jnovak\nAdd-ADGroupMember -Identity Vyroba -Members pdvorak`,
-          },
-          {
-            id: 'win-dns',
-            title: 'DNS záznamy',
-            detail: `Do zóny ${domain} přidej záznam A „www“ (${server.ip}) a vytvoř reverzní zónu pro síť ${server.net}.`,
-            solution: `Add-DnsServerResourceRecordA -Name www -ZoneName ${domain} -IPv4Address ${server.ip}\nAdd-DnsServerPrimaryZone -NetworkId "${server.net}" -ReplicationScope Domain`,
-          },
-          {
-            id: 'win-dhcp',
-            title: 'DHCP server',
-            detail: `Nainstaluj DHCP, autorizuj ho v AD a vytvoř rozsah ${server.dhcpFrom}–${server.dhcpTo} s bránou ${server.gateway} a DNS ${server.ip}.`,
-            solution: `Install-WindowsFeature DHCP -IncludeManagementTools\nAdd-DhcpServerInDC\nAdd-DhcpServerv4Scope -Name LAN -StartRange ${server.dhcpFrom} -EndRange ${server.dhcpTo} -SubnetMask 255.255.255.0\nSet-DhcpServerv4OptionValue -Router ${server.gateway} -DnsServer ${server.ip} -DnsDomain ${domain}`,
-          },
-          {
-            id: 'win-share',
-            title: 'Sdílená složka',
-            detail: 'Vytvoř složku C:\\Ucetni sdílenou jen pro skupinu Ucetni (sdílení i NTFS).',
-            solution: `New-Item -Path C:\\Ucetni -ItemType Directory\nNew-SmbShare -Name Ucetni -Path C:\\Ucetni -FullAccess ${company.toUpperCase()}\\Ucetni\n(NTFS: Vlastnosti → Zabezpečení → přidat skupinu Ucetni, odebrat Users)`,
-          },
-          {
-            id: 'win-gpo',
-            title: 'Zásady skupiny',
-            detail: 'Vytvoř GPO propojené s OU Vyroba, které uživatelům zakáže přístup k Ovládacím panelům.',
-            solution: `New-GPO -Name "Vyroba-zasady" | New-GPLink -Target "OU=Vyroba,${domain.split('.').map((d) => `DC=${d}`).join(',')}"\n(gpmc.msc → upravit GPO → Konfigurace uživatele → Zásady → Šablony pro správu → Ovládací panely → Zakázat přístup k Ovládacím panelům)\nNa klientovi: gpupdate /force`,
-          },
-          {
-            id: 'win-klient',
-            title: 'Klient v doméně',
-            detail: `Připoj klientský počítač do domény ${domain} a přihlas se jako jnovak.`,
-            solution: `Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses ${server.ip}\nAdd-Computer -DomainName ${domain} -Restart`,
-          },
-        ];
+      : (() => {
+          const clientIp = intToIp(srvNet + rnd(21, 99));
+          const dn = domain.split('.').map((d) => `DC=${d}`).join(',');
+          return [
+            {
+              id: 'win-vm',
+              title: 'Virtuální počítače ve VirtualBoxu',
+              detail: 'Vytvoř VM pro Windows Server 2016 Standard (s Desktop prostředím): 2 GB RAM, 2 CPU, disk 50 GB s dynamickou alokací, síťová karta v režimu „Vnitřní síť“. Klient (Windows 10 Pro, příp. 7 Pro): 2 GB RAM (Win 7 stačí 1 GB), 1 CPU, disk 30 GB dynamicky, také vnitřní síť. Do obou doinstaluj přídavky pro hosta.',
+              solution:
+                'VirtualBox → Nový: typ Microsoft Windows, verze Windows 2016 (64-bit)\nPaměť 2048 MB, CPU 2 (Nastavení → Systém → Procesor)\nVytvořit virtuální disk VDI, Dynamicky alokovaný, 50 GB\nNastavení → Síť → Karta 1: Připojena k „Vnitřní síť“, název intnet (u obou VM stejný!)\nNastavení → Úložiště → optická mechanika: ISO Windows Serveru\nPo instalaci: Zařízení → Vložit obraz CD s přídavky pro hosta → spustit VBoxWindowsAdditions.exe → restart\n\nKlient stejně: Windows 10 (64-bit), 2048 MB (Win 7: 1024 MB), 1 CPU, 30 GB dynamicky, vnitřní síť intnet\n\nPříkazy:\nVBoxManage createvm --name ds --ostype Windows2016_64 --register\nVBoxManage modifyvm ds --memory 2048 --cpus 2 --nic1 intnet --intnet1 intnet\nVBoxManage createmedium disk --filename ds.vdi --size 51200 --variant Standard',
+            },
+            {
+              id: 'win-ip',
+              title: 'Název serveru a IP adresy',
+              detail: `Přejmenuj server na ds. Nastav statické adresy ze sítě 192.168.100.0/24: server ${server.ip}, klient ${clientIp}. Jako DNS server použij u obou adresu serveru.`,
+              solution: `Server – Správce serveru → Místní server → Název počítače → Změnit → ds → restart\n(PowerShell) Rename-Computer -NewName ds -Restart\n\nncpa.cpl → Ethernet → Vlastnosti → Protokol IPv4:\n  IP ${server.ip}, maska 255.255.255.0, DNS ${server.ip}\n(PowerShell) New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress ${server.ip} -PrefixLength 24\nSet-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses ${server.ip}\n\nKlient: IP ${clientIp}, maska 255.255.255.0, DNS ${server.ip}\nOvěření: ping ${server.ip} z klienta (když neprojde, povol ve firewallu pravidlo „Sdílení souborů a tiskáren (požadavek na odezvu – ICMPv4)“)\nVe vnitřní síti VirtualBoxu není router – výchozí brána není potřeba.`,
+            },
+            {
+              id: 'win-role',
+              title: 'Role DNS a Active Directory Domain Services',
+              detail: 'Na server doinstaluj role DNS server a Active Directory Domain Services.',
+              solution: 'Správce serveru → Spravovat → Přidat role a funkce → Instalace na základě rolí → server ds → zaškrtnout „Active Directory Domain Services“ a „DNS Server“ (přidat požadované funkce) → Nainstalovat\n(PowerShell) Install-WindowsFeature AD-Domain-Services, DNS -IncludeManagementTools',
+            },
+            {
+              id: 'win-dc',
+              title: 'Primární řadič domény',
+              detail: `Povyš server na primární řadič domény v nové doménové struktuře (lese). Doména: ${domain}.`,
+              solution: `Správce serveru → vlaječka s upozorněním → „Zvýšit úroveň tohoto serveru na řadič domény“\n→ Přidat novou doménovou strukturu → Název kořenové domény: ${domain}\n→ heslo pro režim obnovení adresářových služeb (DSRM) → Další… → Nainstalovat → server se restartuje\n(PowerShell) Install-ADDSForest -DomainName ${domain} -InstallDns\nPo restartu se přihlásíš jako ${domain.split('.')[0].toUpperCase()}\\Administrator`,
+            },
+            {
+              id: 'win-klient',
+              title: 'Klient v doméně',
+              detail: `Připoj klientskou stanici do domény ${domain}.`,
+              solution: `Klient musí mít jako DNS ${server.ip} (jinak řadič domény nenajde)\nsysdm.cpl → Název počítače → Změnit → Člen domény: ${domain} → přihlásit se doménovým účtem (Administrator) → restart\n(PowerShell, Windows 10) Add-Computer -DomainName ${domain} -Restart\nOvěření: na serveru v „Uživatelé a počítače služby Active Directory“ → Computers je klient`,
+            },
+            {
+              id: 'win-users',
+              title: 'Doménová struktura: OU, uživatelé, skupiny',
+              detail: 'Vytvoř organizační jednotky (např. Ucetni a Vyroba), v nich uživatelské účty a globální skupiny, uživatele přidej do skupin. Přihlas se na klientovi jako nový uživatel.',
+              solution: `dsa.msc (Uživatelé a počítače služby Active Directory) → pravým na doménu → Nový → Organizační jednotka\n→ v OU: Nový → Uživatel (přihlašovací jméno, heslo, „uživatel musí změnit heslo“ dle potřeby)\n→ Nový → Skupina (obor Globální, typ Zabezpečení) → Vlastnosti skupiny → Členové → Přidat\n\n(PowerShell)\nNew-ADOrganizationalUnit -Name Ucetni\nNew-ADUser -Name "Jan Novak" -SamAccountName jnovak -Path "OU=Ucetni,${dn}" -AccountPassword (Read-Host -AsSecureString) -Enabled $true\nNew-ADGroup -Name Ucetni -GroupScope Global -Path "OU=Ucetni,${dn}"\nAdd-ADGroupMember -Identity Ucetni -Members jnovak`,
+            },
+            {
+              id: 'win-share',
+              title: 'Navíc: sdílená složka pro skupinu',
+              detail: 'Vytvoř na serveru složku C:\\Ucetni sdílenou jen pro skupinu Ucetni (sdílení i NTFS) a ověř přístup z klienta.',
+              solution: `New-Item -Path C:\\Ucetni -ItemType Directory\nNew-SmbShare -Name Ucetni -Path C:\\Ucetni -FullAccess ${domain.split('.')[0].toUpperCase()}\\Ucetni\n(NTFS: Vlastnosti → Zabezpečení → přidat skupinu Ucetni, odebrat Users)\nZ klienta: \\\\ds\\Ucetni`,
+            },
+            {
+              id: 'win-gpo',
+              title: 'Navíc: zásady skupiny',
+              detail: 'Vytvoř GPO propojené s OU Vyroba, které uživatelům zakáže přístup k Ovládacím panelům, a ověř na klientovi.',
+              solution: `gpmc.msc → OU Vyroba → Vytvořit objekt GPO v této doméně a propojit jej sem → Upravit\n→ Konfigurace uživatele → Zásady → Šablony pro správu → Ovládací panely → „Zakázat přístup k Ovládacím panelům…“ → Povoleno\n(PowerShell) New-GPO -Name "Vyroba-zasady" | New-GPLink -Target "OU=Vyroba,${dn}"\nNa klientovi: gpupdate /force, gpresult /r`,
+            },
+          ];
+        })();
 
   return { os: chosen, company, domain, block: `192.168.${third}.0/24`, subnets, ispLink, server, ptTasks, osTasks };
 }

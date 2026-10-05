@@ -133,6 +133,7 @@ export const CLOUD_TOPICS = [
       ['Microsoft Hyper-V', ['role ve Windows Serveru (i Windows 10/11 Pro)', 'správa: Správce Hyper-V, PowerShell, Windows Admin Center, SCVMM', 'VM 1. generace (BIOS) × 2. generace (UEFI, Secure Boot)', 'disky VHDX, kontrolní body, živá migrace, failover cluster, replikace']],
       ['VMware vSphere', ['ESXi – hypervizor typu 1, vCenter – centrální správa', 'vMotion (živá migrace), Storage vMotion, HA, DRS (vyvažování zátěže), FT', 'disky VMDK, datastore (VMFS, NFS)']],
       ['Proxmox VE', ['open source, Debian + KVM/QEMU a kontejnery LXC', 'webové rozhraní (port 8006), příkazy qm a pct', 'cluster (corosync, pvecm), HA, Ceph, zálohy vzdump / Proxmox Backup Server', 'disky qcow2 / raw, mosty vmbr0']],
+      ['VirtualBox', ['hypervizor typu 2 od Oracle, zdarma, Windows / Linux / macOS', 'disky VDI (i VMDK, VHD), dynamicky alokované × pevná velikost', 'sítě: NAT, Síť NAT, Síťový most, Vnitřní síť, Jen hostitel', 'snímky, klonování, export/import OVA, přídavky pro hosta (Guest Additions)', 'správa z GUI nebo příkazem VBoxManage']],
       ['Další', ['KVM / libvirt (virsh), Xen / XCP-ng, Nutanix', 'desktopové: VirtualBox, VMware Workstation, Hyper-V na Windows']],
     ],
     [
@@ -151,6 +152,8 @@ export const CLOUD_TOPICS = [
       ['Jak se ve VMware jmenuje živá migrace VM?', 'vMotion', ['Live Migration', 'qm migrate', 'DRS']],
       ['Čím se liší VM 2. generace v Hyper-V?', 'používá UEFI a podporuje Secure Boot', ['má víc paměti', 'je jen pro Linux', 'nemá síťovou kartu']],
       ['Na jakém portu běží webové rozhraní Proxmoxu?', '8006', ['443', '8080', '3389']],
+      ['K čemu slouží přídavky pro hosta (Guest Additions) ve VirtualBoxu?', 'ovladače pro lepší grafiku, myš, sdílenou schránku a složky', ['k zálohování VM', 'k připojení do domény', 'k šifrování disku']],
+      ['Jaký formát virtuálního disku používá VirtualBox jako výchozí?', 'VDI', ['VHDX', 'qcow2', 'ISO']],
       ['Co je vCenter?', 'centrální správa hostitelů ESXi', ['typ virtuálního disku', 'kontejner', 'záložní software']],
     ],
     [
@@ -174,7 +177,7 @@ export const CLOUD_TOPICS = [
     'Virtuální sítě',
     'Virtuální počítače se připojují k virtuálním přepínačům, které mohou být propojené s fyzickou sítí, jen s hostitelem, nebo úplně izolované. Virtuální sítě podporují VLAN, NAT i směrování; ve velkém se používá softwarově definovaná síť (SDN).',
     [
-      ['Režimy připojení VM (desktopové hypervizory)', ['NAT – VM jde ven přes adresu hostitele, z vnější sítě není přímo dostupná', 'bridged (most) – VM je v síti jako samostatný počítač s vlastní adresou', 'host-only – komunikace jen s hostitelem a dalšími VM', 'interní síť – jen mezi VM']],
+      ['Režimy připojení VM (desktopové hypervizory, např. VirtualBox)', ['NAT – VM jde ven přes adresu hostitele, z vnější sítě není přímo dostupná', 'Síť NAT – více VM ve společné síti s přístupem ven', 'bridged (síťový most) – VM je v síti jako samostatný počítač s vlastní adresou', 'host-only (jen hostitel) – komunikace jen s hostitelem a dalšími VM', 'vnitřní (interní) síť – jen mezi VM se stejným názvem sítě, bez hostitele a bez přístupu ven']],
       ['Virtuální přepínače', ['Hyper-V: External (přes fyzický adaptér), Internal (VM + hostitel), Private (jen VM)', 'Proxmox: linuxový most vmbr0 navázaný na fyzické rozhraní, VLAN aware', 'VMware: vSwitch / distribuovaný vSwitch, port groups']],
       ['Pokročilé', ['VLAN tagování na virtuálních portech', 'virtuální router / firewall jako VM (pfSense, OPNsense)', 'SDN – oddělení řídicí a datové roviny, overlay sítě (VXLAN)', 'v cloudu: virtuální síť VPC / VNet, podsítě, bezpečnostní skupiny']],
     ],
@@ -192,6 +195,8 @@ export const CLOUD_TOPICS = [
       ['Jak se jmenuje výchozí síťový most v Proxmoxu?', 'vmbr0', ['eth0', 'vSwitch0', 'br-lan']],
       ['Který typ přepínače Hyper-V je propojený s fyzickou sítí?', 'External', ['Internal', 'Private', 'NAT']],
       ['Jak se v AWS jmenuje virtuální síť zákazníka?', 'VPC', ['VNet', 'VLAN', 'DMZ']],
+      ['Který režim VirtualBoxu použiješ, aby server a klient komunikovaly jen mezi sebou?', 'Vnitřní síť', ['NAT', 'Síťový most', 'Jen hostitel']],
+      ['Co musí mít dvě VM ve vnitřní síti VirtualBoxu stejné, aby se viděly?', 'název vnitřní sítě', ['MAC adresu', 'operační systém', 'velikost disku']],
     ],
     [
       {

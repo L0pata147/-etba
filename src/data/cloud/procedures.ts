@@ -3,6 +3,21 @@ import type { Procedure } from '../../types';
 /** Postupy k praktické zkoušce z Programového vybavení cloudu */
 export const CLOUD_PROCEDURES: Procedure[] = [
   {
+    id: 'vb-vm',
+    platform: 'virtualbox',
+    title: 'VirtualBox: VM pro Windows Server (podle školního cvičení)',
+    goal: 'Vytvořit VM s 2 GB RAM, 2 CPU, 50 GB dynamickým diskem ve vnitřní síti a doinstalovat přídavky pro hosta.',
+    steps: [
+      { text: 'Nový virtuální počítač: název ds, typ Microsoft Windows, verze Windows 2016 (64-bit)', cmd: 'VBoxManage createvm --name ds --ostype Windows2016_64 --register' },
+      { text: 'Nastavit paměť 2048 MB a 2 procesory', cmd: 'VBoxManage modifyvm ds --memory 2048 --cpus 2' },
+      { text: 'Vytvořit virtuální disk VDI, dynamicky alokovaný, 50 GB', cmd: 'VBoxManage createmedium disk --filename ds.vdi --size 51200 --variant Standard' },
+      { text: 'Síť: karta 1 připojená k „Vnitřní síť“ (stejný název sítě u serveru i klienta)', cmd: 'VBoxManage modifyvm ds --nic1 intnet --intnet1 intnet' },
+      { text: 'Vložit ISO Windows Serveru do optické mechaniky a nainstalovat systém (Standard s Desktop prostředím)' },
+      { text: 'Zařízení → Vložit obraz CD s přídavky pro hosta → spustit VBoxWindowsAdditions.exe → restart' },
+      { text: 'Před dalšími změnami vytvořit snímek', cmd: 'VBoxManage snapshot ds take po-instalaci' },
+    ],
+  },
+  {
     id: 'hv-vm',
     platform: 'hyperv',
     title: 'Hyper-V: nový virtuální server',

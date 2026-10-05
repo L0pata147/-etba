@@ -28,6 +28,7 @@ export const PLATFORM_LABEL: Record<Platform, string> = {
   docker: 'Docker a kontejnery',
   hyperv: 'Hyper-V (PowerShell)',
   proxmox: 'Proxmox VE',
+  virtualbox: 'VirtualBox (VBoxManage)',
 };
 
 export const COMMANDS: CommandDef[] = [

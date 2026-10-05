@@ -33,5 +33,5 @@ export const ALL_TOPIC_MAP: Record<string, Topic> = Object.fromEntries(ALL_TOPIC
 /** Platformy příkazů podle předmětu */
 export const SUBJECT_PLATFORMS: Record<'site' | 'cloud', Platform[]> = {
   site: ['cisco', 'linux', 'windows'],
-  cloud: ['docker', 'hyperv', 'proxmox'],
+  cloud: ['virtualbox', 'docker', 'hyperv', 'proxmox'],
 };

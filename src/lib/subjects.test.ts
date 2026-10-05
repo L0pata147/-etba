@@ -65,7 +65,7 @@ describe('Příkazy a postupy cloudu', () => {
     expect(checkFillAnswer(q, 'docker run -d -p 80:8080 --name web nginx')).toBe(false);
   });
   it('scénář cloudu bez chybějících hodnot', () => {
-    for (const hv of ['hyperv', 'proxmox'] as const) {
+    for (const hv of ['virtualbox', 'hyperv', 'proxmox'] as const) {
       const s = generateCloudScenario(hv);
       expect(s.tasks.length).toBeGreaterThan(6);
       for (const t of s.tasks) expect(`${t.detail}${t.solution}`).not.toMatch(/undefined|NaN/);
@@ -169,7 +169,7 @@ describe('Novinky 1.3', () => {
       expect(t.wrong).not.toContain(t.answer);
       expect(new Set([t.answer, ...t.wrong]).size).toBe(t.wrong.length + 1);
     }
-    const qs = generateTroubleQuestions(['cisco', 'linux', 'windows', 'docker', 'hyperv', 'proxmox']);
+    const qs = generateTroubleQuestions(['cisco', 'linux', 'windows', 'docker', 'hyperv', 'proxmox', 'virtualbox']);
     expect(qs.length).toBe(TROUBLE.length);
     qs.forEach(validate);
     expect(buildSubjectPool('cloud', { commands: ['docker'], procedures: true }).some((q) => q.factKey === 'tr-dk-port')).toBe(true);
@@ -204,5 +204,31 @@ describe('Novinky 1.3', () => {
     const old = { ...defaultData() } as Record<string, unknown>;
     delete old.topicNotes;
     expect(migrate(old).topicNotes).toEqual({});
+  });
+});
+
+describe('Podle školního cvičení – Windows Server ve VirtualBoxu', () => {
+  it('zadání Windows: server ds, síť 192.168.100.0/24, role, doména, klient', async () => {
+    const { generateScenario } = await import('./netgen');
+    for (let i = 0; i < 20; i++) {
+      const sc = generateScenario('windows');
+      expect(sc.server.host).toBe('ds');
+      expect(sc.server.net).toBe('192.168.100.0/24');
+      expect(sc.server.ip).toMatch(/^192\.168\.100\.\d+$/);
+      const all = sc.osTasks.map((t) => `${t.detail}\n${t.solution}`).join('\n');
+      expect(all).toContain('Install-ADDSForest -DomainName ' + sc.domain);
+      expect(all).toContain('AD-Domain-Services, DNS');
+      expect(all).toContain('Vnitřní síť');
+      expect(all).not.toMatch(/undefined|NaN|\$\{/);
+      const ips = [...all.matchAll(/192\.168\.100\.(\d+)(?!\/)/g)].map((m) => Number(m[1]));
+      expect(ips.every((n) => n >= 1 && n <= 254)).toBe(true);
+    }
+  });
+  it('VirtualBox příkazy a postupy', () => {
+    const qs = generateCommandQuestions(['virtualbox']);
+    expect(qs.length).toBeGreaterThan(10);
+    expect(qs.every((q) => q.bookId === 'cloud-prikazy-virtualbox')).toBe(true);
+    expect(generateProcedureQuestions(['virtualbox']).length).toBeGreaterThan(0);
+    expect(buildSubjectPool('cloud', { commands: ['virtualbox'], procedures: true }).some((q) => q.factKey === 'tr-vb-intnet')).toBe(true);
   });
 });

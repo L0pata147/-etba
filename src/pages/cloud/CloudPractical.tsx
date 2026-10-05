@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
-import { generateCloudScenario, type CloudScenario, type Hypervisor } from '../../lib/cloudgen';
+import { HYPERVISOR_LABEL, generateCloudScenario, type CloudScenario, type Hypervisor } from '../../lib/cloudgen';
 import { Button, Card, PageHeader, Segmented, SectionTitle, Tag } from '../../components/ui';
 import { CommandsTab, ProceduresTab, TaskCard, TroubleTab } from '../site/SitePractical';
 import { SUBJECT_PLATFORMS } from '../../data/subjects';
@@ -34,7 +34,7 @@ export function CloudPractical() {
 }
 
 function CloudScenarioTab() {
-  const [hv, setHv] = useState<Hypervisor>('hyperv');
+  const [hv, setHv] = useState<Hypervisor>('virtualbox');
   const [sc, setSc] = useState<CloudScenario | null>(null);
   const [done, setDone] = useState<Set<string>>(new Set());
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -62,6 +62,7 @@ function CloudScenarioTab() {
             value={hv}
             onChange={setHv}
             options={[
+              { value: 'virtualbox', label: 'VirtualBox' },
               { value: 'hyperv', label: 'Hyper-V' },
               { value: 'proxmox', label: 'Proxmox VE' },
             ]}
@@ -75,7 +76,7 @@ function CloudScenarioTab() {
         <>
           <Card className="flex flex-wrap gap-2 p-5">
             <Tag tone="brand">Firma {sc.company}</Tag>
-            <Tag>{sc.hypervisor === 'hyperv' ? 'Hyper-V' : 'Proxmox VE'}</Tag>
+            <Tag>{HYPERVISOR_LABEL[sc.hypervisor]}</Tag>
             <Tag>Síť {sc.net}</Tag>
             <Tag>Brána {sc.gateway}</Tag>
             <Tag tone="emerald">

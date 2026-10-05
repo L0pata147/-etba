@@ -122,7 +122,16 @@ function ScenarioTab() {
             {osShown ? (
               <>
                 <Card className="mb-3 p-4 text-sm">
-                  Server <b>{sc.server.host}</b> · síť {sc.server.net} · adresa {sc.server.ip} · brána {sc.server.gateway}
+                  {sc.os === 'windows' ? (
+                    <>
+                      VirtualBox · Windows Server 2016 + klient Windows 10 · server <b>{sc.server.host}</b> · vnitřní síť {sc.server.net} · doména {sc.domain}
+                      <div className="mt-1 text-xs text-slate-500">Podle školního cvičení „OS Windows“ – úkoly označené „Navíc“ jsou rozšíření pro trénink.</div>
+                    </>
+                  ) : (
+                    <>
+                      Server <b>{sc.server.host}</b> · síť {sc.server.net} · adresa {sc.server.ip} · brána {sc.server.gateway}
+                    </>
+                  )}
                 </Card>
                 <div className="space-y-3">{sc.osTasks.map((t, i) => task(t, i))}</div>
               </>

@@ -55,9 +55,9 @@ export function CloudHome() {
             </span>
           </div>
           <ProgressBar value={prac} className="mt-2" height="h-2.5" />
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Docker, Hyper-V (PowerShell) a Proxmox VE.</p>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">VirtualBox, Docker, Hyper-V (PowerShell) a Proxmox VE.</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" icon={<Terminal size={16} />} onClick={() => start(commandsConfig(['docker', 'hyperv', 'proxmox'], 'Cloud – příkazy (mix)'))}>
+            <Button size="sm" icon={<Terminal size={16} />} onClick={() => start(commandsConfig(['virtualbox', 'docker', 'hyperv', 'proxmox'], 'Cloud – příkazy (mix)'))}>
               Příkazy
             </Button>
             <Button size="sm" variant="secondary" icon={<ListOrdered size={16} />} to="/cloud/prakticka?tab=postupy">

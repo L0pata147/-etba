@@ -190,6 +190,16 @@ export const TROUBLE: TroubleItem[] = [
   },
   // ===== Cloud =====
   {
+    id: 'tr-vb-intnet',
+    platform: 'virtualbox',
+    title: 'Vnitřní síť VirtualBoxu',
+    symptom: 'Server ds (192.168.100.10) a klient (192.168.100.20) mají adresy ze stejné sítě, oba jsou ve „Vnitřní síť“, ale nepingnou se. Firewall je povolený.',
+    config: '$ VBoxManage showvminfo ds | grep NIC\nNIC 1: ... Attachment: Internal Network \'intnet\'\n$ VBoxManage showvminfo klient | grep NIC\nNIC 1: ... Attachment: Internal Network \'skola\'',
+    answer: 'každá VM je v jiné vnitřní síti (intnet × skola)',
+    wrong: ['vnitřní síť neumí přenášet ping', 'chybí výchozí brána', 'VM musí být v režimu NAT'],
+    fix: 'Vnitřní síť se identifikuje názvem – obě VM musí mít stejný:\nVBoxManage modifyvm klient --intnet1 intnet\n(GUI: Nastavení → Síť → Název: intnet)',
+  },
+  {
     id: 'tr-dk-port',
     platform: 'docker',
     title: 'Mapování portu',

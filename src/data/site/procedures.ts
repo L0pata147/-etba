@@ -3,6 +3,21 @@ import { CLOUD_PROCEDURES } from '../cloud/procedures';
 
 /** Postupy k praktické zkoušce – jak typickou úlohu nastavit krok za krokem */
 export const PROCEDURES: Procedure[] = [
+  {
+    id: 'win-domena-skola',
+    platform: 'windows',
+    title: 'Windows Server 2016: doména podle školního cvičení',
+    goal: 'Server ds v síti 192.168.100.0/24 s rolemi DNS a AD DS, primární řadič domény .local, klient v doméně.',
+    steps: [
+      { text: 'Přejmenovat server na ds a restartovat', cmd: 'Rename-Computer -NewName ds -Restart' },
+      { text: 'Nastavit statickou IP ze sítě 192.168.100.0/24 a jako DNS adresu serveru', cmd: 'New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress 192.168.100.10 -PrefixLength 24\nSet-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 192.168.100.10' },
+      { text: 'Doinstalovat role DNS a Active Directory Domain Services', cmd: 'Install-WindowsFeature AD-Domain-Services, DNS -IncludeManagementTools' },
+      { text: 'Povýšit server na primární řadič domény v nové doménové struktuře', cmd: 'Install-ADDSForest -DomainName skola.local -InstallDns' },
+      { text: 'Na klientovi nastavit IP ze stejné sítě a DNS = adresa serveru', cmd: 'IP 192.168.100.20/24, DNS 192.168.100.10' },
+      { text: 'Připojit klienta do domény a restartovat', cmd: 'Add-Computer -DomainName skola.local -Restart' },
+      { text: 'Vytvořit OU, uživatele a skupiny (dsa.msc) a přihlásit se na klientovi doménovým účtem', cmd: 'New-ADOrganizationalUnit -Name Ucetni\nNew-ADUser -Name "Jan Novak" -SamAccountName jnovak -Path "OU=Ucetni,DC=skola,DC=local" -AccountPassword (Read-Host -AsSecureString) -Enabled $true\nNew-ADGroup -Name Ucetni -GroupScope Global -Path "OU=Ucetni,DC=skola,DC=local"\nAdd-ADGroupMember -Identity Ucetni -Members jnovak' },
+    ],
+  },
   // ===== Packet Tracer (Cisco) =====
   {
     id: 'pt-zaklad',

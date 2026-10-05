@@ -41,6 +41,22 @@ export const CLOUD_COMMANDS: CommandDef[] = [
   c('docker', 'Kubernetes', 'Nasaď do clusteru konfiguraci ze souboru deployment.yaml.', 'kubectl apply -f deployment.yaml'),
   c('docker', 'Kubernetes', 'Zvyš počet replik nasazení „web“ na 3.', 'kubectl scale deployment web --replicas=3', ['kubectl scale deploy web --replicas=3', 'kubectl scale deployment/web --replicas=3']),
 
+  // ===== VirtualBox (VBoxManage) =====
+  c('virtualbox', 'Virtuální počítače', 'Vypiš všechny registrované VM.', 'VBoxManage list vms'),
+  c('virtualbox', 'Virtuální počítače', 'Vypiš právě běžící VM.', 'VBoxManage list runningvms'),
+  c('virtualbox', 'Virtuální počítače', 'Vytvoř a zaregistruj VM „ds“ pro Windows Server 2016 (64 bit).', 'VBoxManage createvm --name ds --ostype Windows2016_64 --register', [], 'Seznam typů: VBoxManage list ostypes', ['vboxmanage createvm', '--name ds', '--ostype windows2016_64', '--register']),
+  c('virtualbox', 'Virtuální počítače', 'Nastav VM „ds“ 2 GB RAM a 2 procesory.', 'VBoxManage modifyvm ds --memory 2048 --cpus 2', [], undefined, ['vboxmanage modifyvm ds', '--memory 2048', '--cpus 2']),
+  c('virtualbox', 'Virtuální počítače', 'Připoj 1. síťovou kartu VM „ds“ do vnitřní sítě s názvem intnet.', 'VBoxManage modifyvm ds --nic1 intnet --intnet1 intnet', [], 'Režimy: nat, natnetwork, bridged, intnet (vnitřní síť), hostonly.', ['vboxmanage modifyvm ds', '--nic1 intnet']),
+  c('virtualbox', 'Virtuální počítače', 'Vytvoř dynamicky alokovaný disk ds.vdi o velikosti 50 GB.', 'VBoxManage createmedium disk --filename ds.vdi --size 51200 --variant Standard', [], 'Velikost v MB; Standard = dynamicky alokovaný, Fixed = pevná velikost.', ['vboxmanage createmedium', '--filename ds.vdi', '--size 51200']),
+  c('virtualbox', 'Virtuální počítače', 'Přidej k VM „ds“ řadič SATA s názvem SATA.', 'VBoxManage storagectl ds --name SATA --add sata', [], undefined, ['vboxmanage storagectl ds', '--name sata', '--add sata']),
+  c('virtualbox', 'Virtuální počítače', 'Připoj disk ds.vdi na port 0 řadiče SATA.', 'VBoxManage storageattach ds --storagectl SATA --port 0 --device 0 --type hdd --medium ds.vdi', [], undefined, ['vboxmanage storageattach ds', '--storagectl sata', '--type hdd', '--medium ds.vdi']),
+  c('virtualbox', 'Virtuální počítače', 'Spusť VM „ds“ bez okna (na pozadí).', 'VBoxManage startvm ds --type headless', ['VBoxManage startvm "ds" --type headless'], 'Bez --type headless se otevře okno.'),
+  c('virtualbox', 'Virtuální počítače', 'Korektně vypni VM „ds“ (stisk tlačítka napájení ACPI).', 'VBoxManage controlvm ds acpipowerbutton', [], 'controlvm ds poweroff = tvrdé vypnutí.'),
+  c('virtualbox', 'Snímky a export', 'Vytvoř snímek VM „ds“ s názvem pred-domenou.', 'VBoxManage snapshot ds take pred-domenou', ['VBoxManage snapshot ds take "pred-domenou"']),
+  c('virtualbox', 'Snímky a export', 'Vrať VM „ds“ do snímku pred-domenou (VM musí být vypnutá).', 'VBoxManage snapshot ds restore pred-domenou', ['VBoxManage snapshot ds restore "pred-domenou"']),
+  c('virtualbox', 'Snímky a export', 'Vyexportuj VM „ds“ do souboru ds.ova.', 'VBoxManage export ds --output ds.ova', ['VBoxManage export ds -o ds.ova']),
+  c('virtualbox', 'Snímky a export', 'Naimportuj VM ze souboru ds.ova.', 'VBoxManage import ds.ova'),
+
   // ===== Hyper-V (PowerShell) =====
   c('hyperv', 'Instalace a sítě', 'Nainstaluj na Windows Server roli Hyper-V i s nástroji a restartuj.', 'Install-WindowsFeature -Name Hyper-V -IncludeManagementTools -Restart', ['Install-WindowsFeature Hyper-V -IncludeManagementTools -Restart'], undefined, ['install-windowsfeature', 'hyper-v', '-includemanagementtools']),
   c('hyperv', 'Instalace a sítě', 'Vytvoř interní virtuální přepínač „LAN“ (VM komunikují mezi sebou a s hostitelem).', 'New-VMSwitch -Name LAN -SwitchType Internal', [], 'Typy: External (přes fyzickou síťovku), Internal (VM + hostitel), Private (jen VM).', ['new-vmswitch', '-name lan', '-switchtype internal']),

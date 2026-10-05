@@ -209,7 +209,7 @@ export function subjectTopicsProgress(data: AppData, topicIds: string[]): number
 
 /** Zvládnutí příkazů a postupů pro dané platformy (cloud) */
 export function cloudPracticalProgress(data: AppData): number {
-  const ps = ['docker', 'hyperv', 'proxmox'];
+  const ps = ['virtualbox', 'docker', 'hyperv', 'proxmox'];
   const cmd = ps.reduce((s, p) => s + areaMastery(data, `cloud-prikazy-${p}`, 'it-prikazy'), 0) / ps.length;
   const proc = ps.reduce((s, p) => s + areaMastery(data, `cloud-postupy-${p}`, 'it-postupy'), 0) / ps.length;
   return (cmd + proc) / 2;

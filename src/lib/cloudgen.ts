@@ -3,7 +3,9 @@ import { pick } from './random';
 
 const rnd = (min: number, max: number) => min + Math.floor(Math.random() * (max - min + 1));
 
-export type Hypervisor = 'hyperv' | 'proxmox';
+export type Hypervisor = 'virtualbox' | 'hyperv' | 'proxmox';
+
+export const HYPERVISOR_LABEL: Record<Hypervisor, string> = { virtualbox: 'VirtualBox', hyperv: 'Hyper-V', proxmox: 'Proxmox VE' };
 
 export interface CloudScenario {
   hypervisor: Hypervisor;
@@ -23,7 +25,7 @@ const COMPANIES = ['Obaly', 'Tiskarna', 'Papirna', 'Logistika', 'Pekarna', 'Auto
 
 /** Zadání nanečisto k praktické zkoušce z cloudu – virtualizace, kontejnery, zálohy */
 export function generateCloudScenario(hv?: Hypervisor): CloudScenario {
-  const hypervisor = hv ?? pick<Hypervisor>(['hyperv', 'proxmox']);
+  const hypervisor = hv ?? pick<Hypervisor>(['virtualbox', 'hyperv', 'proxmox']);
   const company = pick(COMPANIES);
   const c = rnd(10, 250);
   const net = `192.168.${c}.0/24`;
@@ -35,10 +37,45 @@ export function generateCloudScenario(hv?: Hypervisor): CloudScenario {
   const cores = pick([2, 4]);
   const disk = pick([40, 60, 80]);
   const name = company.toLowerCase();
-  const hvName = hypervisor === 'hyperv' ? 'Hyper-V' : 'Proxmox VE';
+  const hvName = HYPERVISOR_LABEL[hypervisor];
+
+  const vbTasks: ScenarioTask[] = [
+    {
+      id: 'vb-net',
+      title: 'Virtuální sítě ve VirtualBoxu',
+      detail: `Server bude mít dvě síťové karty: první „Síť NAT“ s názvem ${company}-NAT (síť ${net}, přístup ven), druhou „Vnitřní síť“ backend jen pro komunikaci mezi VM.`,
+      solution: `Soubor → Nástroje → Správce sítí → Sítě NAT → Vytvořit: ${company}-NAT, ${net}, DHCP podle potřeby\nVBoxManage natnetwork add --netname ${company}-NAT --network "${net}" --enable\nVnitřní síť se nevytváří zvlášť – vznikne zadáním názvu (backend) u síťové karty.\nRežimy: NAT (jen ven), Síť NAT (VM spolu + ven), Síťový most (VM v reálné síti), Vnitřní síť (jen VM), Jen hostitel (VM + hostitel).`,
+    },
+    {
+      id: 'vb-vm',
+      title: 'Virtuální server SRV1',
+      detail: `Vytvoř VM srv1: ${ram} GB RAM, ${cores} CPU, dynamicky alokovaný disk VDI ${disk} GB, karta 1 v síti ${company}-NAT, karta 2 ve vnitřní síti backend.`,
+      solution: `VBoxManage createvm --name srv1 --ostype Ubuntu_64 --register\nVBoxManage modifyvm srv1 --memory ${ram * 1024} --cpus ${cores} --nic1 natnetwork --nat-network1 ${company}-NAT --nic2 intnet --intnet2 backend\nVBoxManage createmedium disk --filename srv1.vdi --size ${disk * 1024} --variant Standard\nVBoxManage storagectl srv1 --name SATA --add sata\nVBoxManage storageattach srv1 --storagectl SATA --port 0 --device 0 --type hdd --medium srv1.vdi\nVBoxManage storageattach srv1 --storagectl SATA --port 1 --device 0 --type dvddrive --medium server.iso\n(GUI: Nový → paměť, CPU, disk dynamicky alokovaný; Nastavení → Síť → Karta 1 a 2)`,
+    },
+    {
+      id: 'vb-os',
+      title: 'Instalace a přídavky pro hosta',
+      detail: `Nainstaluj do VM systém, nastav adresu ${srvIp}/24 s bránou ${gateway} a doinstaluj přídavky pro hosta (Guest Additions).`,
+      solution: `VBoxManage startvm srv1\nPo instalaci: Zařízení → Vložit obraz CD s přídavky pro hosta\n  Windows: spustit VBoxWindowsAdditions.exe\n  Linux: apt install build-essential linux-headers-$(uname -r) → sudo sh /media/cdrom/VBoxLinuxAdditions.run\nAdresa ${srvIp}/24, brána ${gateway} (brána sítě NAT ve VirtualBoxu je .1)`,
+    },
+    {
+      id: 'vb-snapshot',
+      title: 'Snímek',
+      detail: 'Před instalací služeb vytvoř snímek „cista-instalace“, proveď změnu a vrať se do něj.',
+      solution: 'VBoxManage snapshot srv1 take cista-instalace\nVBoxManage controlvm srv1 poweroff\nVBoxManage snapshot srv1 restore cista-instalace\n(GUI: Snímky → Pořídit / Obnovit)',
+    },
+    {
+      id: 'vb-export',
+      title: 'Záloha / export',
+      detail: 'Vyexportuj srv1 do souboru OVA a vysvětli, proč snímek není záloha.',
+      solution: 'VBoxManage export srv1 --output srv1.ova\nObnova: VBoxManage import srv1.ova\nSnímek je uložený u VM a závisí na původním disku – při ztrátě disku se ztratí i snímek.',
+    },
+  ];
 
   const tasks: ScenarioTask[] =
-    hypervisor === 'hyperv'
+    hypervisor === 'virtualbox'
+      ? vbTasks
+      : hypervisor === 'hyperv'
       ? [
           {
             id: 'hv-role',
