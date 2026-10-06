@@ -159,15 +159,80 @@ export const HW_GENERATORS: Record<string, { label: string; gen: Gen }> = {
       return fill('transfer', i, `Za kolik sekund se přenese soubor ${cz(size)} MB rychlostí ${speed} Mb/s? (počítej SI jednotky, bez režie)`, String(t), [], `${cz(size)} MB = ${cz(size * 8)} Mb → ${cz(size * 8)} : ${speed} = ${t} s`, 'Sekundy');
     },
   },
-  raid: {
-    label: 'Kapacita RAID',
+  twos: {
+    label: 'Dvojkový doplněk (8 bitů)',
     gen: (i) => {
-      const level = pick(['0', '1', '5', '6', '10']);
-      const size = pick([1, 2, 4, 8]);
-      const n = level === '1' ? 2 : level === '10' ? pick([4, 6]) : level === '6' ? rnd(4, 6) : rnd(3, 6);
-      const cap = level === '0' ? n * size : level === '1' ? size : level === '5' ? (n - 1) * size : level === '6' ? (n - 2) * size : (n / 2) * size;
-      const rule = { '0': 'RAID 0 = součet všech disků', '1': 'RAID 1 = kapacita jednoho disku (zrcadlo)', '5': 'RAID 5 = (n − 1) disků', '6': 'RAID 6 = (n − 2) disků', '10': 'RAID 10 = polovina disků' }[level];
-      return fill('raid', i, `Kolik TB je využitelných v poli RAID ${level} z ${n} disků po ${size} TB?`, String(cap), [`${cap} tb`, `${cap}tb`], `${rule} → ${cap} TB`, 'TB');
+      const n = rnd(1, 128);
+      const code = (256 - n).toString(2).padStart(8, '0');
+      const pos = n.toString(2).padStart(8, '0');
+      if (Math.random() < 0.5) {
+        const inv = pos.replace(/[01]/g, (b) => (b === '0' ? '1' : '0'));
+        return fill('twos', i, `Zapiš číslo −${n} jako 8bitové znaménkové číslo ve dvojkovém doplňku.`, code, [], n === 128 ? '−128 = 10000000 (nejmenší 8bitové znaménkové číslo)' : `${n} = ${pos} → inverze ${inv} → +1 = ${code}`);
+      }
+      return fill('twos', i, `8bitové znaménkové číslo ve dvojkovém doplňku je ${code}. Jakou má hodnotu v desítkové soustavě?`, `-${n}`, [`−${n}`, `–${n}`, `- ${n}`], n === 128 ? '10000000 = −128' : `MSB je 1 → záporné; −1 a inverze → ${pos} = ${n} → −${n}`);
+    },
+  },
+  'ram-bw': {
+    label: 'Propustnost RAM',
+    gen: (i) => {
+      const mt = pick([2133, 2400, 2666, 3200, 3600, 4800, 5600, 6000]);
+      const ddr = mt >= 4800 ? 'DDR5' : 'DDR4';
+      const ch = pick([1, 2]);
+      const bw = mt * 8 * ch;
+      return fill('ram-bw', i, `Jakou maximální propustnost v MB/s má ${ddr}-${mt} v režimu ${ch === 2 ? 'Dual' : 'Single'} Channel? (sběrnice 64 bitů)`, String(bw), [], `${mt} × 8 B × ${ch} ${ch === 2 ? 'kanály' : 'kanál'} = ${bw} MB/s`, 'MB/s');
+    },
+  },
+  'vram-bw': {
+    label: 'Propustnost VRAM',
+    gen: (i) => {
+      const eff = pick([14, 16, 18, 19, 21]);
+      const bus = pick([128, 192, 256, 384]);
+      const bw = (eff * bus) / 8;
+      return fill('vram-bw', i, `Grafická karta má paměť s efektivním taktem ${eff} Gb/s na pin a sběrnici ${bus} bitů. Jaká je propustnost VRAM v GB/s?`, cz(bw), variants(bw), `(${eff} × ${bus}) / 8 = ${cz(bw)} GB/s`, 'GB/s');
+    },
+  },
+  psu: {
+    label: 'Výkon zdroje',
+    gen: (i) => {
+      const cpu = pick([65, 105, 125, 150, 170]);
+      const gpu = pick([115, 160, 200, 220, 285, 320]);
+      const peak = cpu + gpu + 100;
+      const w = peak * 1.5;
+      return fill('psu', i, `Sestava má CPU s maximální spotřebou ${cpu} W a GPU ${gpu} W. Jaký výkon zdroje vyjde podle pravidla (CPU + GPU + 100 W) × 1,5?`, cz(w), variants(w), `${cpu} + ${gpu} + 100 = ${peak} W; ${peak} × 1,5 = ${cz(w)} W`, 'W');
+    },
+  },
+  'psu-eff': {
+    label: 'Účinnost zdroje',
+    gen: (i) => {
+      const eff = pick([80, 90]);
+      const out = eff === 80 ? pick([400, 480, 600, 640, 800]) : pick([450, 540, 630, 720, 900]);
+      const inp = (out * 100) / eff;
+      return fill('psu-eff', i, `Zdroj s účinností ${eff} % dodává komponentám ${out} W. Kolik wattů odebírá ze zásuvky?`, String(inp), [], `${out} / ${eff / 100} = ${inp} W (rozdíl ${inp - out} W je teplo)`, 'W');
+    },
+  },
+  optical: {
+    label: 'Rychlost optické mechaniky',
+    gen: (i) => {
+      const v = pick([
+        () => {
+          const x = pick([8, 16, 24, 32, 48, 52]);
+          return { q: `Jakou maximální rychlost v KB/s má ${x}× CD mechanika? (1× = 150 KB/s)`, a: x * 150, unit: 'KB/s', e: `${x} × 150 KB/s = ${x * 150} KB/s` };
+        },
+        () => {
+          const x = pick([2, 4, 6, 8, 12]);
+          return { q: `Jakou maximální rychlost v MB/s má ${x}× Blu-ray mechanika? (1× = 4,5 MB/s)`, a: x * 4.5, unit: 'MB/s', e: `${x} × 4,5 MB/s = ${cz(x * 4.5)} MB/s` };
+        },
+      ])();
+      return fill('optical', i, v.q, cz(v.a), variants(v.a), v.e, v.unit);
+    },
+  },
+  throw: {
+    label: 'Projekční poměr',
+    gen: (i) => {
+      const ratio = pick([1.2, 1.5, 2]);
+      const width = pick([1.5, 2, 2.5, 3]);
+      const dist = Math.round(ratio * width * 100) / 100;
+      return fill('throw', i, `Projektor s projekčním poměrem ${cz(ratio)}:1 stojí ${cz(dist)} m od plátna. Jak široký obraz v metrech vytvoří?`, cz(width), variants(width), `šířka = vzdálenost / poměr = ${cz(dist)} / ${cz(ratio)} = ${cz(width)} m`, 'm');
     },
   },
   colors: {

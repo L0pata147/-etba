@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Calculator, ClipboardList, Dumbbell } from 'lucide-react';
 import { useStore } from '../../store';
-import { HW_TOPICS } from '../../data/hw/topics';
+import { HW_EXTRA_FROM, HW_TOPICS } from '../../data/hw/topics';
 import { HW_GENERATORS, generateHwCalcQuestions } from '../../lib/hwgen';
 import { areaMastery, topicLastStudied, topicProgress } from '../../lib/progress';
 import { shuffle } from '../../lib/random';
@@ -28,7 +28,7 @@ export function HwHome() {
       <PageHeader
         title="Technické vybavení počítačů"
         emoji="🖥️"
-        sub="Písemný test v Moodlu (60 minut) – hardware, paměti, rozhraní, úložiště, periferie, číselné soustavy a jednotky."
+        sub="Písemný test v Moodlu (60 minut). Okruhy podle maturitního zadání, látka podle učitelova textu."
         action={
           <Button icon={<ClipboardList size={18} />} to="/hw/test">
             Cvičný test
@@ -91,8 +91,12 @@ export function HwHome() {
         ))}
       </div>
 
-      <SectionTitle sub="Klikni na okruh – výklad, pojmy, kvíz a trénink.">Okruhy</SectionTitle>
-      <TopicGrid rows={rows} />
+      <SectionTitle sub="Historie, jednotky a soustavy, základní deska, rozhraní, CPU, paměť, zdroj, vstupní, polohovací a výstupní zařízení.">Okruhy podle maturitního zadání</SectionTitle>
+      <TopicGrid rows={rows.filter((r) => r.t.number < HW_EXTRA_FROM)} />
+      <div className="mt-6">
+        <SectionTitle sub="Kapitoly z učitelova textu, které zadání výslovně nejmenuje – v testu se ale objevit můžou.">Další látka z učitelova textu</SectionTitle>
+        <TopicGrid rows={rows.filter((r) => r.t.number >= HW_EXTRA_FROM)} />
+      </div>
     </div>
   );
 }

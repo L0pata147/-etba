@@ -34,7 +34,7 @@ ${books}
 ${topics}
 - Praktická zkouška: nejdřív úloha v Cisco Packet Traceru (VLAN, směrování, DHCP, NAT, SSH…), potom se losuje Linux (Debian 13), nebo Windows Server (síť, DHCP, DNS, web, uživatelé, AD, GPO, sdílení).
 
-3) Technické vybavení počítačů – písemný test v Moodlu (60 min): procesor, paměti, základní deska a UEFI, rozhraní, disky a RAID, grafika a monitory, periferie, napájení, servery, číselné soustavy a jednotky.
+3) Technické vybavení počítačů – písemný test v Moodlu (60 min). Podle maturitního zadání: historie a vývoj počítačů, jednotky informace a číselné soustavy (převody), vstupní a výstupní zařízení, polohovací zařízení, základní deska, napájecí zdroj, CPU, operační paměť a komunikační rozhraní. Látka podle učitelova textu „Architektura a hardware osobních počítačů“ – navíc chlazení, logické obvody, HDD a diskety, SSD, optická média, síťová karta a komprese.
 
 4) Programové vybavení cloudu – praktická zkouška: virtualizace a hypervizory (Hyper-V, Proxmox, VMware), virtuální sítě a úložiště, snapshoty a zálohy, vysoká dostupnost, Docker a Kubernetes, veřejné cloudy, IaaS/PaaS/SaaS, IAM, infrastruktura jako kód.
 

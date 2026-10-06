@@ -97,13 +97,17 @@ describe('Převody a výpočty – hardware', () => {
       }
     }
   });
-  it('RAID kapacita', () => {
+  it('dvojkový doplněk a další výpočty z učitelova textu', () => {
     for (let r = 0; r < 50; r++) {
-      const q = HW_GENERATORS.raid.gen(0) as FillQuestion;
-      const [, level, n, size] = q.prompt.match(/RAID (\d+) z (\d+) disků po (\d+) TB/)!.map(Number) as number[];
-      const cap = { 0: n * size, 1: size, 5: (n - 1) * size, 6: (n - 2) * size, 10: (n / 2) * size }[level as 0 | 1 | 5 | 6 | 10];
-      expect(q.answer).toBe(String(cap));
+      const q = HW_GENERATORS.twos.gen(0) as FillQuestion;
+      const m = q.prompt.match(/−(\d+)/);
+      if (m) expect(parseInt(q.answer, 2)).toBe(256 - Number(m[1]));
+      else expect(-((256 - parseInt(q.prompt.match(/je ([01]{8})/)![1], 2)) % 256 || 256)).toBe(Number(q.answer));
     }
+    const ram = HW_GENERATORS['ram-bw'].gen(0) as FillQuestion;
+    const [, mt] = ram.prompt.match(/DDR\d-(\d+)/)!;
+    expect(Number(ram.answer) % (Number(mt) * 8)).toBe(0);
+    expect((HW_GENERATORS['psu-eff'].gen(0) as FillQuestion).answer).toMatch(/^\d+$/);
   });
 });
 
