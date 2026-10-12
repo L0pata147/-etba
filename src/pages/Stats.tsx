@@ -42,7 +42,7 @@ export function Stats() {
     [data.sessions],
   );
 
-  const color = dark ? '#60a5fa' : '#2563eb';
+  const color = dark ? '#37aec0' : '#0e758a';
   const grid = dark ? '#1e293b' : '#e2e8f0';
   const axis = dark ? '#94a3b8' : '#64748b';
   const tooltipStyle = {

@@ -1,6 +1,8 @@
 import { useMemo, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Dices, GraduationCap, Play, RefreshCw, Timer, TriangleAlert } from 'lucide-react';
+import { ArrowRight, BookOpen, CircleCheck, Dices, Flame, GraduationCap, HelpCircle, Library, Play, RefreshCw, Timer, TrendingUp, TriangleAlert } from 'lucide-react';
+import { SUBJECT_STYLE, SubjectIcon } from '../components/subjectStyle';
+import type { SubjectId } from '../types';
 import { useStore } from '../store';
 import { AREA_MAP, CATEGORIES } from '../data/osnova';
 import { areaStats, BADGES, currentWeek, itRecommendations, overview, recommendations, staleBooks } from '../lib/insights';
@@ -56,9 +58,9 @@ export function Dashboard() {
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
             {greeting}! {days !== null && days >= 0 && <>Do maturity zbývá <b className="text-slate-800 dark:text-slate-200">{days} {plural(days, 'den', 'dny', 'dní')}</b>.</>}
           </p>
-          <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Dnešní příprava</h1>
+          <h1 className="text-[1.65rem] font-bold tracking-tight sm:text-[2rem]">Dnešní příprava</h1>
         </div>
-        <Link to="/pokrok" className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-sm shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+        <Link to="/pokrok" className="flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-sm shadow-sm ring-1 ring-slate-200/80 dark:bg-white/[0.04] dark:ring-white/10">
           <span className="font-bold">Úroveň {lvl.level}</span>
           <span className="text-slate-500">{levelName(lvl.level)}</span>
           <span className="text-slate-400">·</span>
@@ -66,31 +68,10 @@ export function Dashboard() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        <Stat icon="📚" label="Knih" value={ov.bookCount} />
-        <Stat icon="🔥" label="Série učení" value={`${ov.streak} ${plural(ov.streak, 'den', 'dny', 'dní')}`} tone="amber" />
-        <Stat icon="📈" label="Pokrok" value={`${Math.round(ov.progress * 100)} %`} tone="violet" />
-        <Stat icon="✅" label="Naučeno" value={`${ov.learned}/${ov.bookCount}`} tone="emerald" />
-        <Stat icon="⚠️" label="Zopakovat" value={`${ov.review} ${plural(ov.review, 'kniha', 'knihy', 'knih')}`} tone="rose" />
-      </div>
-
-      <BackupReminder />
-
-      <Link to="/otazka-dne" className="card flex items-center gap-3 p-4 transition hover:-translate-y-0.5 hover:shadow-md">
-        <span className="text-2xl">❓</span>
-        <div className="min-w-0 flex-1">
-          <div className="font-bold">Otázka dne</div>
-          <div className="text-sm text-slate-500 dark:text-slate-400">Jedna rychlá otázka ze všech předmětů – stejná jako v upozornění na telefonu.</div>
-        </div>
-        <ArrowRight size={18} className="shrink-0 text-slate-400" />
-      </Link>
-
-      <SubjectCards />
-
       {/* Doporučení */}
       <Card className="overflow-hidden">
-        <div className="bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 p-5 text-white sm:p-7">
-          <div className="text-sm font-semibold uppercase tracking-wide text-brand-100">Dnes doporučujeme zopakovat</div>
+        <div className="relative bg-gradient-to-br from-brand-700 via-brand-800 to-brand-950 p-5 text-white sm:p-7">
+          <div className="text-xs font-bold uppercase tracking-[0.14em] text-brand-200">Dnes doporučujeme zopakovat</div>
           <ol className="mt-3 space-y-2">
             {recs.map((r, i) => (
               <li key={r.book.id + r.area} className="flex items-center gap-3">
@@ -118,7 +99,7 @@ export function Dashboard() {
             ))}
           </ol>
           <div className="mt-5 flex flex-wrap items-center gap-3">
-            <Button size="lg" className="bg-white !text-brand-800 hover:bg-brand-50" icon={<Play size={18} />} onClick={() => start(recommendedSession(data, recs, itRecs).cfg)}>
+            <Button size="lg" className="!bg-white !text-brand-800 hover:!bg-brand-50" icon={<Play size={18} />} onClick={() => start(recommendedSession(data, recs, itRecs).cfg)}>
               Začít dnešní trénink
             </Button>
             <span className="flex items-center gap-1.5 text-sm text-brand-100">
@@ -143,35 +124,60 @@ export function Dashboard() {
         )}
       </Card>
 
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5 [&>*:last-child]:col-span-2 lg:[&>*:last-child]:col-span-1">
+        <Stat icon={<Flame size={20} />} label="Série učení" value={`${ov.streak} ${plural(ov.streak, 'den', 'dny', 'dní')}`} tone="amber" />
+        <Stat icon={<TrendingUp size={20} />} label="Pokrok" value={`${Math.round(ov.progress * 100)} %`} />
+        <Stat icon={<Library size={20} />} label="Knih" value={ov.bookCount} tone="violet" />
+        <Stat icon={<CircleCheck size={20} />} label="Naučeno" value={`${ov.learned}/${ov.bookCount}`} tone="emerald" />
+        <Stat icon={<TriangleAlert size={20} />} label="Zopakovat" value={`${ov.review} ${plural(ov.review, 'kniha', 'knihy', 'knih')}`} tone="rose" />
+      </div>
+
+      <BackupReminder />
+
+      <Link to="/otazka-dne" className="card flex items-center gap-3 p-4 transition hover:-translate-y-0.5 hover:shadow-md">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300">
+          <HelpCircle size={20} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="font-bold">Otázka dne</div>
+          <div className="text-sm text-slate-500 dark:text-slate-400">Jedna rychlá otázka ze všech předmětů – stejná jako v upozornění na telefonu.</div>
+        </div>
+        <ArrowRight size={18} className="shrink-0 text-slate-400" />
+      </Link>
+
+      <SubjectCards />
+
       {/* Rychlé režimy */}
       <div>
         <SectionTitle>Rychlý start</SectionTitle>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[5, 15, 30, 60].map((m) => (
             <button key={m} onClick={() => start(minutesSession(m))} className="card group p-4 text-left transition hover:-translate-y-0.5 hover:shadow-md">
-              <div className="text-2xl">⏱️</div>
-              <div className="mt-1 font-bold">Mám {m} minut</div>
+              <Timer size={20} className="text-brand-600 dark:text-brand-300" />
+              <div className="mt-2 font-display text-lg font-bold">
+                {m} <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">min</span>
+              </div>
               <div className="text-xs text-slate-500">{m <= 5 ? 'rychlé opakování' : m <= 15 ? 'krátký trénink' : m <= 30 ? 'důkladný trénink' : 'velký trénink'}</div>
             </button>
           ))}
         </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <QuickAction icon={<Dices size={20} />} title="🎲 Náhodný trénink" text="Literatura i sítě napřeskáčku" onClick={() => start(randomSession())} />
+          <QuickAction icon={<Dices size={20} />} title="Náhodný trénink" text="Literatura i sítě napřeskáčku" onClick={() => start(randomSession())} />
           <QuickAction
             icon={<TriangleAlert size={20} />}
-            title="🔥 Trénovat, co neumím"
+            title="Trénovat, co neumím"
             text={unknownCount ? `${unknownCount} ${plural(unknownCount, 'otázka', 'otázky', 'otázek')} k doučení` : 'Seznam je zatím prázdný'}
             disabled={!unknownCount}
             onClick={() => start(unknownSession())}
           />
           <QuickAction
             icon={<RefreshCw size={20} />}
-            title="🔁 Opakování"
+            title="Opakování"
             text={ov.due ? `${ov.due} ${plural(ov.due, 'otázka čeká', 'otázky čekají', 'otázek čeká')} na zopakování` : 'Nic nečeká – skvělé!'}
             disabled={!ov.due}
             onClick={() => start(dueSession())}
           />
-          <QuickAction icon={<GraduationCap size={20} />} title="🎓 Simulace maturity" text="Celá osnova, vlastní odpovědi" to="/simulace" />
+          <QuickAction icon={<GraduationCap size={20} />} title="Simulace maturity" text="Celá osnova, vlastní odpovědi" to="/simulace" />
         </div>
       </div>
 
@@ -303,16 +309,15 @@ function SubjectCards() {
   const writings = data.writings.filter((w) => w.finished).length;
   const weakest = siteTopics[0];
 
-  const card = (emoji: string, title: string, value: number, sub: ReactNode, actions: ReactNode) => (
+  const card = (subject: SubjectId, title: string, value: number, sub: ReactNode, actions: ReactNode) => (
     <Card className="p-5">
-      <div className="flex items-center justify-between">
-        <div className="font-bold">
-          {emoji} {title}
-        </div>
-        <span className="font-bold tabular-nums">{Math.round(value * 100)} %</span>
+      <div className="flex items-center gap-3">
+        <SubjectIcon subject={subject} />
+        <div className="min-w-0 flex-1 font-display text-[17px] font-bold">{title}</div>
+        <span className="font-display text-lg font-bold tabular-nums">{Math.round(value * 100)} %</span>
       </div>
-      <ProgressBar value={value} className="mt-2" height="h-2.5" />
-      <p className="mt-2 text-sm text-slate-500">{sub}</p>
+      <ProgressBar value={value} className="mt-3" height="h-2" color={SUBJECT_STYLE[subject].bar} />
+      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{sub}</p>
       <div className="mt-3 flex flex-wrap gap-2">{actions}</div>
     </Card>
   );
@@ -320,7 +325,7 @@ function SubjectCards() {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {card(
-        '📚',
+        'cjl',
         'Čeština',
         ov.progress,
         <>
@@ -339,7 +344,7 @@ function SubjectCards() {
         </>,
       )}
       {card(
-        '🌐',
+        'site',
         'Počítačové sítě',
         (oral + practical) / 2,
         <>
@@ -358,7 +363,7 @@ function SubjectCards() {
         </>,
       )}
       {card(
-        '🖥️',
+        'hw',
         'Hardware',
         (hwTheory + hwCalc) / 2,
         <>
@@ -374,7 +379,7 @@ function SubjectCards() {
         </>,
       )}
       {card(
-        '☁️',
+        'cloud',
         'Cloud',
         (cloudTheory + cloudPrac) / 2,
         <>

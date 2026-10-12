@@ -8,10 +8,10 @@ export function cx(...c: (string | false | null | undefined)[]): string {
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-brand-600 text-white hover:bg-brand-700 shadow-sm shadow-brand-600/20 disabled:bg-brand-600/50',
+  primary: 'bg-brand-700 text-white hover:bg-brand-800 shadow-sm shadow-brand-900/20 disabled:bg-brand-700/50 dark:bg-brand-500 dark:text-ink dark:hover:bg-brand-400',
   secondary:
-    'bg-white text-slate-800 border border-slate-300 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700',
-  ghost: 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800',
+    'bg-white text-slate-800 border border-slate-200 shadow-sm shadow-slate-900/[0.03] hover:border-slate-300 hover:bg-slate-50 dark:bg-white/[0.04] dark:text-slate-100 dark:border-white/10 dark:hover:bg-white/[0.08]',
+  ghost: 'text-slate-700 hover:bg-slate-900/[0.05] dark:text-slate-300 dark:hover:bg-white/[0.06]',
   danger: 'bg-rose-600 text-white hover:bg-rose-700',
   success: 'bg-emerald-600 text-white hover:bg-emerald-700',
 };
@@ -59,7 +59,7 @@ export function SectionTitle({ children, action, sub }: { children: ReactNode; a
   return (
     <div className="mb-3 flex items-end justify-between gap-3">
       <div>
-        <h2 className="text-lg font-bold tracking-tight">{children}</h2>
+        <h2 className="text-[1.15rem] font-bold tracking-tight">{children}</h2>
         {sub && <p className="text-sm text-slate-500 dark:text-slate-400">{sub}</p>}
       </div>
       {action}
@@ -71,8 +71,7 @@ export function PageHeader({ title, sub, action, emoji }: { title: string; sub?:
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
-          {emoji && <span className="mr-2">{emoji}</span>}
+        <h1 className="text-[1.65rem] font-bold leading-tight tracking-tight sm:text-[2rem]" data-emoji={emoji}>
           {title}
         </h1>
         {sub && <p className="mt-1 text-slate-500 dark:text-slate-400">{sub}</p>}
@@ -93,7 +92,7 @@ export function ProgressBar({ value, className, color, height = 'h-2' }: { value
   const pct = Math.round(Math.max(0, Math.min(1, value)) * 100);
   return (
     <div
-      className={cx('w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800', height, className)}
+      className={cx('w-full overflow-hidden rounded-full bg-slate-900/[0.07] dark:bg-white/[0.08]', height, className)}
       role="progressbar"
       aria-valuenow={pct}
       aria-valuemin={0}
@@ -118,10 +117,10 @@ export function Stat({ icon, label, value, sub, tone = 'brand' }: { icon: ReactN
   };
   return (
     <div className="card flex items-center gap-3 p-4">
-      <div className={cx('grid h-11 w-11 shrink-0 place-items-center rounded-xl text-xl', tones[tone])}>{icon}</div>
+      <div className={cx('grid h-10 w-10 shrink-0 place-items-center rounded-xl text-lg', tones[tone])}>{icon}</div>
       <div className="min-w-0">
-        <div className="truncate text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
-        <div className="text-xl font-bold tabular-nums">{value}</div>
+        <div className="truncate text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</div>
+        <div className="font-display text-xl font-bold tabular-nums">{value}</div>
         {sub && <div className="truncate text-xs text-slate-500 dark:text-slate-400">{sub}</div>}
       </div>
     </div>
@@ -176,7 +175,7 @@ export function Segmented<T extends string | number>({
   className?: string;
 }) {
   return (
-    <div className={cx('inline-flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800', className)}>
+    <div className={cx('inline-flex flex-wrap gap-1 rounded-xl bg-slate-900/[0.05] p-1 dark:bg-white/[0.06]', className)}>
       {options.map((o) => (
         <button
           key={String(o.value)}
@@ -184,7 +183,7 @@ export function Segmented<T extends string | number>({
           onClick={() => onChange(o.value)}
           className={cx(
             'rounded-lg px-3 py-1.5 text-sm font-medium transition',
-            o.value === value ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-950 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
+            o.value === value ? 'bg-white font-semibold text-brand-800 shadow-sm dark:bg-ink dark:text-brand-200' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
           )}
         >
           {o.label}
@@ -203,7 +202,7 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
         'inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition',
         checked
           ? 'border-brand-500 bg-brand-50 text-brand-800 dark:bg-brand-500/15 dark:text-brand-200'
-          : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800',
+          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:bg-white/[0.07]',
       )}
       aria-pressed={checked}
     >
@@ -226,7 +225,7 @@ export function EmptyState({ icon, title, text, action }: { icon: ReactNode; tit
 
 export function Tag({ children, tone = 'slate' }: { children: ReactNode; tone?: 'slate' | 'brand' | 'emerald' | 'amber' | 'rose' | 'violet' }) {
   const tones = {
-    slate: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    slate: 'bg-slate-900/[0.06] text-slate-700 dark:bg-white/[0.08] dark:text-slate-300',
     brand: 'bg-brand-100 text-brand-800 dark:bg-brand-500/20 dark:text-brand-200',
     emerald: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200',
     amber: 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200',

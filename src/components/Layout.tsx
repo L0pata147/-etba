@@ -1,11 +1,12 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ChevronDown, GraduationCap, Home, Menu, Moon, Search, BarChart3, Sun, X } from 'lucide-react';
+import { ChevronDown, Flame, GraduationCap, Home, Menu, Moon, Search, BarChart3, Sun, X } from 'lucide-react';
 import { useStore } from '../store';
 import { cx } from './ui';
 import { StorageWarning } from './StorageWarning';
 import { levelFromXp, streak } from '../lib/progress';
 import { NAV_BOTTOM, NAV_SUBJECTS, NAV_TOP, activeNavItem, type NavItem } from './navData';
+import { SubjectIcon } from './subjectStyle';
 
 const MOBILE: NavItem[] = [
   { to: '/', label: 'Dnes', icon: Home },
@@ -29,7 +30,7 @@ export function useTheme() {
   const dark = pref === 'dark' || (pref === 'system' && systemDark);
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#020617' : '#1e3a8a');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#070d17' : '#0f5f71');
   }, [dark]);
   return { dark, toggle: () => updateSettings({ theme: dark ? 'light' : 'dark' }) };
 }
@@ -89,11 +90,11 @@ export function Layout({ children }: { children: ReactNode }) {
           'flex items-center gap-3 rounded-xl px-3 font-medium transition',
           small ? 'py-1.5 text-[14px]' : 'py-2.5 text-[15px]',
           isActive
-            ? 'bg-brand-600 text-white shadow-sm shadow-brand-600/30'
-            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white',
+            ? 'bg-brand-600/10 font-semibold text-brand-800 dark:bg-brand-400/15 dark:text-brand-200'
+            : 'text-slate-600 hover:bg-slate-900/[0.04] hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/[0.05] dark:hover:text-white',
         )}
       >
-        <n.icon size={small ? 16 : 19} />
+        <n.icon size={small ? 16 : 19} className={isActive ? 'text-brand-600 dark:text-brand-300' : undefined} />
         <span className="flex-1">{n.label}</span>
         {n.to === '/doucit' && unknownCount > 0 && <span className="rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white">{unknownCount}</span>}
       </Link>
@@ -113,11 +114,11 @@ export function Layout({ children }: { children: ReactNode }) {
               onClick={() => toggleSubject(subj.id)}
               aria-expanded={isOpen}
               className={cx(
-                'flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-[15px] font-semibold transition hover:bg-slate-100 dark:hover:bg-slate-800',
+                'flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left text-[15px] font-semibold transition hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05]',
                 hasActive ? 'text-brand-700 dark:text-brand-300' : 'text-slate-700 dark:text-slate-200',
               )}
             >
-              <span className="w-5 text-center">{subj.emoji}</span>
+              <SubjectIcon subject={subj.id} size="sm" />
               <span className="flex-1">{subj.label}</span>
               <ChevronDown size={16} className={cx('shrink-0 text-slate-400 transition', isOpen && 'rotate-180')} />
             </button>
@@ -145,29 +146,31 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
       {/* Sidebar (desktop) */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white/80 px-3 py-5 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200/80 bg-white/75 px-3 py-5 backdrop-blur dark:border-white/[0.06] dark:bg-ink/80 lg:flex">
         <Brand />
         <div className="mt-6 flex-1 overflow-y-auto">{navList}</div>
-        <div className="mt-4 rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">
+        <div className="mt-4 rounded-xl bg-paper p-3 text-sm ring-1 ring-slate-200/70 dark:bg-white/[0.04] dark:ring-white/[0.06]">
           <div className="flex items-center justify-between">
             <span className="font-semibold">Úroveň {lvl.level}</span>
-            <span className="text-slate-500 dark:text-slate-400">🔥 {st} {st === 1 ? 'den' : st >= 2 && st <= 4 ? 'dny' : 'dní'}</span>
+            <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+              <Flame size={14} className="text-amber-500" /> {st} {st === 1 ? 'den' : st >= 2 && st <= 4 ? 'dny' : 'dní'}
+            </span>
           </div>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
             <div className="h-full rounded-full bg-brand-500" style={{ width: `${Math.round(lvl.progress * 100)}%` }} />
           </div>
           <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             {data.xp} / {lvl.next} XP
           </div>
         </div>
-        <button onClick={toggle} className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+        <button onClick={toggle} className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-600 hover:bg-slate-900/[0.04] dark:text-slate-400 dark:hover:bg-white/[0.05]">
           {dark ? <Sun size={18} /> : <Moon size={18} />}
           {dark ? 'Světlý režim' : 'Tmavý režim'}
         </button>
       </aside>
 
       {/* Top bar (mobile) */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white/85 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85 lg:hidden">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/85 px-4 py-3 backdrop-blur dark:border-white/[0.06] dark:bg-ink/85 lg:hidden">
         <Brand compact />
         <div className="flex items-center gap-1">
           <span className="mr-1 text-sm font-semibold text-slate-600 dark:text-slate-300">🔥 {st}</span>
@@ -186,7 +189,7 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* Mobile drawer */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-sm lg:hidden" onClick={() => setMenuOpen(false)}>
-          <div className="animate-fade-up absolute inset-y-0 right-0 w-[82%] max-w-xs overflow-y-auto bg-white p-4 dark:bg-slate-900" onClick={(e) => e.stopPropagation()}>
+          <div className="animate-fade-up absolute inset-y-0 right-0 w-[82%] max-w-xs overflow-y-auto bg-white p-4 dark:bg-ink" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <Brand compact />
               <button onClick={() => setMenuOpen(false)} className="rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Zavřít menu">
@@ -207,7 +210,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
       {/* Bottom nav (mobile) */}
       {!inSession && (
-        <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 lg:hidden">
+        <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/80 bg-white/95 backdrop-blur dark:border-white/[0.06] dark:bg-ink/95 lg:hidden">
           <div className="grid grid-cols-5">
             {MOBILE.map((n) => (
               <NavLink
@@ -217,7 +220,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 className={({ isActive }) =>
                   cx(
                     'flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium',
-                    isActive || (n.to === '/zkousky' && !!active?.subject) ? 'text-brand-600 dark:text-brand-400' : 'text-slate-500 dark:text-slate-400',
+                    isActive || (n.to === '/zkousky' && !!active?.subject) ? 'font-semibold text-brand-700 dark:text-brand-300' : 'text-slate-500 dark:text-slate-400',
                   )
                 }
               >
@@ -255,11 +258,11 @@ export function Layout({ children }: { children: ReactNode }) {
 function Brand({ compact }: { compact?: boolean }) {
   return (
     <NavLink to="/" className="flex items-center gap-2.5 px-2">
-      <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 text-white shadow-md shadow-brand-700/30">
+      <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand-700 text-white dark:bg-brand-500">
         <GraduationCap size={20} />
       </div>
       <div className="leading-tight">
-        <div className="font-extrabold tracking-tight">Maturitní trenér</div>
+        <div className="font-display text-[17px] font-bold tracking-tight">Maturitní trenér</div>
         {!compact && <div className="text-xs text-slate-500 dark:text-slate-400">Maturita IT – 4 předměty</div>}
       </div>
     </NavLink>

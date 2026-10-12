@@ -6,6 +6,7 @@ import { subjectProgress } from '../lib/insights';
 import { areaMastery, sitePracticalProgress, subjectTopicsProgress } from '../lib/progress';
 import { SUBJECT_TOPICS } from '../data/subjects';
 import { Card, PageHeader, Pct, ProgressBar } from '../components/ui';
+import { SUBJECT_STYLE, SubjectIcon } from '../components/subjectStyle';
 
 /** Rozcestník: předměty → zkoušky → co k nim procvičit */
 export function Exams() {
@@ -27,17 +28,18 @@ export function Exams() {
         {NAV_SUBJECTS.map((subj) => (
           <Card key={subj.id} className="p-5">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-bold">
-                {subj.emoji} {subj.label}
+              <h2 className="flex min-w-0 items-center gap-3 text-lg font-bold">
+                <SubjectIcon subject={subj.id} />
+                {subj.label}
               </h2>
               <span className="shrink-0 whitespace-nowrap font-bold">
                 <Pct value={progress[subj.id]} />
               </span>
             </div>
-            <ProgressBar value={progress[subj.id]} className="mt-2" />
+            <ProgressBar value={progress[subj.id]} className="mt-3" color={SUBJECT_STYLE[subj.id].bar} />
             <div className={subj.exams.length > 1 ? 'mt-4 grid gap-4 md:grid-cols-2' : 'mt-4'}>
               {subj.exams.map((ex) => (
-                <div key={ex.id} className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/60">
+                <div key={ex.id} className="rounded-xl bg-paper p-4 ring-1 ring-slate-200/60 dark:bg-white/[0.03] dark:ring-white/[0.06]">
                   <div className="flex items-baseline justify-between gap-2">
                     <div className="font-bold">{ex.label}</div>
                     {examProgress[ex.id] !== undefined && (
@@ -52,7 +54,7 @@ export function Exams() {
                       <Link
                         key={it.to}
                         to={it.to}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-700 transition hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:text-brand-300"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-700 transition hover:border-brand-400 hover:text-brand-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200 dark:hover:text-brand-300"
                       >
                         <it.icon size={15} />
                         {it.label}
