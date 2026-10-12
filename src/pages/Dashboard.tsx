@@ -108,7 +108,7 @@ export function Dashboard() {
           </div>
         </div>
         {week && (
-          <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 px-5 py-3 text-sm dark:border-slate-800">
+          <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 px-5 py-3 text-sm dark:border-white/[0.07]">
             <span className="font-semibold">Studijní plán – týden {week.index}:</span>
             {week.bookIds.map((id) => {
               const b = data.books.find((x) => x.id === id);
@@ -186,7 +186,7 @@ export function Dashboard() {
           <SectionTitle action={<Link to="/knihy" className="text-sm font-semibold text-brand-700 dark:text-brand-400">Všechny knihy</Link>}>
             Dlouho neopakováno
           </SectionTitle>
-          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+          <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
             {stale.map(({ book, last }) => (
               <li key={book.id}>
                 <Link to={`/knihy/${book.id}`} className="flex items-center gap-3 py-2.5 hover:opacity-80">
@@ -230,7 +230,7 @@ export function Dashboard() {
         <Card className="p-5 lg:col-span-2">
           <SectionTitle>Poslední výsledky testů</SectionTitle>
           {data.sessions.length ? (
-            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+            <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
               {data.sessions.slice(0, 5).map((s) => (
                 <li key={s.id} className="flex items-center gap-3 py-2.5">
                   <div className={`grid h-10 w-12 shrink-0 place-items-center rounded-lg text-sm font-bold tabular-nums ${s.score >= 0.75 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300' : s.score >= 0.5 ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300'}`}>

@@ -64,13 +64,13 @@ function TopicInner({ id }: { id?: string }) {
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button size="sm" onClick={() => start(topicConfig([t.id], `Téma ${t.number}: ${t.title} – lehce`, 'easy', 12))}>
-            🟢 Lehký trénink
+            <span className="h-2 w-2 rounded-full bg-emerald-300" /> Lehký trénink
           </Button>
           <Button size="sm" onClick={() => start(topicConfig([t.id], `Téma ${t.number}: ${t.title}`, 'medium', 15))}>
-            🟡 Střední
+            <span className="h-2 w-2 rounded-full bg-amber-300" /> Střední
           </Button>
           <Button size="sm" onClick={() => start(topicConfig([t.id], `Téma ${t.number}: ${t.title} – vlastní odpovědi`, 'hard', 6))}>
-            🔴 Vlastní odpovědi
+            <span className="h-2 w-2 rounded-full bg-rose-300" /> Vlastní odpovědi
           </Button>
           <Button
             size="sm"
@@ -96,7 +96,7 @@ function TopicInner({ id }: { id?: string }) {
           { value: 'vyklad', label: 'Osnova výkladu' },
           { value: 'pojmy', label: `Pojmy (${t.terms.length})` },
           { value: 'kviz', label: `Otázky (${t.quiz.length + t.deep.length})` },
-          { value: 'poznamky', label: data.topicNotes[t.id] ? '📝 Poznámky ●' : '📝 Poznámky' },
+          { value: 'poznamky', label: data.topicNotes[t.id] ? 'Poznámky ●' : 'Poznámky' },
         ]}
       />
 
@@ -129,7 +129,7 @@ function TopicInner({ id }: { id?: string }) {
       )}
 
       {tab === 'pojmy' && (
-        <Card className="divide-y divide-slate-100 dark:divide-slate-800">
+        <Card className="divide-y divide-slate-100 dark:divide-white/[0.06]">
           {t.terms.map((x) => (
             <div key={x.term} className="p-4">
               <div className="font-semibold">{x.term}</div>
@@ -193,7 +193,7 @@ function TopicNotes({ id }: { id: string }) {
         onChange={(e) => setText(e.target.value)}
         rows={12}
         placeholder="Poznámky se ukládají automaticky a najdeš je i přes vyhledávání."
-        className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 text-[15px] dark:border-slate-700 dark:bg-slate-900"
+        className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 text-[15px] dark:border-white/10 dark:bg-slate-900"
       />
       <p className="mt-1 text-xs text-slate-500">{text === saved ? 'Uloženo' : 'Ukládám…'}</p>
     </Card>

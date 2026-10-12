@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { CircleCheck, CircleHelp, CircleX, Flag, Flame, Library, Target, Timer, TrendingUp } from 'lucide-react';
 import type { SubjectId } from '../types';
 import { SUBJECTS, SUBJECT_TOPICS } from '../data/subjects';
 import { LEARNED_TARGET, subjectAnswers, subjectForecast, subjectProgress } from '../lib/insights';
@@ -63,14 +64,14 @@ export function Stats() {
       <PageHeader title="Můj pokrok" emoji="📊" sub={`Úroveň ${lvl.level} – ${levelName(lvl.level)} · ${data.xp} XP`} />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat icon="❓" label="Otázek celkem" value={ov.questions} />
-        <Stat icon="✅" label="Správně" value={ov.correct} tone="emerald" />
-        <Stat icon="❌" label="Špatně" value={ov.questions - ov.correct} tone="rose" />
-        <Stat icon="🎯" label="Úspěšnost" value={`${Math.round(accuracy * 100)} %`} tone="violet" />
-        <Stat icon="📚" label="Naučené knihy" value={`${ov.learned}/${ov.bookCount}`} tone="emerald" />
-        <Stat icon="⏱️" label="Čas učení" value={formatDuration(ov.seconds)} tone="amber" />
-        <Stat icon="🏁" label="Dokončené testy" value={ov.sessions} />
-        <Stat icon="🔥" label="Série dní" value={`${ov.streak} ${plural(ov.streak, 'den', 'dny', 'dní')}`} sub={`nejdelší: ${longestStreak(data)}`} tone="amber" />
+        <Stat icon={<CircleHelp size={20} />} label="Otázek celkem" value={ov.questions} />
+        <Stat icon={<CircleCheck size={20} />} label="Správně" value={ov.correct} tone="emerald" />
+        <Stat icon={<CircleX size={20} />} label="Špatně" value={ov.questions - ov.correct} tone="rose" />
+        <Stat icon={<Target size={20} />} label="Úspěšnost" value={`${Math.round(accuracy * 100)} %`} tone="violet" />
+        <Stat icon={<Library size={20} />} label="Naučené knihy" value={`${ov.learned}/${ov.bookCount}`} tone="emerald" />
+        <Stat icon={<Timer size={20} />} label="Čas učení" value={formatDuration(ov.seconds)} tone="amber" />
+        <Stat icon={<Flag size={20} />} label="Dokončené testy" value={ov.sessions} />
+        <Stat icon={<Flame size={20} />} label="Série dní" value={`${ov.streak} ${plural(ov.streak, 'den', 'dny', 'dní')}`} sub={`nejdelší: ${longestStreak(data)}`} tone="amber" />
       </div>
 
       <SubjectStats color={color} grid={grid} axis={axis} tooltipStyle={tooltipStyle} />
@@ -139,11 +140,11 @@ export function Stats() {
 
       <div className="grid gap-5 md:grid-cols-2">
         <Card className="p-5">
-          <SectionTitle>💪 Nejsilnější témata</SectionTitle>
+          <SectionTitle>Nejsilnější témata</SectionTitle>
           <AreaList items={strongest} />
         </Card>
         <Card className="p-5">
-          <SectionTitle>🎯 Nejslabší témata</SectionTitle>
+          <SectionTitle>Nejslabší témata</SectionTitle>
           <AreaList items={weakest} />
         </Card>
       </div>
@@ -178,7 +179,7 @@ export function Stats() {
           {BADGES.map((b) => {
             const got = data.badges[b.id];
             return (
-              <div key={b.id} className={`rounded-xl border p-3 text-center ${got ? 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-500/10' : 'border-slate-200 opacity-50 grayscale dark:border-slate-800'}`}>
+              <div key={b.id} className={`rounded-xl border p-3 text-center ${got ? 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-500/10' : 'border-slate-200 opacity-50 grayscale dark:border-white/[0.07]'}`}>
                 <div className="text-3xl">{b.emoji}</div>
                 <div className="mt-1 text-sm font-bold">{b.label}</div>
                 <div className="text-xs text-slate-500">{got ? `získáno ${formatDate(got)}` : b.description}</div>
@@ -250,13 +251,13 @@ function SubjectStats({ color, grid, axis, tooltipStyle }: { color: string; grid
         className="mb-4"
         value={subject}
         onChange={setSubject}
-        options={(Object.keys(SUBJECTS) as SubjectId[]).map((s) => ({ value: s, label: `${SUBJECTS[s].emoji} ${SUBJECTS[s].short}` }))}
+        options={(Object.keys(SUBJECTS) as SubjectId[]).map((s) => ({ value: s, label: SUBJECTS[s].short }))}
       />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat icon="📈" label="Zvládnutí" value={`${Math.round(progress[subject] * 100)} %`} tone="violet" />
-        <Stat icon="❓" label="Odpovědí" value={answers.attempts} />
-        <Stat icon="🎯" label="Úspěšnost" value={answers.attempts ? `${Math.round((answers.correct / answers.attempts) * 100)} %` : '–'} tone="emerald" />
-        <Stat icon="🏁" label="Odhad naučení" value={fc} sub={`${mastered}/${parts.length} ${subject === 'cjl' ? 'knih' : 'témat'} zvládnuto`} tone="amber" />
+        <Stat icon={<TrendingUp size={20} />} label="Zvládnutí" value={`${Math.round(progress[subject] * 100)} %`} tone="violet" />
+        <Stat icon={<CircleHelp size={20} />} label="Odpovědí" value={answers.attempts} />
+        <Stat icon={<Target size={20} />} label="Úspěšnost" value={answers.attempts ? `${Math.round((answers.correct / answers.attempts) * 100)} %` : '–'} tone="emerald" />
+        <Stat icon={<Flag size={20} />} label="Odhad naučení" value={fc} sub={`${mastered}/${parts.length} ${subject === 'cjl' ? 'knih' : 'témat'} zvládnuto`} tone="amber" />
       </div>
       <div className="mt-5">
         <div className="mb-2 text-sm font-semibold">Vývoj zvládnutí</div>

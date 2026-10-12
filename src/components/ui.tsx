@@ -151,7 +151,7 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-white/[0.07]">
           <h3 className="text-lg font-bold">{title}</h3>
           <button className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={onClose} aria-label="Zavřít">
             <X size={20} />

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { CheckCircle2, ChevronDown, Circle, ClipboardCheck, Dumbbell, GraduationCap, Pencil, Star } from 'lucide-react';
+import { CheckCircle2, ChevronDown, Circle, ClipboardCheck, Compass, Dumbbell, GraduationCap, Info, Landmark, Lightbulb, MessageSquareQuote, PenLine, Pencil, ScrollText, Star, UserRound, Users, type LucideIcon } from 'lucide-react';
 import type { AreaId, Book } from '../types';
 import { useStore } from '../store';
 import { AREA_MAP, CATEGORIES, EXAM_AREAS, KINDS } from '../data/osnova';
@@ -109,11 +109,11 @@ export function BookDetail() {
         value={tab}
         onChange={setTab}
         options={[
-          { value: 'full', label: '📖 Kompletní příprava' },
-          { value: 'quick', label: '⚡ Za 10 minut' },
-          { value: 'exam', label: '🎓 Maturitní otázky' },
-          { value: 'notes', label: '📝 Moje poznámky' },
-          { value: 'progress', label: '📊 Pokrok' },
+          { value: 'full', label: 'Kompletní příprava' },
+          { value: 'quick', label: 'Za 10 minut' },
+          { value: 'exam', label: 'Maturitní otázky' },
+          { value: 'notes', label: 'Moje poznámky' },
+          { value: 'progress', label: 'Pokrok' },
         ]}
       />
 
@@ -126,11 +126,15 @@ export function BookDetail() {
   );
 }
 
-function Block({ title, children, emoji }: { title: string; children: ReactNode; emoji?: string }) {
+function Block({ title, children, icon: Icon }: { title: string; children: ReactNode; icon?: LucideIcon }) {
   return (
     <Card className="p-5">
-      <h2 className="mb-2 text-lg font-bold">
-        {emoji && <span className="mr-1.5">{emoji}</span>}
+      <h2 className="mb-3 flex items-center gap-2.5 text-lg font-bold">
+        {Icon && (
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300">
+            <Icon size={17} />
+          </span>
+        )}
         {title}
       </h2>
       <div className="space-y-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-300">{children}</div>
@@ -151,7 +155,7 @@ function Row({ label, value }: { label: string; value?: string }) {
 function FullView({ book: b }: { book: Book }) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Block title="Základní informace" emoji="📌">
+      <Block title="Základní informace" icon={Info}>
         <Row label="Autor" value={`${b.author}${b.authorLife ? ` (${b.authorLife})` : ''}`} />
         <Row label="Rok" value={b.year} />
         <Row label="Literární druh" value={KINDS[b.kind]} />
@@ -159,7 +163,7 @@ function FullView({ book: b }: { book: Book }) {
         <Row label="Období" value={b.period} />
         <Row label="Směr" value={b.movement} />
       </Block>
-      <Block title="Téma a motivy" emoji="💡">
+      <Block title="Téma a motivy" icon={Lightbulb}>
         <Row label="Téma" value={b.theme} />
         {b.motifs.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
@@ -173,7 +177,7 @@ function FullView({ book: b }: { book: Book }) {
         <Row label="Hlavní myšlenka" value={b.mainIdea} />
       </Block>
       <div className="lg:col-span-2">
-        <Block title="Děj" emoji="📜">
+        <Block title="Děj" icon={ScrollText}>
           <p className="whitespace-pre-line">{b.plot || '—'}</p>
           {b.plotEvents.length > 0 && (
             <ol className="mt-3 list-decimal space-y-1 pl-5">
@@ -184,7 +188,7 @@ function FullView({ book: b }: { book: Book }) {
           )}
         </Block>
       </div>
-      <Block title="Postavy" emoji="👥">
+      <Block title="Postavy" icon={Users}>
         {b.mainCharacters.map((c) => (
           <div key={c.name}>
             <span className="font-semibold text-slate-900 dark:text-slate-100">{c.name}</span> – {c.description}
@@ -197,31 +201,31 @@ function FullView({ book: b }: { book: Book }) {
           </div>
         ))}
       </Block>
-      <Block title="Časoprostor a kompozice" emoji="🧭">
+      <Block title="Časoprostor a kompozice" icon={Compass}>
         <Row label="Prostředí" value={b.setting} />
         <Row label="Čas" value={b.time} />
         <Row label="Kompozice" value={b.composition} />
       </Block>
-      <Block title="Vypravěč a promluvy" emoji="🗣️">
+      <Block title="Vypravěč a promluvy" icon={MessageSquareQuote}>
         <Row label="Vypravěč / lyrický subjekt" value={b.narrator} />
         <Row label="Vyprávěcí způsoby" value={b.narrativeModes} />
         <Row label="Typy promluv" value={b.speechTypes} />
         <Row label="Veršová výstavba" value={b.verse || 'Dílo je psáno prózou.'} />
       </Block>
-      <Block title="Jazyk a literární prostředky" emoji="✍️">
+      <Block title="Jazyk a literární prostředky" icon={PenLine}>
         <Row label="Jazykové prostředky" value={b.language} />
         <Row label="Tropy a figury" value={b.tropes} />
       </Block>
-      <Block title="Autor" emoji="👤">
+      <Block title="Autor" icon={UserRound}>
         <p className="whitespace-pre-line">{b.authorContext || '—'}</p>
         {b.otherWorks.length > 0 && <Row label="Další díla" value={b.otherWorks.join(', ')} />}
       </Block>
-      <Block title="Literárněhistorický kontext" emoji="🏛️">
+      <Block title="Literárněhistorický kontext" icon={Landmark}>
         <p className="whitespace-pre-line">{b.historicalContext || '—'}</p>
       </Block>
       {(b.interpretation || b.examTips) && (
         <div className="lg:col-span-2">
-          <Block title="K ústní maturitě" emoji="🎓">
+          <Block title="K ústní maturitě" icon={GraduationCap}>
             <Row label="Interpretace" value={b.interpretation} />
             <Row label="Na co se zaměřit" value={b.examTips} />
           </Block>
@@ -250,7 +254,7 @@ function QuickView({ book: b }: { book: Book }) {
   return (
     <div className="space-y-4">
       <Card className="p-5 sm:p-7">
-        <h2 className="mb-1 text-xl font-bold">⚡ Naučit se za 10 minut</h2>
+        <h2 className="mb-1 text-xl font-bold">Naučit se za 10 minut</h2>
         <p className="mb-4 text-sm text-slate-500">To nejdůležitější o díle. Přečti si body a pak si je hned ověř krátkým testem.</p>
         <ol className="space-y-3">
           {items.map((t, i) => (
@@ -355,7 +359,7 @@ function Notes({ book }: { book: Book }) {
   return (
     <Card className="p-5">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-lg font-bold">📝 Moje poznámky</h2>
+        <h2 className="text-lg font-bold">Moje poznámky</h2>
         <span className="text-xs text-slate-500">{saved ? '✓ Uloženo' : 'Ukládám…'}</span>
       </div>
       <textarea

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { ArrowDown, ArrowUp, Check, GripVertical, Mic, MicOff, RotateCcw, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Check, CircleCheck, CircleHelp, CircleX, GripVertical, Mic, MicOff, RotateCcw, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import type {
   AbcQuestion,
   AnswerResult,
@@ -93,7 +93,7 @@ function Flashcard({ q, result, onSubmit }: P<FlashcardQuestion>) {
             <Prompt text={q.prompt} />
             <span className="mt-4 text-sm font-medium text-brand-700 dark:text-brand-300">Klikni pro zobrazení odpovědi</span>
           </button>
-          <div className="flip-face flip-back absolute inset-0 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+          <div className="flip-face flip-back absolute inset-0 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-slate-900">
             <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{q.prompt.split('\n')[0]}</div>
             <p className="whitespace-pre-line text-[16px] leading-relaxed">{q.answer}</p>
           </div>
@@ -101,14 +101,14 @@ function Flashcard({ q, result, onSubmit }: P<FlashcardQuestion>) {
       </div>
       {flipped && !result && (
         <div className="mt-4 grid grid-cols-3 gap-2">
-          <Button variant="success" onClick={() => onSubmit({ score: 1, userAnswer: 'Umím', confidence: 'good' })}>
-            ✅ Umím
+          <Button variant="success" icon={<CircleCheck size={18} />} onClick={() => onSubmit({ score: 1, userAnswer: 'Umím', confidence: 'good' })}>
+            Umím
           </Button>
-          <Button className="bg-amber-500 text-white hover:bg-amber-600" onClick={() => onSubmit({ score: 0.5, userAnswer: 'Nejsem si jistý', confidence: 'hard' })}>
-            🤔 Nejsem si jistý
+          <Button className="bg-amber-500 text-white hover:bg-amber-600" icon={<CircleHelp size={18} />} onClick={() => onSubmit({ score: 0.5, userAnswer: 'Nejsem si jistý', confidence: 'hard' })}>
+            Nejsem si jistý
           </Button>
-          <Button variant="danger" onClick={() => onSubmit({ score: 0, userAnswer: 'Neumím', confidence: 'again', dontKnow: true })}>
-            ❌ Neumím
+          <Button variant="danger" icon={<CircleX size={18} />} onClick={() => onSubmit({ score: 0, userAnswer: 'Neumím', confidence: 'again', dontKnow: true })}>
+            Neumím
           </Button>
         </div>
       )}
@@ -150,10 +150,10 @@ function Abc({ q, result, onSubmit }: P<AbcQuestion>) {
                 }}
                 className={cx(
                   'flex w-full items-start gap-3 rounded-xl border-2 px-4 py-3 text-left text-[15px] transition',
-                  state === 'open' && 'border-slate-200 bg-white hover:border-brand-400 hover:bg-brand-50/50 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-brand-500 dark:hover:bg-brand-500/10',
+                  state === 'open' && 'border-slate-200 bg-white hover:border-brand-400 hover:bg-brand-50/50 dark:border-white/10 dark:bg-slate-900 dark:hover:border-brand-500 dark:hover:bg-brand-500/10',
                   state === 'correct' && 'animate-pop border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10',
                   state === 'wrong' && 'animate-pop border-rose-500 bg-rose-50 dark:bg-rose-500/10',
-                  state === 'idle' && 'border-slate-200 opacity-60 dark:border-slate-800',
+                  state === 'idle' && 'border-slate-200 opacity-60 dark:border-white/[0.07]',
                 )}
               >
                 <span
@@ -196,13 +196,16 @@ function TrueFalse({ q, result, onSubmit }: P<TrueFalseQuestion>) {
         }}
         className={cx(
           'rounded-2xl border-2 py-6 text-lg font-bold transition',
-          state === 'open' && 'border-slate-200 bg-white hover:border-brand-400 hover:bg-brand-50/60 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-brand-500/10',
+          state === 'open' && 'border-slate-200 bg-white hover:border-brand-400 hover:bg-brand-50/60 dark:border-white/10 dark:bg-slate-900 dark:hover:bg-brand-500/10',
           state === 'correct' && 'animate-pop border-emerald-500 bg-emerald-50 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300',
           state === 'wrong' && 'animate-pop border-rose-500 bg-rose-50 text-rose-800 dark:bg-rose-500/10 dark:text-rose-300',
-          state === 'idle' && 'border-slate-200 opacity-50 dark:border-slate-800',
+          state === 'idle' && 'border-slate-200 opacity-50 dark:border-white/[0.07]',
         )}
       >
-        {val ? '👍 PRAVDA' : '👎 LEŽ'}
+        <span className="inline-flex items-center gap-2">
+          {val ? <ThumbsUp size={20} /> : <ThumbsDown size={20} />}
+          {val ? 'PRAVDA' : 'LEŽ'}
+        </span>
       </button>
     );
   };
@@ -335,7 +338,7 @@ function Match({ q, result, onSubmit }: P<MatchQuestion>) {
                 onClick={() => !result && setActiveLeft(activeLeft === p.left ? null : p.left)}
                 className={cx(
                   'cursor-pointer rounded-xl border-2 p-3 transition',
-                  activeLeft === p.left ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900',
+                  activeLeft === p.left ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900',
                   correct === true && 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10',
                   correct === false && 'border-rose-500 bg-rose-50 dark:bg-rose-500/10',
                 )}
@@ -362,7 +365,7 @@ function Match({ q, result, onSubmit }: P<MatchQuestion>) {
               disabled={!!result}
               className={cx(
                 'flex w-full items-center gap-2 rounded-xl border-2 p-3 text-left text-sm transition',
-                usedRights.has(r) ? 'border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-800 dark:bg-slate-900/50' : 'border-slate-200 bg-white hover:border-brand-400 dark:border-slate-700 dark:bg-slate-900',
+                usedRights.has(r) ? 'border-slate-200 bg-slate-50 text-slate-400 dark:border-white/[0.07] dark:bg-slate-900/50' : 'border-slate-200 bg-white hover:border-brand-400 dark:border-white/10 dark:bg-slate-900',
               )}
             >
               <GripVertical size={16} className="shrink-0 text-slate-400" />
@@ -432,7 +435,7 @@ function Order({ q, result, onSubmit }: P<OrderQuestion>) {
               }}
               className={cx(
                 'flex items-center gap-2 rounded-xl border-2 bg-white p-2.5 dark:bg-slate-900',
-                ok === null && 'border-slate-200 dark:border-slate-700',
+                ok === null && 'border-slate-200 dark:border-white/10',
                 ok === true && 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10',
                 ok === false && 'border-rose-500 bg-rose-50 dark:bg-rose-500/10',
               )}
@@ -553,7 +556,7 @@ export function Open({ q, result, onSubmit, hideRating }: P<OpenQuestion> & { hi
               <p className="whitespace-pre-line text-[15px]">{text}</p>
             </div>
           )}
-          <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+          <div className="rounded-xl border border-slate-200 p-4 dark:border-white/10">
             <div className="mb-2 flex items-center justify-between">
               <div className="text-sm font-bold">Klíčové body</div>
               <div className="text-sm font-semibold tabular-nums">
@@ -587,9 +590,9 @@ export function Open({ q, result, onSubmit, hideRating }: P<OpenQuestion> & { hi
               <div className="grid grid-cols-3 gap-2">
                 {(
                   [
-                    ['good', '✅ Zvládl(a)', 'success'],
-                    ['hard', '🤔 Částečně', 'amber'],
-                    ['again', '❌ Nezvládl(a)', 'danger'],
+                    ['good', 'Zvládl(a)', 'success'],
+                    ['hard', 'Částečně', 'amber'],
+                    ['again', 'Nezvládl(a)', 'danger'],
                   ] as const
                 ).map(([c, label, tone]) => (
                   <Button

@@ -6,7 +6,7 @@ export const STORAGE_KEY = 'maturitni-trener:data';
 export const DATA_VERSION = 1;
 
 export const DEFAULT_SETTINGS: Settings = {
-  theme: 'system',
+  theme: 'dark',
   examDate: '',
   dailyMinutes: 15,
   onboarded: false,

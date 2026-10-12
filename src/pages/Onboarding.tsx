@@ -44,15 +44,15 @@ export function Onboarding() {
   const steps = ['Seznam knih', 'Datum maturity', 'Čas na učení', 'Tvůj plán'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-slate-100 px-4 py-8 dark:from-slate-950 dark:via-slate-950 dark:to-brand-950">
+    <div className="min-h-screen bg-paper px-4 py-8 dark:bg-ink">
       <div className="mx-auto max-w-2xl">
         <div className="mb-6 flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 text-white shadow-lg">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-brand-700 text-white dark:bg-brand-500">
             <GraduationCap size={24} />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Vítej v maturitním trenérovi.</h1>
-            <p className="text-slate-500 dark:text-slate-400">Připravíme tě na ústní zkoušku z literatury. Nastavení zabere minutu.</p>
+            <h1 className="text-2xl font-bold tracking-tight">Vítej v maturitním trenérovi.</h1>
+            <p className="text-slate-500 dark:text-slate-400">Připravíme tě na maturitu z češtiny, sítí, hardwaru a cloudu. Nastavení zabere minutu.</p>
           </div>
         </div>
 
@@ -95,7 +95,7 @@ export function Onboarding() {
                             }
                             className={cx(
                               'flex items-center gap-2 rounded-xl border-2 px-3 py-2 text-left text-sm transition',
-                              on ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 dark:border-slate-700',
+                              on ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 dark:border-white/10',
                             )}
                           >
                             <span className={cx('grid h-5 w-5 shrink-0 place-items-center rounded-md', on ? 'bg-brand-600 text-white' : 'border border-slate-300 dark:border-slate-600')}>{on && <Check size={14} />}</span>
@@ -146,7 +146,7 @@ export function Onboarding() {
                   <button
                     key={m}
                     onClick={() => setMinutes(m as number)}
-                    className={cx('rounded-2xl border-2 p-4 text-left transition', minutes === m ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 dark:border-slate-700')}
+                    className={cx('rounded-2xl border-2 p-4 text-left transition', minutes === m ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 dark:border-white/10')}
                   >
                     <div className="text-2xl font-extrabold">{m} min</div>
                     <div className="text-sm text-slate-500">{t}</div>

@@ -249,7 +249,7 @@ function TestRun({ count, calc, minutes, onAgain }: { count: number; calc: boole
                   aria-label={`Otázka ${k + 1}`}
                   className={cx(
                     'relative h-9 rounded-md border text-sm font-semibold tabular-nums',
-                    k === i ? 'border-brand-600 ring-2 ring-brand-500/40' : 'border-slate-300 dark:border-slate-700',
+                    k === i ? 'border-brand-600 ring-2 ring-brand-500/40' : 'border-slate-300 dark:border-white/10',
                     answered ? 'bg-slate-200 dark:bg-slate-700' : 'bg-white dark:bg-slate-900',
                   )}
                 >
@@ -297,7 +297,7 @@ function TestQuestion({ q, value, onChange }: { q: Question; value: Answer; onCh
         <p className="mb-2 text-sm text-slate-500">Vyberte jednu odpověď:</p>
         <div className="space-y-2">
           {q.options.map((o, k) => (
-            <label key={k} className={cx('flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition', value === k ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/15' : 'border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800')}>
+            <label key={k} className={cx('flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition', value === k ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/15' : 'border-slate-200 hover:bg-slate-50 dark:border-white/[0.07] dark:hover:bg-slate-800')}>
               <input type="radio" name={q.id} checked={value === k} onChange={() => onChange(k)} className="mt-1" />
               <span>
                 <b className="mr-1">{String.fromCharCode(97 + k)}.</b> {o}
@@ -320,7 +320,7 @@ function TestQuestion({ q, value, onChange }: { q: Question; value: Answer; onCh
             [true, 'Pravda'],
             [false, 'Nepravda'],
           ].map(([v, l]) => (
-            <label key={String(v)} className={cx('flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2.5', value === v ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/15' : 'border-slate-200 dark:border-slate-800')}>
+            <label key={String(v)} className={cx('flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2.5', value === v ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/15' : 'border-slate-200 dark:border-white/[0.07]')}>
               <input type="radio" name={q.id} checked={value === v} onChange={() => onChange(v as boolean)} />
               {l as string}
             </label>
@@ -343,7 +343,7 @@ function TestQuestion({ q, value, onChange }: { q: Question; value: Answer; onCh
         value={typeof value === 'string' ? value : ''}
         onChange={(e) => onChange(e.target.value)}
         autoComplete="off"
-        className={cx('mt-1 w-full max-w-md rounded-xl border border-slate-300 bg-white px-4 py-2.5 dark:border-slate-700 dark:bg-slate-900', f.exact && 'font-mono')}
+        className={cx('mt-1 w-full max-w-md rounded-xl border border-slate-300 bg-white px-4 py-2.5 dark:border-white/10 dark:bg-slate-900', f.exact && 'font-mono')}
       />
     </div>
   );

@@ -300,7 +300,7 @@ function SimulationSummary({ book, results, seconds }: { book: Book; results: St
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 divide-x divide-slate-100 text-center dark:divide-slate-800">
+        <div className="grid grid-cols-3 divide-x divide-slate-100 text-center dark:divide-white/[0.06]">
           <div className="p-4">
             <div className="text-2xl font-bold text-emerald-600">{good.length}</div>
             <div className="text-xs text-slate-500">zvládnuto</div>

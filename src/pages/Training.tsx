@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Play } from 'lucide-react';
+import { ArrowDownUp, BookOpen, Layers, Link2, ListChecks, Mic, NotebookPen, PenLine, Play, Scale, Search, Shapes, UserRound, type LucideIcon } from 'lucide-react';
 import type { AreaId, Difficulty, QuestionType, SectionId } from '../types';
 import { useStore } from '../store';
 import { AREAS, CATEGORIES, CATEGORY_ORDER, SECTIONS } from '../data/osnova';
@@ -11,19 +11,19 @@ import { Button, Card, PageHeader, SectionTitle, Toggle, cx } from '../component
 
 type Mode = 'mix' | QuestionType;
 
-const MODES: { id: Mode; emoji: string; letter?: string; desc: string }[] = [
-  { id: 'mix', emoji: '🧩', desc: 'Kombinace typů podle obtížnosti' },
-  { id: 'flashcard', emoji: '🃏', letter: 'A', desc: 'Otázka → otočit → umím / nejsem si jistý / neumím' },
-  { id: 'abc', emoji: '🔤', letter: 'B', desc: 'Výběr ze 3–4 možností s vysvětlením' },
-  { id: 'truefalse', emoji: '⚖️', letter: 'C', desc: 'Rozhodni, zda tvrzení platí' },
-  { id: 'match', emoji: '🔗', letter: 'D', desc: 'Autor → dílo, postava → dílo, pojem → definice…' },
-  { id: 'fill', emoji: '✏️', letter: 'E', desc: 'Doplň chybějící údaj' },
-  { id: 'order', emoji: '↕️', letter: 'F', desc: 'Seřaď děj, období nebo díla' },
-  { id: 'identifyWork', emoji: '🔎', letter: 'G', desc: 'Podle popisu napiš název díla' },
-  { id: 'identifyAuthor', emoji: '👤', letter: 'H', desc: 'K dílu napiš autora' },
-  { id: 'identifyTerm', emoji: '📖', letter: 'I', desc: 'Podle definice napiš literární pojem' },
-  { id: 'open', emoji: '📝', letter: 'J', desc: 'Vlastní odpověď, porovnání s klíčovými body' },
-  { id: 'speech', emoji: '🎤', letter: 'K', desc: 'Odpověz nahlas – přepis a klíčové body (experimentální)' },
+const MODES: { id: Mode; icon: LucideIcon; letter?: string; desc: string }[] = [
+  { id: 'mix', icon: Shapes, desc: 'Kombinace typů podle obtížnosti' },
+  { id: 'flashcard', icon: Layers, letter: 'A', desc: 'Otázka → otočit → umím / nejsem si jistý / neumím' },
+  { id: 'abc', icon: ListChecks, letter: 'B', desc: 'Výběr ze 3–4 možností s vysvětlením' },
+  { id: 'truefalse', icon: Scale, letter: 'C', desc: 'Rozhodni, zda tvrzení platí' },
+  { id: 'match', icon: Link2, letter: 'D', desc: 'Autor → dílo, postava → dílo, pojem → definice…' },
+  { id: 'fill', icon: PenLine, letter: 'E', desc: 'Doplň chybějící údaj' },
+  { id: 'order', icon: ArrowDownUp, letter: 'F', desc: 'Seřaď děj, období nebo díla' },
+  { id: 'identifyWork', icon: Search, letter: 'G', desc: 'Podle popisu napiš název díla' },
+  { id: 'identifyAuthor', icon: UserRound, letter: 'H', desc: 'K dílu napiš autora' },
+  { id: 'identifyTerm', icon: BookOpen, letter: 'I', desc: 'Podle definice napiš literární pojem' },
+  { id: 'open', icon: NotebookPen, letter: 'J', desc: 'Vlastní odpověď, porovnání s klíčovými body' },
+  { id: 'speech', icon: Mic, letter: 'K', desc: 'Odpověz nahlas – přepis a klíčové body (experimentální)' },
 ];
 
 const SECTION_CHOICES: SectionId[] = ['art1', 'art2', 'art3', 'lhk', 'basics'];
@@ -72,12 +72,12 @@ export function Training() {
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[5, 15, 30, 60].map((m) => (
           <button key={m} onClick={() => start(minutesSession(m))} className="card p-3 text-left transition hover:-translate-y-0.5 hover:shadow-md">
-            <div className="font-bold">⏱️ Mám {m} minut</div>
+            <div className="font-bold">Mám {m} minut</div>
             <div className="text-xs text-slate-500">automatický trénink</div>
           </button>
         ))}
         <button onClick={() => start(randomSession())} className="card p-3 text-left transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="font-bold">🎲 Náhodný trénink</div>
+          <div className="font-bold">Náhodný trénink</div>
           <div className="text-xs text-slate-500">mix všeho</div>
         </button>
         <button
@@ -85,15 +85,15 @@ export function Training() {
           disabled={!Object.keys(data.unknown).length}
           className="card p-3 text-left transition hover:-translate-y-0.5 hover:shadow-md disabled:opacity-50"
         >
-          <div className="font-bold">🔥 Jen to, co neumím</div>
+          <div className="font-bold">Jen to, co neumím</div>
           <div className="text-xs text-slate-500">{Object.keys(data.unknown).length} otázek</div>
         </button>
         <button onClick={() => start(dueSession())} className="card p-3 text-left transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="font-bold">🔁 Opakování</div>
+          <div className="font-bold">Opakování</div>
           <div className="text-xs text-slate-500">otázky, které jsou na řadě</div>
         </button>
-        <button onClick={() => start({ ...randomSession(), title: '🔥 Maturita – mix osnovy', mode: 'mix-maturita', difficulty: 'maturita', types: ['open'], count: 8 })} className="card p-3 text-left transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="font-bold">🔥 Maturitní mix</div>
+        <button onClick={() => start({ ...randomSession(), title: 'Maturita – mix osnovy', mode: 'mix-maturita', difficulty: 'maturita', types: ['open'], count: 8 })} className="card p-3 text-left transition hover:-translate-y-0.5 hover:shadow-md">
+          <div className="font-bold">Maturitní mix</div>
           <div className="text-xs text-slate-500">celá osnova, bez nápověd</div>
         </button>
       </div>
@@ -111,10 +111,10 @@ export function Training() {
                     onClick={() => setMode(m.id)}
                     className={cx(
                       'flex items-start gap-3 rounded-xl border-2 p-3 text-left transition',
-                      mode === m.id ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 hover:border-brand-300 dark:border-slate-700',
+                      mode === m.id ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 hover:border-brand-300 dark:border-white/[0.08] dark:hover:border-brand-500/50',
                     )}
                   >
-                    <span className="text-2xl">{m.emoji}</span>
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300"><m.icon size={18} /></span>
                     <span className="min-w-0">
                       <span className="block font-semibold">
                         {m.letter && <span className="mr-1 text-slate-400">{m.letter})</span>}
@@ -139,7 +139,7 @@ export function Training() {
                     setDifficulty(d);
                     if (d === 'maturita') setMode('mix');
                   }}
-                  className={cx('rounded-xl border-2 p-3 text-left transition', difficulty === d ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 hover:border-brand-300 dark:border-slate-700')}
+                  className={cx('rounded-xl border-2 p-3 text-left transition', difficulty === d ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 hover:border-brand-300 dark:border-white/[0.08] dark:hover:border-brand-500/50')}
                 >
                   <div className="font-semibold">
                     {DIFFICULTY_INFO[d].emoji} {DIFFICULTY_INFO[d].label.toUpperCase()}
@@ -158,9 +158,9 @@ export function Training() {
                 <Toggle key={s} checked={sections.includes(s)} onChange={(v) => setSections((x) => (v ? [...x, s] : x.filter((y) => y !== s)))} label={SECTIONS[s].label} />
               ))}
             </div>
-            <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
-              <Toggle checked={terms} onChange={setTerms} label="📖 Literární pojmy" />
-              <Toggle checked={nonArt} onChange={setNonArt} label="📰 Neumělecký text" />
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3 dark:border-white/[0.07]">
+              <Toggle checked={terms} onChange={setTerms} label="Literární pojmy" />
+              <Toggle checked={nonArt} onChange={setNonArt} label="Neumělecký text" />
             </div>
           </Card>
 

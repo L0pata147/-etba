@@ -186,7 +186,7 @@ function OralRun({ topic, onAgain }: { topic: Topic; onAgain: () => void }) {
             onChange={(e) => setNotes(e.target.value)}
             rows={14}
             placeholder={'Např.\n1) definice …\n2) jak to funguje …\n3) příklad / příkazy …'}
-            className="mt-1 w-full rounded-xl border border-slate-300 bg-white p-3 font-mono text-[15px] dark:border-slate-700 dark:bg-slate-900"
+            className="mt-1 w-full rounded-xl border border-slate-300 bg-white p-3 font-mono text-[15px] dark:border-white/10 dark:bg-slate-900"
           />
           <Button size="lg" className="mt-4 w-full" icon={<ArrowRight size={18} />} onClick={() => go('exam')}>
             Jsem připraven(a) – ke zkoušení
@@ -280,7 +280,7 @@ function OralSummary({ topic, results, onAgain, onTrain }: { topic: Topic; resul
             </div>
           </div>
         </div>
-        <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+        <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
           {results.map((r) => (
             <li key={r.q.id} className="flex items-start gap-3 p-4 text-sm">
               <span>{r.score >= 0.85 ? '✅' : r.score > 0 ? '🟡' : '❌'}</span>

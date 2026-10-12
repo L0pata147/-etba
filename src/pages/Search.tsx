@@ -105,7 +105,7 @@ export function SearchPage() {
           }}
           placeholder="např. VLAN, RAID 5, Čapek, metafora, docker run…"
           aria-label="Hledaný výraz"
-          className="w-full rounded-2xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-[16px] dark:border-slate-700 dark:bg-slate-900"
+          className="w-full rounded-2xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-[16px] dark:border-white/10 dark:bg-slate-900"
         />
       </div>
       {q.trim().length >= 2 && !hits.length && <EmptyState icon="🤷" title="Nic nenalezeno" text="Zkus jiné slovo nebo kratší výraz." />}
@@ -115,7 +115,7 @@ export function SearchPage() {
             <h2 className="mb-2 flex items-center gap-2 font-bold">
               {g} <Tag>{list.length}</Tag>
             </h2>
-            <Card className="divide-y divide-slate-100 dark:divide-slate-800">
+            <Card className="divide-y divide-slate-100 dark:divide-white/[0.06]">
               {list.map((h, k) => (
                 <Link key={h.to + h.title + k} to={h.to} className="block p-3 hover:bg-slate-50 dark:hover:bg-slate-800/60">
                   <div className="font-semibold">{h.title}</div>

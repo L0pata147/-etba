@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Calculator, Dumbbell, Network, Shuffle, Terminal } from 'lucide-react';
+import { Calculator, Dumbbell, Network, Shuffle, SquareTerminal, Terminal, Zap } from 'lucide-react';
 import { useStore } from '../../store';
 import { SITE_TOPICS } from '../../data/site';
 import { sitePracticalProgress, topicLastStudied, topicProgress } from '../../lib/progress';
@@ -72,11 +72,11 @@ export function SiteHome() {
             <Button size="sm" variant="secondary" icon={<Calculator size={16} />} onClick={() => start(calcConfig())}>
               Výpočty
             </Button>
-            <Button size="sm" variant="secondary" to="/terminal">
-              💻 Terminál
+            <Button size="sm" variant="secondary" icon={<SquareTerminal size={16} />} to="/terminal">
+              Terminál
             </Button>
-            <Button size="sm" variant="secondary" to="/dril?predmet=site">
-              ⚡ Dril na čas
+            <Button size="sm" variant="secondary" icon={<Zap size={16} />} to="/dril?predmet=site">
+              Dril na čas
             </Button>
           </div>
         </Card>

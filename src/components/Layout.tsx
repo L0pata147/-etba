@@ -123,7 +123,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <ChevronDown size={16} className={cx('shrink-0 text-slate-400 transition', isOpen && 'rotate-180')} />
             </button>
             {isOpen && (
-              <div className="mb-1 ml-4 border-l border-slate-200 pl-2 dark:border-slate-800">
+              <div className="mb-1 ml-4 border-l border-slate-200 pl-2 dark:border-white/[0.07]">
                 {subj.exams.map((ex) => (
                   <div key={ex.id} className="mt-1">
                     <div className="px-3 pb-0.5 pt-1.5">
@@ -146,7 +146,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
       {/* Sidebar (desktop) */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200/80 bg-white/75 px-3 py-5 backdrop-blur dark:border-white/[0.06] dark:bg-ink/80 lg:flex">
+      <aside className={cx('fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200/80 bg-white/75 px-3 py-5 backdrop-blur dark:border-white/[0.06] dark:bg-ink/80', !inSession && 'lg:flex')}>
         <Brand />
         <div className="mt-6 flex-1 overflow-y-auto">{navList}</div>
         <div className="mt-4 rounded-xl bg-paper p-3 text-sm ring-1 ring-slate-200/70 dark:bg-white/[0.04] dark:ring-white/[0.06]">
@@ -201,7 +201,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <main className={cx('mx-auto max-w-6xl px-4 pt-5 sm:px-6 lg:ml-64 lg:px-10 lg:pt-8', inSession ? 'pb-10' : 'pb-28 lg:pb-12')}>
+      <main className={cx('mx-auto max-w-6xl px-4 pt-5 sm:px-6 lg:px-10 lg:pt-8', inSession ? 'pb-10 lg:pt-12' : 'pb-28 lg:ml-64 lg:pb-12')}>
         <StorageWarning />
         <div key={loc.pathname} className="animate-fade-up">
           {children}

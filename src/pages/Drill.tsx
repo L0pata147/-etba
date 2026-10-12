@@ -70,7 +70,7 @@ export function Drill() {
               <button
                 key={k}
                 onClick={() => setKinds((s) => (s.includes(k) ? s.filter((x) => x !== k) : [...s, k]))}
-                className={cx('rounded-lg border px-2.5 py-1 text-sm', kinds.includes(k) ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/15' : 'border-slate-300 text-slate-500 dark:border-slate-700')}
+                className={cx('rounded-lg border px-2.5 py-1 text-sm', kinds.includes(k) ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/15' : 'border-slate-300 text-slate-500 dark:border-white/10')}
               >
                 {gens[k].label}
               </button>
@@ -205,7 +205,7 @@ function DrillRun({ subject, seconds, kinds, best, onEnd }: { subject: Subject; 
             submit();
           }}
         >
-          <input ref={input} autoFocus value={value} onChange={(e) => setValue(e.target.value)} aria-label="Výsledek" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 font-mono text-lg dark:border-slate-700 dark:bg-slate-900" />
+          <input ref={input} autoFocus value={value} onChange={(e) => setValue(e.target.value)} aria-label="Výsledek" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 font-mono text-lg dark:border-white/10 dark:bg-slate-900" />
           <Button type="submit" size="lg">
             OK
           </Button>

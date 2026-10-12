@@ -128,7 +128,7 @@ export function AiTeacher() {
               <p className="mb-3 text-slate-500">Zkus třeba:</p>
               <div className="flex flex-wrap gap-2">
                 {suggestions.map((s) => (
-                  <button key={s} onClick={() => send(s)} className="rounded-xl border border-slate-200 px-3 py-2 text-left text-sm hover:border-brand-400 hover:bg-brand-50 dark:border-slate-700 dark:hover:bg-brand-500/10">
+                  <button key={s} onClick={() => send(s)} className="rounded-xl border border-slate-200 px-3 py-2 text-left text-sm hover:border-brand-400 hover:bg-brand-50 dark:border-white/10 dark:hover:bg-brand-500/10">
                     {s}
                   </button>
                 ))}
@@ -151,7 +151,7 @@ export function AiTeacher() {
           <div ref={bottom} />
         </div>
         <form
-          className="flex gap-2 border-t border-slate-200 p-3 dark:border-slate-800"
+          className="flex gap-2 border-t border-slate-200 p-3 dark:border-white/[0.07]"
           onSubmit={(e) => {
             e.preventDefault();
             send(input);

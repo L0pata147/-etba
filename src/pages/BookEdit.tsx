@@ -108,7 +108,7 @@ export function BookEdit() {
                 onClick={() => applyTemplate(t.id)}
                 className={cx(
                   'rounded-xl border-2 p-3 text-left transition',
-                  template === t.id ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 hover:border-brand-300 dark:border-slate-700',
+                  template === t.id ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 hover:border-brand-300 dark:border-white/10',
                 )}
               >
                 <div className="font-semibold">{t.label}</div>
@@ -271,7 +271,7 @@ function Characters({ label, list, onChange }: { label: string; list: Character[
       <label className="label">{label}</label>
       <div className="space-y-2">
         {list.map((c, i) => (
-          <div key={i} className="flex flex-col gap-2 rounded-xl border border-slate-200 p-2 dark:border-slate-700 sm:flex-row">
+          <div key={i} className="flex flex-col gap-2 rounded-xl border border-slate-200 p-2 dark:border-white/10 sm:flex-row">
             <input className="input sm:w-48" placeholder="Jméno" value={c.name} onChange={(e) => onChange(list.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
             <textarea className="input flex-1" rows={2} placeholder="Charakteristika" value={c.description} onChange={(e) => onChange(list.map((x, j) => (j === i ? { ...x, description: e.target.value } : x)))} />
             <button className="self-end rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-600 sm:self-center" onClick={() => onChange(list.filter((_, j) => j !== i))} aria-label="Odebrat postavu">
@@ -293,7 +293,7 @@ function Scenes({ list, onChange }: { list: Scene[]; onChange: (v: Scene[]) => v
       <label className="label">Scény pro „zasazení výňatku do kontextu“</label>
       <div className="space-y-2">
         {list.map((s, i) => (
-          <div key={i} className="flex flex-col gap-2 rounded-xl border border-slate-200 p-2 dark:border-slate-700 sm:flex-row">
+          <div key={i} className="flex flex-col gap-2 rounded-xl border border-slate-200 p-2 dark:border-white/10 sm:flex-row">
             <textarea className="input flex-1" rows={2} placeholder="Popis scény / výňatku" value={s.scene} onChange={(e) => onChange(list.map((x, j) => (j === i ? { ...x, scene: e.target.value } : x)))} />
             <textarea className="input flex-1" rows={2} placeholder="Kam scéna v díle patří (co předchází, co následuje)" value={s.context} onChange={(e) => onChange(list.map((x, j) => (j === i ? { ...x, context: e.target.value } : x)))} />
             <button className="self-end rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-600 sm:self-center" onClick={() => onChange(list.filter((_, j) => j !== i))} aria-label="Odebrat scénu">

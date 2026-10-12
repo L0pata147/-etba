@@ -99,11 +99,11 @@ function NewWriting({ onOpen }: { onOpen: (id: string) => void }) {
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <label className="text-sm font-semibold">
             Název
-            <input value={own.title} onChange={(e) => setOwn({ ...own, title: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-normal dark:border-slate-700 dark:bg-slate-900" />
+            <input value={own.title} onChange={(e) => setOwn({ ...own, title: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-normal dark:border-white/10 dark:bg-slate-900" />
           </label>
           <label className="text-sm font-semibold">
             Útvar
-            <select value={own.form} onChange={(e) => setOwn({ ...own, form: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-normal dark:border-slate-700 dark:bg-slate-900">
+            <select value={own.form} onChange={(e) => setOwn({ ...own, form: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-normal dark:border-white/10 dark:bg-slate-900">
               {WRITING_FORMS.map((f) => (
                 <option key={f.id} value={f.id}>
                   {formName(f.id)}
@@ -114,7 +114,7 @@ function NewWriting({ onOpen }: { onOpen: (id: string) => void }) {
         </div>
         <label className="mt-3 block text-sm font-semibold">
           Zadání
-          <textarea value={own.task} onChange={(e) => setOwn({ ...own, task: e.target.value })} rows={3} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-normal dark:border-slate-700 dark:bg-slate-900" />
+          <textarea value={own.task} onChange={(e) => setOwn({ ...own, task: e.target.value })} rows={3} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-normal dark:border-white/10 dark:bg-slate-900" />
         </label>
         <Button className="mt-3" icon={<PenLine size={17} />} disabled={!own.title.trim() || !own.task.trim()} onClick={() => begin(own)}>
           Začít psát
@@ -165,7 +165,7 @@ function Editor({ w, onDone }: { w: Writing; onDone: () => void }) {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="sticky top-14 z-20 -mx-4 mb-3 flex flex-wrap items-center gap-3 border-b border-slate-200 bg-white/90 px-4 py-2 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90 lg:top-0">
+      <div className="sticky top-14 z-20 -mx-4 mb-3 flex flex-wrap items-center gap-3 border-b border-slate-200 bg-white/90 px-4 py-2 backdrop-blur dark:border-white/[0.07] dark:bg-slate-950/90 lg:top-0">
         <span className={cx('font-semibold tabular-nums', left < 0 ? 'text-rose-600' : left < 600 ? 'text-amber-600' : '')}>
           ⏱ {left < 0 ? '+' : ''}
           {String(Math.floor(Math.abs(left) / 60)).padStart(2, '0')}:{String(Math.abs(left) % 60).padStart(2, '0')}
@@ -199,7 +199,7 @@ function Editor({ w, onDone }: { w: Writing; onDone: () => void }) {
         rows={22}
         spellCheck={false}
         placeholder="Piš sem. Odstavce odděluj prázdným řádkem."
-        className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-[16px] leading-relaxed dark:border-slate-700 dark:bg-slate-900"
+        className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-[16px] leading-relaxed dark:border-white/10 dark:bg-slate-900"
       />
       <p className="mt-1 text-xs text-slate-500">Kontrola pravopisu prohlížeče je vypnutá – u zkoušky ji také mít nebudeš. Koncept se ukládá automaticky.</p>
       <Modal open={confirm} onClose={() => setConfirm(false)} title="Dokončit práci?">

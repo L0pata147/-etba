@@ -9,7 +9,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 // Motiv nastavíme hned, aby při načtení neproblikla špatná barva
 try {
   const raw = localStorage.getItem('maturitni-trener:data');
-  const theme = raw ? JSON.parse(raw)?.settings?.theme : 'system';
+  const theme = raw ? JSON.parse(raw)?.settings?.theme : 'dark';
   const dark = theme === 'dark' || (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.classList.toggle('dark', dark);
 } catch {

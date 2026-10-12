@@ -215,7 +215,7 @@ function BookCard({
         <span className="w-10 text-right text-sm font-semibold tabular-nums">{Math.round(progress * 100)}%</span>
       </div>
       <div className="mt-1 text-xs text-slate-500">{last ? `Naposledy procvičeno ${relativeDays(last)}` : 'Zatím neprocvičeno'}</div>
-      <div className="mt-3 flex items-center gap-1 border-t border-slate-100 pt-3 dark:border-slate-800">
+      <div className="mt-3 flex items-center gap-1 border-t border-slate-100 pt-3 dark:border-white/[0.07]">
         <button
           onClick={onLearned}
           className={cx('mr-auto flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium', b.learned ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800')}
@@ -251,7 +251,7 @@ export function DatabaseModal({ open, onClose, existing, onAdd }: { open: boolea
         Předvyplněné informace o dílech. Po přidání je můžeš libovolně upravit. Údaje vždy ověř se svým učitelem nebo čítankou.
       </p>
       <input className="input mb-3" placeholder="Hledat…" value={q} onChange={(e) => setQ(e.target.value)} />
-      <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+      <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
         {list.map((b) => {
           const has = existing.has(b.id);
           return (

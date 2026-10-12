@@ -87,7 +87,7 @@ function TermCard({ term: t, open, onToggle, onTest }: { term: Term; open: boole
         <ChevronDown size={20} className={cx('mt-1 shrink-0 text-slate-400 transition', open && 'rotate-180')} />
       </button>
       {open && (
-        <div className="animate-fade-up mt-3 space-y-2 border-t border-slate-100 pt-3 text-[15px] dark:border-slate-800">
+        <div className="animate-fade-up mt-3 space-y-2 border-t border-slate-100 pt-3 text-[15px] dark:border-white/[0.07]">
           <p>
             <b>Vysvětlení:</b> {t.detail}
           </p>

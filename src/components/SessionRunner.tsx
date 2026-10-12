@@ -1,7 +1,7 @@
 import { itemLabel } from '../lib/topicgen';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Flag, RotateCcw, Timer, X } from 'lucide-react';
+import { ArrowRight, BookmarkPlus, CircleCheck, CircleDot, CircleX, Flag, RotateCcw, Timer, X } from 'lucide-react';
 import type { AnswerResult, Difficulty, Question, SectionId, SessionRecord } from '../types';
 import { AREA_MAP, SECTIONS, SECTION_ORDER } from '../data/osnova';
 import { useStore } from '../store';
@@ -135,7 +135,7 @@ export function SessionRunner({ questions, title, mode, difficulty, showSections
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-4 flex items-center gap-3">
-        <button onClick={() => (results.length ? finish() : navigate(-1))} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Ukončit">
+        <button onClick={() => (results.length ? finish() : navigate(-1))} className="rounded-lg p-2 text-slate-500 hover:bg-slate-900/[0.05] dark:hover:bg-white/[0.06]" aria-label="Ukončit">
           <X size={22} />
         </button>
         <ProgressBar value={(index + (answered ? 1 : 0)) / questions.length} color="bg-brand-500" height="h-2.5" />
@@ -155,7 +155,7 @@ export function SessionRunner({ questions, title, mode, difficulty, showSections
         {q.passage && (
           <div className="mb-5 space-y-3">
             {q.passage.map((p) => (
-              <div key={p.label} className="rounded-xl border-l-4 border-brand-400 bg-slate-50 p-4 dark:bg-slate-800/60">
+              <div key={p.label} className="rounded-xl border-l-4 border-brand-400 bg-paper p-4 dark:bg-white/[0.04]">
                 <div className="mb-1 text-xs font-semibold uppercase text-slate-500">{p.label}</div>
                 {p.mono ? (
                   <pre className="overflow-x-auto whitespace-pre rounded-lg bg-slate-900 p-3 font-mono text-[13px] leading-relaxed text-emerald-300">{p.text}</pre>
@@ -169,15 +169,15 @@ export function SessionRunner({ questions, title, mode, difficulty, showSections
         <QuestionBody q={q} result={current} onSubmit={submit} />
 
         {!answered && !selfRated && (
-          <div className="mt-5 border-t border-slate-100 pt-4 dark:border-slate-800">
+          <div className="mt-5 border-t border-slate-100 pt-4 dark:border-white/[0.07]">
             <button
               type="button"
               onClick={() => {
                 submit({ score: 0, userAnswer: '(neumím)', dontKnow: true });
               }}
-              className="text-sm font-semibold text-rose-600 hover:underline dark:text-rose-400"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-600 hover:underline dark:text-rose-400"
             >
-              ❌ Neumím – ukaž odpověď a přidej do „Musím se doučit“
+              <CircleX size={16} /> Neumím – ukaž odpověď a přidej do „Musím se doučit“
             </button>
           </div>
         )}
@@ -188,7 +188,7 @@ export function SessionRunner({ questions, title, mode, difficulty, showSections
           className={cx(
             'animate-fade-up mt-4 rounded-2xl border-2 p-5',
             selfRated
-              ? 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'
+              ? 'border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900'
               : correct
                 ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-500/10'
                 : partial
@@ -197,8 +197,14 @@ export function SessionRunner({ questions, title, mode, difficulty, showSections
           )}
         >
           {!selfRated && (
-            <div className="text-lg font-bold">
-              {correct ? '✅ Správně!' : partial ? `🟡 Částečně správně (${Math.round(current!.score * 100)} %)` : current!.dontKnow ? '📌 Přidáno do „Musím se doučit“' : '❌ Špatně'}
+            <div
+              className={cx(
+                'flex items-center gap-2 font-display text-xl font-bold',
+                correct ? 'text-emerald-700 dark:text-emerald-300' : partial ? 'text-amber-700 dark:text-amber-300' : 'text-rose-700 dark:text-rose-300',
+              )}
+            >
+              {correct ? <CircleCheck size={24} /> : partial ? <CircleDot size={24} /> : current!.dontKnow ? <BookmarkPlus size={24} /> : <CircleX size={24} />}
+              {correct ? 'Správně!' : partial ? `Částečně správně (${Math.round(current!.score * 100)} %)` : current!.dontKnow ? 'Přidáno do „Musím se doučit“' : 'Špatně'}
             </div>
           )}
           {!selfRated && !correct && (
@@ -397,7 +403,7 @@ export function RetryModal({ q, onClose }: { q: Question | null; onClose: () => 
       />
       {result && (
         <div className={cx('mt-4 rounded-xl p-4', selfRated ? 'bg-slate-100 dark:bg-slate-800' : ok ? 'bg-emerald-50 dark:bg-emerald-500/10' : 'bg-rose-50 dark:bg-rose-500/10')}>
-          {!selfRated && <div className="font-bold">{ok ? '✅ Správně!' : '❌ Stále špatně'}</div>}
+          {!selfRated && <div className={cx('font-bold', ok ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300')}>{ok ? 'Správně!' : 'Stále špatně'}</div>}
           {!selfRated && !ok && <p className="mt-1 whitespace-pre-line text-sm">Správně: {correctAnswerText(q)}</p>}
           <Button className="mt-3" size="sm" onClick={onClose}>
             Hotovo

@@ -179,7 +179,7 @@ export function CommandsTab({ platforms = PLATFORMS }: { platforms?: Platform[] 
           }}
           options={platforms.map((p) => ({ value: p, label: PLATFORM_LABEL[p] }))}
         />
-        <select value={group} onChange={(e) => setGroup(e.target.value)} aria-label="Skupina příkazů" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+        <select value={group} onChange={(e) => setGroup(e.target.value)} aria-label="Skupina příkazů" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-slate-900">
           <option value="">Všechny skupiny</option>
           {groups.map((g) => (
             <option key={g}>{g}</option>
@@ -197,7 +197,7 @@ export function CommandsTab({ platforms = PLATFORMS }: { platforms?: Platform[] 
           {hide ? 'Ukázat příkazy' : 'Skrýt příkazy (otestuj se)'}
         </Button>
       </div>
-      <Card className="divide-y divide-slate-100 dark:divide-slate-800">
+      <Card className="divide-y divide-slate-100 dark:divide-white/[0.06]">
         {list.map((c) => (
           <div key={c.id} className="p-4">
             <div className="flex flex-wrap items-center gap-2">
@@ -295,7 +295,7 @@ function CalcTab() {
 /** Úkol zadání s odškrtnutím a skrytým řešením */
 export function TaskCard({ t, i, done, open, onDone, onOpen }: { t: ScenarioTask; i: number; done: boolean; open: boolean; onDone: () => void; onOpen: () => void }) {
   return (
-    <div className={cx('rounded-xl border p-4 transition', done ? 'border-emerald-300 bg-emerald-50/60 dark:border-emerald-800 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-800')}>
+    <div className={cx('rounded-xl border p-4 transition', done ? 'border-emerald-300 bg-emerald-50/60 dark:border-emerald-800 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-white/[0.07]')}>
       <div className="flex items-start gap-3">
         <button
           onClick={onDone}

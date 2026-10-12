@@ -74,7 +74,7 @@ export function SiteTraining({ subject = 'site' }: { subject?: ItSubject }) {
                   onClick={() => setTopicIds((s) => toggle(s, t.id))}
                   className={cx(
                     'flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition',
-                    topicIds.includes(t.id) ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/15' : 'border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800',
+                    topicIds.includes(t.id) ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/15' : 'border-slate-200 hover:bg-slate-50 dark:border-white/[0.07] dark:hover:bg-slate-800',
                   )}
                 >
                   <span className="w-6 font-bold text-slate-500">{t.number}.</span>
