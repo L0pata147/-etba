@@ -25,6 +25,7 @@ import {
   SquareTerminal,
   Terminal,
   TriangleAlert,
+  UserRound,
   Wrench,
   Zap,
   type LucideIcon,
@@ -71,6 +72,7 @@ export const NAV_SUBJECTS: NavSubject[] = [
         format: 'literatura a neumělecký text',
         items: [
           { to: '/knihy', label: 'Moje knihy', icon: Library },
+          { to: '/autori', label: 'Autoři', icon: UserRound },
           { to: '/trenink', label: 'Trénink', icon: Dumbbell },
           { to: '/simulace', label: 'Simulace zkoušení', icon: GraduationCap },
           { to: '/pojmy', label: 'Literární pojmy', icon: BookOpen },

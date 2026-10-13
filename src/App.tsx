@@ -31,6 +31,7 @@ import { SearchPage } from './pages/Search';
 import { TerminalPage } from './pages/Terminal';
 import { QuestionOfDay } from './pages/QuestionOfDay';
 import { Exams } from './pages/Exams';
+import { AuthorDetail, Authors } from './pages/Authors';
 
 const Stats = lazy(() => import('./pages/Stats').then((m) => ({ default: m.Stats })));
 
@@ -75,6 +76,8 @@ export function App() {
         <Route path="/terminal" element={<TerminalPage />} />
         <Route path="/otazka-dne" element={<QuestionOfDay />} />
         <Route path="/zkousky" element={<Exams />} />
+        <Route path="/autori" element={<Authors />} />
+        <Route path="/autori/:id" element={<AuthorDetail />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>

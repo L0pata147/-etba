@@ -282,3 +282,18 @@ describe('Verze 1.6 – otázka dne a statistiky po předmětech', () => {
     expect(f.days).toBeGreaterThan(0);
   });
 });
+
+describe('Autoři', () => {
+  it('seskupení a otázky jen o autorech', async () => {
+    const { groupAuthors, authorQuestions } = await import('./authors');
+    const books = defaultData().books;
+    const authors = groupAuthors(books);
+    expect(authors.find((a) => a.name.includes('Hemingway'))!.books.length).toBe(2);
+    expect(authors.some((a) => /nezn/i.test(a.name))).toBe(false);
+    const qs = authorQuestions(books, books);
+    expect(qs.length).toBeGreaterThan(authors.length * 3);
+    expect(new Set(qs.map((q) => q.id)).size).toBe(qs.length);
+    expect(qs.every((q) => /^(author|other-work|match-otherwork)/.test(q.factKey))).toBe(true);
+    for (const q of qs) if (q.type === 'abc') expect(q.options[q.correctIndex]).toBeTruthy();
+  });
+});
