@@ -81,6 +81,8 @@ export interface Procedure {
   title: string;
   goal: string;
   steps: { text: string; cmd?: string }[];
+  /** Odkaz na zdroj (např. učitelův průvodce), kde je postup podrobně */
+  source?: { label: string; url: string };
 }
 
 export type CategoryId = 'do18' | 'st19' | 'svet20' | 'cz20';

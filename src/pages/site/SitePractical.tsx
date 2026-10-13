@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Calculator, Check, Dices, Eye, EyeOff, ListOrdered, RefreshCw, Terminal } from 'lucide-react';
+import { Calculator, Check, Dices, ExternalLink, Eye, EyeOff, ListOrdered, RefreshCw, Terminal } from 'lucide-react';
 import type { Platform } from '../../types';
 import { ALL_COMMANDS, COMMAND_GROUPS, PLATFORM_LABEL } from '../../data/site/commands';
 import { ALL_PROCEDURES } from '../../data/site/procedures';
@@ -253,6 +253,11 @@ export function ProceduresTab({ platforms = PLATFORMS }: { platforms?: Platform[
                 </li>
               ))}
             </ol>
+            {p.source && (
+              <a href={p.source.url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:underline dark:text-brand-300">
+                <ExternalLink size={15} /> {p.source.label}
+              </a>
+            )}
           </details>
         ))}
       </div>
