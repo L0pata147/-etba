@@ -127,3 +127,18 @@ describe('profil', () => {
     expect(mergeData(base, base, local).settings.profile?.frame).toBe('bronz');
   });
 });
+
+describe('profil – pozadí, motto, nejsilnější předmět', () => {
+  it('zamčené pozadí spadne na výchozí, motto se očistí a zkrátí', async () => {
+    const { safeProfile, favoriteSubject, TITLES } = await import('./profile');
+    const ctx = { level: 2, longest: 1, total: 10, subjects: { cjl: 0.2, site: 0.4, hw: 0, cloud: 0 }, subnet: 0 };
+    const p = safeProfile({ avatar: '', frame: '', title: 'start', showcase: [], banner: 'zlata', motto: '  Ahoj\n\tsvěte  ' + 'x'.repeat(100) }, ctx);
+    expect(p.banner).toBe('zaklad');
+    expect(p.motto?.startsWith('Ahoj světe')).toBe(true);
+    expect(p.motto?.length).toBe(60);
+    expect(safeProfile({ banner: 'noc' }, ctx).banner).toBe('noc');
+    expect(favoriteSubject(ctx.subjects)).toBe('site');
+    expect(favoriteSubject({ cjl: 0, site: 0, hw: 0, cloud: 0 })).toBeNull();
+    expect(TITLES[0].label).toBe('Nováček');
+  });
+});

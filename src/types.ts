@@ -403,6 +403,10 @@ export interface Profile {
   title: string;
   /** až 3 id odznaků do vitríny */
   showcase: string[];
+  /** id pozadí profilové karty */
+  banner?: string;
+  /** krátký status (max. 60 znaků) */
+  motto?: string;
 }
 
 export interface GroupMembership {

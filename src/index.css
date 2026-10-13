@@ -113,6 +113,14 @@ body {
 }
 .animate-pop { animation: pop 0.25s ease-out; }
 
+/* lesklé rámečky profilu (Diamant, Plamen, Maturant) */
+@keyframes frame-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.frame-shimmer { background-size: 220% 220%; animation: frame-shimmer 4s ease-in-out infinite; }
+
 .flip-card { perspective: 1200px; }
 .flip-inner { transition: transform 0.45s cubic-bezier(.2,.7,.2,1); transform-style: preserve-3d; }
 .flip-inner.flipped { transform: rotateY(180deg); }

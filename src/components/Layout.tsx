@@ -1,5 +1,8 @@
 import { UpdateBanner } from './UpdateBanner';
-import { useEffect, useState, type ReactNode } from 'react';
+import { UnlockWatcher } from './UnlockWatcher';
+import { Avatar } from './Avatar';
+import { myProfile } from '../lib/profile';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { ChevronDown, Flame, GraduationCap, Home, Menu, Moon, Search, BarChart3, Sun, Users, X } from 'lucide-react';
 import { useStore } from '../store';
@@ -42,6 +45,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const loc = useLocation();
   const lvl = levelFromXp(data.xp);
+  const me = useMemo(() => myProfile(data), [data]);
   const st = streak(data);
   const unknownCount = Object.keys(data.unknown).length;
   const inSession = loc.pathname.startsWith('/trenink/relace') || loc.pathname.startsWith('/simulace/') || (loc.pathname === '/terminal' && loc.search.includes('uloha='));
@@ -150,7 +154,11 @@ export function Layout({ children }: { children: ReactNode }) {
       <aside className={cx('fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200/80 bg-white/75 px-3 py-5 backdrop-blur dark:border-white/[0.06] dark:bg-ink/80', !inSession && 'lg:flex')}>
         <Brand />
         <div className="mt-6 flex-1 overflow-y-auto">{navList}</div>
-        <div className="mt-4 rounded-xl bg-paper p-3 text-sm ring-1 ring-slate-200/70 dark:bg-white/[0.04] dark:ring-white/[0.06]">
+        <NavLink to="/profil" className="mt-4 block rounded-xl bg-paper p-3 text-sm ring-1 ring-slate-200/70 transition hover:ring-brand-500/50 dark:bg-white/[0.04] dark:ring-white/[0.06]">
+          <div className="mb-2 flex items-center gap-2.5">
+            <Avatar name={data.settings.group?.name ?? 'Ty'} avatar={me.avatar} frame={me.frame} size="sm" />
+            <span className="min-w-0 truncate font-semibold">{data.settings.group?.name ?? 'Můj profil'}</span>
+          </div>
           <div className="flex items-center justify-between">
             <span className="font-semibold">Úroveň {lvl.level}</span>
             <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
@@ -163,7 +171,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             {data.xp} / {lvl.next} XP
           </div>
-        </div>
+        </NavLink>
         <button onClick={toggle} className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-600 hover:bg-slate-900/[0.04] dark:text-slate-400 dark:hover:bg-white/[0.05]">
           {dark ? <Sun size={18} /> : <Moon size={18} />}
           {dark ? 'Světlý režim' : 'Tmavý režim'}
@@ -175,6 +183,9 @@ export function Layout({ children }: { children: ReactNode }) {
         <Brand compact />
         <div className="flex items-center gap-1">
           <span className="mr-1 text-sm font-semibold text-slate-600 dark:text-slate-300">🔥 {st}</span>
+          <NavLink to="/profil" className="rounded-full p-1" aria-label="Můj profil">
+            <Avatar name={data.settings.group?.name ?? 'Ty'} avatar={me.avatar} frame={me.frame} size="xs" />
+          </NavLink>
           <NavLink to="/hledat" className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Hledat">
             <Search size={20} />
           </NavLink>
@@ -204,6 +215,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
       <main className={cx('mx-auto max-w-6xl px-4 pt-5 sm:px-6 lg:px-10 lg:pt-8', inSession ? 'pb-10 lg:pt-12' : 'pb-28 lg:ml-64 lg:pb-12')}>
         <StorageWarning />
+        <UnlockWatcher />
         {!inSession && <UpdateBanner />}
         <div key={loc.pathname} className="animate-fade-up">
           {children}

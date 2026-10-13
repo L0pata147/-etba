@@ -164,7 +164,8 @@ export function levelFromXp(xp: number): { level: number; current: number; next:
   return { level, current, next, progress: (xp - current) / (next - current) };
 }
 
-export const LEVEL_NAMES = ['Začátečník', 'Čtenář', 'Pozorný čtenář', 'Znalec', 'Literát', 'Kritik', 'Expert', 'Maturant', 'Mistr literatury'];
+// názvy úrovní pro všechny čtyři předměty (ne jen literaturu)
+export const LEVEL_NAMES = ['Nováček', 'Učeň', 'Student', 'Pokročilý', 'Znalec', 'Expert', 'Mistr', 'Maturant', 'Legenda'];
 
 export function levelName(level: number): string {
   return LEVEL_NAMES[Math.min(LEVEL_NAMES.length - 1, level - 1)];

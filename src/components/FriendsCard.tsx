@@ -170,7 +170,7 @@ export function FriendsCard() {
           </ul>
         </>
       )}
-      <FriendProfile open={!!opened} onClose={() => setOpened(null)} name={opened?.name ?? ''} stats={opened?.stats ?? null} rank={opened?.rank} />
+      <FriendProfile open={!!opened} onClose={() => setOpened(null)} name={opened?.name ?? ''} stats={opened?.stats ?? null} rank={opened?.rank} mine={opened && opened.stats !== mine ? mine : undefined} />
       <Link to="/kamaradi" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline dark:text-brand-300">
         Celý žebříček <ArrowRight size={15} />
       </Link>

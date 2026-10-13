@@ -186,7 +186,7 @@ export function Group() {
         })}
       </div>
 
-      <FriendProfile open={!!shown} onClose={() => setShown(null)} name={shown?.name ?? ''} stats={shown?.stats ?? null} rank={shown?.rank} />
+      <FriendProfile open={!!shown} onClose={() => setShown(null)} name={shown?.name ?? ''} stats={shown?.stats ?? null} rank={shown?.rank} mine={shown && shown.stats !== mine ? mine : undefined} />
 
       {rows && rows.length === 1 && (
         <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Ve skupině zatím nikdo další není. Pošli kamarádům kód tlačítkem Pozvat.</p>

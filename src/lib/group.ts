@@ -25,6 +25,10 @@ export interface GroupStats {
   subnet?: number;
   /** Profilovka, rámeček, titul, vitrína */
   profile?: Profile;
+  /** Celkový čas učení v sekundách */
+  time?: number;
+  /** První den s aktivitou (YYYY-MM-DD) */
+  since?: string;
 }
 
 /** Údaje pro kontrolu rámečků a titulů ze souhrnu kamaráda */
@@ -64,12 +68,16 @@ export function groupStats(data: AppData, now = new Date()): GroupStats {
   let total = 0;
   let correct = 0;
   let lastActive = '';
+  let since = '';
+  let time = 0;
   const weekAgo = dayKey(new Date(now.getTime() - 6 * 86400000));
   for (const [k, a] of days) {
     total += a.questions;
     correct += a.correct;
     if (k >= weekAgo) week += a.questions;
     if (a.questions > 0 && k > lastActive) lastActive = k;
+    if (a.questions > 0 && (!since || k < since)) since = k;
+    time += a.seconds;
   }
   const sp = subjectProgress(data);
   return {
@@ -85,6 +93,8 @@ export function groupStats(data: AppData, now = new Date()): GroupStats {
     longest: longestStreak(data),
     subnet: round(areaMastery(data, 'site-vypocty', 'it-vypocty')),
     profile: myProfile(data),
+    time: Math.round(time),
+    since,
   };
 }
 
