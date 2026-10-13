@@ -82,7 +82,8 @@ async function rpc<T>(fn: string, body: unknown): Promise<T> {
   try {
     const res = await fetch(`${SYNC_URL.replace(/\/$/, '')}/rest/v1/rpc/${fn}`, {
       method: 'POST',
-      headers: { apikey: SYNC_KEY, Authorization: `Bearer ${SYNC_KEY}`, 'Content-Type': 'application/json' },
+      // nové klíče (sb_publishable_…) jdou jen v hlavičce apikey, starý anon JWT i jako Bearer
+      headers: { apikey: SYNC_KEY, ...(SYNC_KEY.startsWith('eyJ') ? { Authorization: `Bearer ${SYNC_KEY}` } : {}), 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
       signal: ctrl.signal,
     });
