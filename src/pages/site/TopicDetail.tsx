@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff, Mic, Shuffle } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Eye, EyeOff, Mic, Shuffle } from 'lucide-react';
 import { useStore } from '../../store';
 import { ALL_TOPIC_MAP, SUBJECTS, SUBJECT_TOPICS } from '../../data/subjects';
 import { areaMastery, topicProgress } from '../../lib/progress';
@@ -9,6 +9,7 @@ import { AREA_MAP } from '../../data/osnova';
 import { Button, Card, EmptyState, PageHeader, Pct, ProgressBar, Segmented, SectionTitle, Tag, cx } from '../../components/ui';
 import { useStartSession } from '../SessionPage';
 import { siteConfig, topicConfig } from './common';
+import { teacherChapters } from '../../data/site/teacher';
 
 type Tab = 'vyklad' | 'pojmy' | 'kviz' | 'poznamky';
 
@@ -39,6 +40,8 @@ function TopicInner({ id }: { id?: string }) {
       else n.add(i);
       return n;
     });
+
+  const chapters = teacherChapters(t.id);
 
   return (
     <div>
@@ -87,6 +90,22 @@ function TopicInner({ id }: { id?: string }) {
           )}
         </div>
       </Card>
+
+      {chapters.length > 0 && (
+        <Card className="mb-5 p-5">
+          <SectionTitle sub="Kapitoly z učitelových učebnic na randis.cz, ze kterých téma vychází.">Učitelova teorie</SectionTitle>
+          <ul className="space-y-1.5">
+            {chapters.map((c) => (
+              <li key={c.key}>
+                <a href={c.url} target="_blank" rel="noreferrer" className="inline-flex items-start gap-2 text-[15px] font-medium text-brand-700 hover:underline dark:text-brand-300">
+                  <ExternalLink size={15} className="mt-1 shrink-0" />
+                  {c.book} – kapitola {c.n}: {c.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <Segmented
         className="mb-4"

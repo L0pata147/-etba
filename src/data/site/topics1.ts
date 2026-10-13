@@ -12,6 +12,9 @@ export const SITE_TOPICS_1 = [
       ['Režimy komunikace', ['simplex – jen jedním směrem', 'half-duplex – oběma směry, ale ne současně (hub, Wi-Fi)', 'full-duplex – oběma směry současně (switch, moderní Ethernet)']],
       ['Kolize a CSMA/CD', ['kolize = dvě stanice vysílají současně na sdíleném médiu, signály se poškodí', 'CSMA/CD: naslouchá, vysílá, detekuje kolizi, pošle jam signál, čeká náhodnou dobu (backoff) a zkusí znovu', 'kolizní doména = část sítě, kde může dojít ke kolizi; hub ji nerozděluje, switch ano (každý port = vlastní kolizní doména)', 'při full-duplexu kolize nevznikají']],
       ['Bezdrátové sítě – CSMA/CA', ['ve Wi-Fi nelze kolizi spolehlivě detekovat', 'CSMA/CA se kolizím vyhýbá: čekání, potvrzování (ACK), volitelně RTS/CTS']],
+      ['Způsoby přenosu a synchronizace', ['sériový přenos – bity po jednom za sebou (Ethernet, USB, SATA); paralelní – více bitů současně po více vodičích (LPT, PATA)', 'asynchronní přenos – každý bajt se start a stop bity (RS-232)', 'synchronní přenos – dlouhé bloky (rámce), hodiny zvlášť nebo zakódované v signálu (Manchester); používá Ethernet']],
+      ['Baseband, broadband a multiplex', ['baseband – signál zabírá celou šířku pásma, v jednu chvíli jedna komunikace (Ethernet)', 'broadband – pásmo rozdělené na více kanálů na různých nosných frekvencích', 'FDM – frekvenční multiplex (rádiové stanice)', 'TDM – časový multiplex (časové úseky v opakujícím se rámci)', 'WDM – vlnový multiplex v optice (různé vlnové délky světla)']],
+      ['Deterministické přístupové metody', ['bezkolizní, každá stanice se v daném pořadí dostane na řadu', 'token passing – vysílá jen stanice s tokenem (Token Ring, FDDI)', 'polling – řídicí (master) stanice postupně vyzývá ostatní (slave)']],
     ],
     [
       ['kolize', 'Současné vysílání dvou stanic na sdíleném médiu, při kterém se signály poškodí.'],
@@ -20,6 +23,9 @@ export const SITE_TOPICS_1 = [
       ['kolizní doména', 'Část sítě, ve které spolu mohou kolidovat rámce; switch ji omezuje na jeden port.'],
       ['full-duplex', 'Režim, kdy zařízení vysílá a přijímá současně – kolize nevznikají.'],
       ['propustnost (throughput)', 'Skutečné množství dat přenesených za čas; bývá nižší než šířka pásma.'],
+      ['multiplex', 'Rozdělení jednoho přenosového média na více kanálů (FDM, TDM, WDM).'],
+      ['baseband', 'Přenos, kdy signál využívá celou šířku pásma média – v jednu chvíli jen jedna komunikace (Ethernet).'],
+      ['token passing', 'Deterministická metoda: vysílat smí jen stanice, která drží pověření (token); kolize nevznikají.'],
     ],
     [
       ['Které zařízení rozděluje kolizní domény?', 'switch', ['hub', 'repeater', 'kabel s konektorem RJ-45'], 'Každý port switche tvoří samostatnou kolizní doménu; hub a repeater jen opakují signál.'],
@@ -27,6 +33,9 @@ export const SITE_TOPICS_1 = [
       ['Co udělá stanice po detekci kolize při CSMA/CD?', 'pošle jam signál a počká náhodnou dobu', ['okamžitě vysílá znovu', 'restartuje síťovou kartu', 'pošle ICMP zprávu'], 'Náhodné čekání (backoff) snižuje šanci na opakovanou kolizi.'],
       ['V jakém režimu u Ethernetu kolize nevznikají?', 'full-duplex', ['half-duplex', 'simplex', 'broadcast'], 'Při full-duplexu má každý směr vlastní vodiče a nemůže dojít ke kolizi.'],
       ['Na které vrstvě modelu OSI se přenášejí bity jako signál?', 'fyzické (L1)', ['linkové (L2)', 'síťové (L3)', 'transportní (L4)']],
+      ['Který multiplex se používá v optických vláknech?', 'WDM – vlnový', ['FDM – frekvenční', 'TDM – časový', 'CSMA/CD'], 'WDM odděluje signály různými vlnovými délkami (barvami) světla.'],
+      ['Co je typické pro baseband přenos?', 'signál zabírá celou šířku pásma média', ['médium je rozdělené na frekvenční kanály', 'používá se jen v optice', 'vysílá jen stanice s tokenem'], 'Baseband používá Ethernet – v jednu chvíli probíhá na médiu jedna komunikace.'],
+      ['Která přístupová metoda je deterministická?', 'token passing', ['CSMA/CD', 'CSMA/CA', 'CSMA'], 'U token passingu vysílá jen držitel tokenu, takže nemůže dojít ke kolizi.'],
     ],
     [
       {

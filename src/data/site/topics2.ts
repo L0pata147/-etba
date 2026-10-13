@@ -95,6 +95,7 @@ export const SITE_TOPICS_2 = [
       ['Známé porty', ['TCP: HTTP 80, HTTPS 443, SSH 22, Telnet 23, FTP 20/21, SMTP 25, RDP 3389', 'UDP: DNS 53, DHCP 67/68, TFTP 69, SNMP 161, NTP 123', 'DNS používá i TCP 53 (přenos zóny, velké odpovědi)']],
       ['UDP', ['nespojovaný – žádné navazování spojení', 'nespolehlivý – bez potvrzování, opakování a řazení', 'bez řízení toku a zahlcení', 'hlavička jen 8 B: zdrojový port, cílový port, délka, kontrolní součet']],
       ['Kdy UDP', ['krátké dotazy a odpovědi (DNS, DHCP)', 'provoz v reálném čase, kde je zpoždění horší než ztráta (VoIP, video, hry)', 'spolehlivost případně řeší aplikace sama']],
+      ['Real-time protokoly nad UDP', ['TCP se pro živý hlas a video nehodí (retransmise způsobují zasekávání), samotné UDP neřeší pořadí ani časování', 'RTP – přenáší audio/video; hlavička: typ obsahu (kodek), sekvenční číslo (řazení, detekce ztrát), časové razítko (plynulé přehrávání, lip-sync)', 'RTCP – kontrolní kanál, obvykle port RTP + 1; statistiky ztrát a jitteru (Sender/Receiver Reports)', 'RTSP – „dálkové ovládání“ streamu přes TCP 554: DESCRIBE, SETUP, PLAY, PAUSE, TEARDOWN']],
     ],
     [
       ['port', '16bitové číslo, které na transportní vrstvě určuje aplikaci (službu).'],
@@ -102,6 +103,9 @@ export const SITE_TOPICS_2 = [
       ['UDP', 'Nespojovaný transportní protokol bez potvrzování s hlavičkou 8 B.'],
       ['well-known porty', 'Porty 0–1023 vyhrazené známým službám.'],
       ['multiplexing', 'Současná komunikace více aplikací díky rozlišení portů.'],
+      ['RTP', 'Real-time Transport Protocol – přenáší audio a video nad UDP, přidává sekvenční čísla a časová razítka.'],
+      ['RTCP', 'Kontrolní protokol k RTP – hlásí statistiky přenosu (ztráty, jitter); obvykle port RTP + 1.'],
+      ['RTSP', 'Protokol pro ovládání streamu (PLAY, PAUSE, TEARDOWN), běží nad TCP port 554.'],
     ],
     [
       ['Jaký port používá DNS?', '53', ['80', '67', '22']],
@@ -110,6 +114,9 @@ export const SITE_TOPICS_2 = [
       ['Proč se pro VoIP používá UDP?', 'nízké zpoždění je důležitější než opakované doručení ztracených dat', ['UDP šifruje hovory', 'UDP zaručuje doručení', 'TCP nepodporuje zvuk']],
       ['Do jakého rozsahu patří dynamické (klientské) porty?', '49152–65535', ['0–1023', '1024–49151', '1–65535']],
       ['Na jakém portu běží SSH?', '22', ['23', '21', '443']],
+      ['Které pole RTP hlavičky zajišťuje plynulé přehrávání a synchronizaci zvuku s obrazem?', 'časové razítko (timestamp)', ['sekvenční číslo', 'typ obsahu (payload type)', 'kontrolní součet'], 'Časové razítko říká, kdy se má vzorek přehrát vzhledem k začátku streamu.'],
+      ['K čemu slouží RTSP?', 'k ovládání streamu (play, pause, stop)', ['k přenosu samotných audio dat', 'k hlášení ztrát paketů', 'k překladu doménových jmen'], 'RTSP je „dálkové ovládání“, data nese RTP a statistiky RTCP.'],
+      ['Nad jakým transportním protokolem typicky běží RTP?', 'UDP', ['TCP', 'ICMP', 'ARP'], 'Opožděný znovu poslaný paket je pro živý hovor bezcenný, proto UDP.'],
     ],
     [
       {
@@ -136,6 +143,7 @@ export const SITE_TOPICS_2 = [
       ['Spolehlivost', ['sekvenční číslo (SEQ) a číslo potvrzení (ACK)', 'časovač – při chybějícím potvrzení retransmise', 'segmentace dat podle MSS']],
       ['Řízení toku a zahlcení', ['posuvné okno (window size) – kolik dat lze poslat bez potvrzení', 'slow start, congestion avoidance – zpomalení při ztrátách']],
       ['Použití a srovnání s UDP', ['web (HTTP/HTTPS), e-mail, SSH, FTP, přenos souborů', 'TCP = spolehlivost za cenu režie a zpoždění; UDP = rychlost bez záruk']],
+      ['Klouzavé okénko (sliding window)', ['stop-and-wait (čekat na ACK po každém segmentu) je při velkém RTT velmi neefektivní', 'odesílatel smí poslat víc segmentů najednou – kolik, určuje velikost okna, kterou oznamuje příjemce v každé TCP hlavičce', 'po přijetí potvrzení se okno posune dál; potvrzení je kumulativní (ACK = další očekávaný bajt)', 'ztráta segmentu: příjemce posílá duplicitní ACK, po vypršení časovače nebo 3 duplicitních ACK odesílatel segment pošle znovu', 'řízení toku: plný buffer → příjemce zmenší okno (až na 0), uvolnění oznámí Window Update']],
     ],
     [
       ['3-way handshake', 'Navázání TCP spojení výměnou SYN, SYN-ACK, ACK.'],
@@ -144,6 +152,9 @@ export const SITE_TOPICS_2 = [
       ['okno (window)', 'Množství dat, které lze odeslat bez čekání na potvrzení – řízení toku.'],
       ['retransmise', 'Opakované odeslání segmentu, který nebyl potvrzen.'],
       ['MSS', 'Maximum Segment Size – největší množství dat v jednom TCP segmentu.'],
+      ['klouzavé okénko', 'Mechanismus TCP: odesílatel posílá více segmentů bez čekání na potvrzení, okno se posouvá s přijatými ACK.'],
+      ['velikost okna (window size)', 'Údaj od příjemce v TCP hlavičce – kolik bajtů smí odesílatel poslat bez potvrzení (řízení toku).'],
+      ['řízení toku (flow control)', 'Zajištění, že odesílatel nepošle víc dat, než příjemce stihne zpracovat.'],
     ],
     [
       ['Jaké je pořadí zpráv při navazování TCP spojení?', 'SYN, SYN-ACK, ACK', ['SYN, ACK, FIN', 'ACK, SYN, SYN-ACK', 'HELLO, ACK, SYN']],
@@ -151,6 +162,9 @@ export const SITE_TOPICS_2 = [
       ['K čemu slouží velikost okna (window size)?', 'k řízení toku – kolik dat lze poslat bez potvrzení', ['k šifrování', 'k určení portu', 'k výpočtu TTL']],
       ['Který příznak okamžitě ruší spojení?', 'RST', ['FIN', 'PSH', 'URG']],
       ['Která služba používá TCP?', 'HTTPS', ['DNS dotaz', 'DHCP', 'TFTP']],
+      ['Kdo určuje velikost TCP okna?', 'příjemce', ['odesílatel', 'router na cestě', 'DNS server'], 'Příjemce oznamuje v hlavičce, kolik má místa v bufferu.'],
+      ['Co znamená ACK=4001?', 'vše do bajtu 4000 bylo přijato, očekává se bajt 4001', ['byl přijat jen bajt 4001', 'ztratilo se 4001 bajtů', 'okno má velikost 4001'], 'Potvrzení v TCP je kumulativní a udává další očekávaný bajt.'],
+      ['Co udělá příjemce, když se mu zaplní buffer?', 'zmenší oznamovanou velikost okna (až na 0)', ['ukončí spojení příznakem FIN', 'pošle ICMP Echo', 'přepne na UDP'], 'Tím odesílatele přibrzdí – to je řízení toku.'],
     ],
     [
       {
@@ -305,6 +319,7 @@ export const SITE_TOPICS_2 = [
       ['Šifrování a certifikáty', ['TLS – šifrování a ověření serveru certifikátem', 'certifikát vydává certifikační autorita (CA)', 'symetrická (AES) × asymetrická kryptografie (RSA, veřejný a soukromý klíč)']],
       ['Zabezpečení', ['principy CIA: důvěrnost, integrita, dostupnost', 'firewall a ACL – povolit jen potřebné porty', 'aktualizace, silná hesla, vícefaktorové ověření, princip nejmenších oprávnění', 'VPN pro vzdálený přístup, oddělení sítí (VLAN, DMZ)']],
       ['Útoky na služby (podrobně v tématu 20)', ['DoS/DDoS – zahlcení služby', 'man-in-the-middle, ARP spoofing, DNS spoofing', 'phishing, útok hrubou silou na hesla', 'DHCP starvation / podvržený DHCP server (obrana DHCP snooping)']],
+      ['Proxy servery', ['proxy = prostředník na aplikační vrstvě (L7); vzniknou dvě oddělená spojení klient → proxy a proxy → server', 'rozdíl oproti NAT: NAT jen přepisuje adresy a porty v hlavičkách (L3/L4), proxy spojení ukončí a data čte', 'forward proxy (u klientů): cache, filtrování URL, antivirová kontrola, logování, anonymizace; explicitní (nastavená v klientovi) nebo transparentní (router provoz přesměruje)', 'reverzní proxy (u serverů): load balancing, SSL/TLS offloading, WAF, cachování']],
     ],
     [
       ['HTTPS', 'HTTP zabezpečené pomocí TLS (port 443).'],
@@ -314,6 +329,9 @@ export const SITE_TOPICS_2 = [
       ['firewall', 'Zařízení nebo software, který filtruje provoz podle pravidel.'],
       ['DMZ', 'Demilitarizovaná zóna – oddělená síť pro veřejně dostupné servery.'],
       ['DDoS', 'Distribuovaný útok zahlcením služby z mnoha zdrojů.'],
+      ['proxy server', 'Prostředník na aplikační vrstvě, který ukončí spojení od klienta a naváže nové k cílovému serveru.'],
+      ['reverzní proxy', 'Proxy na straně serverů – rozkládá zátěž, ukončuje TLS (offloading), funguje jako WAF.'],
+      ['transparentní proxy', 'Klient o proxy neví; provoz na ni přesměruje hraniční router.'],
     ],
     [
       ['Který protokol nahrazuje nešifrovaný Telnet?', 'SSH', ['FTP', 'SNMP', 'RDP']],
@@ -322,6 +340,9 @@ export const SITE_TOPICS_2 = [
       ['Co zajišťuje certifikát u HTTPS?', 'ověření identity serveru a šifrování komunikace', ['rychlejší načítání stránek', 'přidělení IP adresy', 'překlad jmen']],
       ['Co je DMZ?', 'oddělená síť pro servery dostupné z internetu', ['typ útoku', 'šifrovací algoritmus', 'druh kabelu']],
       ['Který port používá RDP?', '3389', ['3306', '22', '445']],
+      ['Na které vrstvě pracuje proxy server?', 'aplikační (L7)', ['síťové (L3)', 'linkové (L2)', 'fyzické (L1)'], 'Proxy rozumí protokolu (HTTP, FTP), proto může data filtrovat a cachovat.'],
+      ['Co je hlavní úkol reverzní proxy?', 'rozkládat zátěž mezi servery za ní', ['skrýt IP adresu klienta', 'filtrovat weby zaměstnancům', 'přidělovat IP adresy'], 'Reverzní proxy stojí u serverů; skrývání klientů a filtrování dělá forward proxy.'],
+      ['Čím se liší transparentní proxy od explicitní?', 'klient o ní neví, provoz přesměruje router', ['šifruje veškerý provoz', 'funguje jen pro DNS', 'musí se nastavit v prohlížeči'], 'Explicitní proxy se nastavuje v klientovi (např. proxy.firma.cz:8080).'],
     ],
     [
       {

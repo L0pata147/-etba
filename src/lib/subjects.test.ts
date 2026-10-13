@@ -3,6 +3,7 @@ import type { FillQuestion, Question } from '../types';
 import { ALL_TOPICS, SUBJECT_TOPICS } from '../data/subjects';
 import { ALL_COMMANDS } from '../data/site/commands';
 import { ALL_PROCEDURES } from '../data/site/procedures';
+import { teacherChapters } from '../data/site/teacher';
 import { WRITING_FORMS, WRITING_PROMPTS } from '../data/writing';
 import { HW_GENERATORS, generateHwCalcQuestions } from './hwgen';
 import { generateCloudScenario } from './cloudgen';
@@ -295,5 +296,16 @@ describe('Autoři', () => {
     expect(new Set(qs.map((q) => q.id)).size).toBe(qs.length);
     expect(qs.every((q) => /^(author|other-work|match-otherwork)/.test(q.factKey))).toBe(true);
     for (const q of qs) if (q.type === 'abc') expect(q.options[q.correctIndex]).toBeTruthy();
+  });
+});
+
+describe('učitelova teorie', () => {
+  it('každé téma sítí má kapitoly a všechny odkazované kapitoly existují', () => {
+    for (const t of SUBJECT_TOPICS.site) {
+      const ch = teacherChapters(t.id);
+      expect(ch.length, t.id).toBeGreaterThan(0);
+      for (const c of ch) expect(c.title, `${t.id} ${c.key}`).toBeTruthy();
+    }
+    for (const t of SUBJECT_TOPICS.cloud) for (const c of teacherChapters(t.id)) expect(c.title, `${t.id} ${c.key}`).toBeTruthy();
   });
 });
