@@ -5,6 +5,7 @@ import { useStore } from '../store';
 import { exportJson, readImportFile } from '../lib/storage';
 import { isAndroidApp } from '../lib/native';
 import { ReminderSettings } from '../components/ReminderSettings';
+import { SyncSettings } from '../components/SyncSettings';
 import { Button, Card, Modal, PageHeader, Segmented, SectionTitle, Toggle } from '../components/ui';
 
 export function SettingsPage() {
@@ -108,6 +109,8 @@ export function SettingsPage() {
           </select>
         </div>
       </Card>
+
+      <SyncSettings />
 
       <Card className="space-y-3 p-5">
         <SectionTitle sub="Všechna data (knihy, pokrok, výsledky, poznámky, nastavení) jsou uložena v prohlížeči. Zálohuj si je.">Záloha dat</SectionTitle>

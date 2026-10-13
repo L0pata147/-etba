@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { syncCode, syncNow } from './lib/sync';
 import type { AnswerResult, AppData, Book, Question, SessionRecord, Settings, StudyPlan, Writing } from './types';
 import { defaultData, loadData, saveData } from './lib/storage';
 import { dayKey, gradeFromScore, masteryKey, questionBookIds, updateMastery, updateSrs } from './lib/progress';
@@ -28,6 +29,8 @@ interface Store {
   setTopicNote: (id: string, text: string) => void;
   markExported: () => void;
   replaceAll: (data: AppData) => void;
+  /** Okamžitá synchronizace s ostatními zařízeními */
+  runSync: () => void;
   resetAll: () => void;
   toasts: Toast[];
   toast: (text: string, tone?: Toast['tone']) => void;
@@ -80,6 +83,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const t = setTimeout(() => syncNative(data), 1500);
     return () => clearTimeout(t);
   }, [data]);
+
+  // Synchronizace mezi zařízeními (Supabase): při startu, po změnách, při návratu do aplikace a každých 5 minut
+  const dataRef = useRef(data);
+  dataRef.current = data;
+  const runSync = useCallback(() => {
+    if (!syncCode()) return;
+    void syncNow(dataRef.current).then((merged) => {
+      if (merged) setData(merged);
+    });
+  }, []);
+  useEffect(() => {
+    runSync();
+    const onVisible = () => document.visibilityState === 'visible' && runSync();
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('online', runSync);
+    const timer = setInterval(() => document.visibilityState === 'visible' && runSync(), 5 * 60 * 1000);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('online', runSync);
+      clearInterval(timer);
+    };
+  }, [runSync]);
+  useEffect(() => {
+    const t = setTimeout(runSync, 4000);
+    return () => clearTimeout(t);
+  }, [data, runSync]);
 
   // Synchronizace mezi záložkami
   useEffect(() => {
@@ -179,9 +208,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }),
       markExported: () => update((d) => ({ ...d, lastExport: Date.now() })),
       replaceAll: (next) => update(() => next, true),
+      runSync,
       resetAll: () => update(() => defaultData()),
     }),
-    [data, toasts, toast, dismissToast, update],
+    [data, toasts, toast, dismissToast, update, runSync],
   );
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>;
