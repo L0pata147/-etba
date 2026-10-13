@@ -1,3 +1,4 @@
+import { UpdateBanner } from './UpdateBanner';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { ChevronDown, Flame, GraduationCap, Home, Menu, Moon, Search, BarChart3, Sun, X } from 'lucide-react';
@@ -203,6 +204,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
       <main className={cx('mx-auto max-w-6xl px-4 pt-5 sm:px-6 lg:px-10 lg:pt-8', inSession ? 'pb-10 lg:pt-12' : 'pb-28 lg:ml-64 lg:pb-12')}>
         <StorageWarning />
+        {!inSession && <UpdateBanner />}
         <div key={loc.pathname} className="animate-fade-up">
           {children}
         </div>

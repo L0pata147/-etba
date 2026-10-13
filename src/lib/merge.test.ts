@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { mergeData } from './merge';
 import { groupStats } from './group';
+import { newerVersion } from './update';
 import { defaultData } from './storage';
 import type { AppData, SessionRecord } from '../types';
 
@@ -101,5 +102,14 @@ describe('skupina kamarádů', () => {
     d.activity = { '2026-10-13': { questions: 10, correct: 8, seconds: 60 }, '2026-10-10': { questions: 5, correct: 2, seconds: 30 }, '2026-09-01': { questions: 5, correct: 5, seconds: 30 } };
     const s = groupStats(d, now);
     expect(s).toMatchObject({ xp: 100, today: 10, week: 15, total: 20, accuracy: 0.75, lastActive: '2026-10-13' });
+  });
+});
+
+describe('aktualizace', () => {
+  it('porovnává verze číselně', () => {
+    expect(newerVersion('1.16.0', '1.15.0')).toBe(true);
+    expect(newerVersion('1.10.0', '1.9.3')).toBe(true);
+    expect(newerVersion('1.15.0', '1.15.0')).toBe(false);
+    expect(newerVersion('1.14.2', '1.15.0')).toBe(false);
   });
 });
