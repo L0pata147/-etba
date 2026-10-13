@@ -1,7 +1,7 @@
 {
-  "version": "1.21.0",
+  "version": "1.22.0",
   "notes": [
-    "Pokrok se při přechodu na novou verzi přenese sám",
-    "Obnovení pokroku hned na úvodní obrazovce (kód nebo záloha)"
+    "Profily: rámečky, tituly a vitrína odznaků",
+    "Karta kamaráda po kliknutí v žebříčku"
   ]
 }

@@ -5,6 +5,8 @@ import { useStore } from '../store';
 import { cachedGroup, fetchGroup, groupAvailable, groupStats, subscribeGroupCache, type GroupRow, type GroupStats } from '../lib/group';
 import { dayKey } from '../lib/progress';
 import { Button, Card, Segmented, cx, plural } from './ui';
+import { Avatar } from './Avatar';
+import { FriendProfile, memberProfile } from './FriendProfile';
 
 type Mode = 'week' | 'xp';
 const HIDE_KEY = 'maturitni-trener:friends-card-hidden';
@@ -54,6 +56,7 @@ export function FriendsCard() {
   const g = data.settings.group ?? null;
   const [hidden, setHidden] = useState(() => read(HIDE_KEY) === '1');
   const [mode, setMode] = useState<Mode>(() => (read(MODE_KEY) === 'xp' ? 'xp' : 'week'));
+  const [opened, setOpened] = useState<{ name: string; stats: GroupStats; rank: number } | null>(null);
   const cache = useSyncExternalStore(subscribeGroupCache, () => (g ? JSON.stringify(cachedGroup(g.code)) : 'null'));
 
   useEffect(() => {
@@ -134,7 +137,11 @@ export function FriendsCard() {
           <p className="mb-3 text-sm font-medium text-slate-600 dark:text-slate-300">{motivation(rows, mode)}</p>
           <ul className="space-y-1.5">
             {shown.map(({ r, i }) => (
-              <li key={`${r.name}-${i}`} className={cx('flex items-center gap-3 rounded-xl px-2.5 py-2', r.me ? 'bg-brand-500/10 ring-1 ring-brand-500/30' : 'bg-slate-900/[0.03] dark:bg-white/[0.03]')}>
+              <li
+                key={`${r.name}-${i}`}
+                onClick={() => setOpened({ name: r.name, stats: r.stats, rank: i + 1 })}
+                className={cx('flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 transition hover:brightness-110', r.me ? 'bg-brand-500/10 ring-1 ring-brand-500/30' : 'bg-slate-900/[0.03] dark:bg-white/[0.03]')}
+              >
                 <span
                   className={cx(
                     'grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-bold',
@@ -143,7 +150,10 @@ export function FriendsCard() {
                 >
                   {i === 0 ? <Trophy size={14} /> : i + 1}
                 </span>
-                <span className={cx('h-2 w-2 shrink-0 rounded-full', r.stats.lastActive === today && r.stats.today > 0 ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-white/15')} title={r.stats.lastActive === today ? 'dnes se učil(a)' : 'dnes zatím ne'} />
+                <span className="relative">
+                  <Avatar name={r.name} avatar={memberProfile(r.stats).avatar} frame={memberProfile(r.stats).frame} size="sm" />
+                  <span className={cx('absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-white dark:ring-ink', r.stats.lastActive === today && r.stats.today > 0 ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600')} title={r.stats.lastActive === today ? 'dnes se učil(a)' : 'dnes zatím ne'} />
+                </span>
                 <span className="min-w-0 flex-1 truncate font-semibold">
                   {r.name}
                   {r.me && <span className="ml-1.5 text-xs font-bold uppercase text-brand-700 dark:text-brand-300">ty</span>}
@@ -160,6 +170,7 @@ export function FriendsCard() {
           </ul>
         </>
       )}
+      <FriendProfile open={!!opened} onClose={() => setOpened(null)} name={opened?.name ?? ''} stats={opened?.stats ?? null} rank={opened?.rank} />
       <Link to="/kamaradi" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline dark:text-brand-300">
         Celý žebříček <ArrowRight size={15} />
       </Link>

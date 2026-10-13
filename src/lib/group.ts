@@ -1,6 +1,7 @@
-import type { AppData, GroupMembership, SubjectId } from '../types';
+import type { AppData, GroupMembership, Profile, SubjectId } from '../types';
 import { subjectProgress } from './insights';
-import { dayKey, levelFromXp, streak } from './progress';
+import { areaMastery, dayKey, levelFromXp, longestStreak, streak } from './progress';
+import { myProfile, type ProfileCtx } from './profile';
 import { SYNC_ALPHABET, rpc, syncAvailable } from './sync';
 
 /** Souhrn pokroku, který vidí ostatní ve skupině */
@@ -18,7 +19,22 @@ export interface GroupStats {
   subjects: Record<SubjectId, number>;
   /** Poslední den s aktivitou (YYYY-MM-DD) */
   lastActive: string;
+  /** Nejdelší série dní */
+  longest?: number;
+  /** Zvládnutí výpočtů adresace (0–1) */
+  subnet?: number;
+  /** Profilovka, rámeček, titul, vitrína */
+  profile?: Profile;
 }
+
+/** Údaje pro kontrolu rámečků a titulů ze souhrnu kamaráda */
+export const statsCtx = (s: GroupStats): ProfileCtx => ({
+  level: s.level ?? 1,
+  longest: s.longest ?? s.streak ?? 0,
+  total: s.total ?? 0,
+  subjects: { cjl: s.subjects?.cjl ?? 0, site: s.subjects?.site ?? 0, hw: s.subjects?.hw ?? 0, cloud: s.subjects?.cloud ?? 0 },
+  subnet: s.subnet ?? 0,
+});
 
 export interface GroupRow {
   name: string;
@@ -66,6 +82,9 @@ export function groupStats(data: AppData, now = new Date()): GroupStats {
     accuracy: total ? round(correct / total) : 0,
     subjects: { cjl: round(sp.cjl), site: round(sp.site), hw: round(sp.hw), cloud: round(sp.cloud) },
     lastActive,
+    longest: longestStreak(data),
+    subnet: round(areaMastery(data, 'site-vypocty', 'it-vypocty')),
+    profile: myProfile(data),
   };
 }
 

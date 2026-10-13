@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Copy, Flame, LogOut, Pencil, RefreshCw, Share2, Trophy, UserPlus, Users } from 'lucide-react';
+import { Copy, Flame, LogOut, Pencil, RefreshCw, Share2, Trophy, UserPlus, UserRound, Users } from 'lucide-react';
 import { useStore } from '../store';
 import { SUBJECTS } from '../data/subjects';
 import type { SubjectId } from '../types';
 import { createGroup, fetchGroup, formatGroupCode, groupAvailable, groupStats, joinGroup, leaveGroup, publishStats, type GroupRow } from '../lib/group';
 import { dayKey } from '../lib/progress';
+import { Avatar } from '../components/Avatar';
+import { FriendProfile, memberProfile, memberTitle } from '../components/FriendProfile';
+import type { GroupStats } from '../lib/group';
 import { SUBJECT_STYLE, SubjectIcon } from '../components/subjectStyle';
 import { Button, Card, EmptyState, Modal, PageHeader, Pct, ProgressBar, SectionTitle, Segmented, cx, plural } from '../components/ui';
 
@@ -21,6 +24,7 @@ export function Group() {
   const [sort, setSort] = useState<SortKey>('xp');
   const [rename, setRename] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const [shown, setShown] = useState<{ name: string; stats: GroupStats; rank: number } | null>(null);
 
   const load = useCallback(async () => {
     if (!g) return;
@@ -85,9 +89,14 @@ export function Group() {
         title="Kamarádi"
         sub="Žebříček tvé skupiny. Ostatní vidí jen tvoji přezdívku a souhrn pokroku, ne tvoje odpovědi ani poznámky."
         action={
-          <Button variant="secondary" icon={<RefreshCw size={16} className={cx(loading && 'animate-spin')} />} onClick={() => void load()} disabled={loading}>
-            Obnovit
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" icon={<UserRound size={16} />} to="/profil">
+              Můj profil
+            </Button>
+            <Button variant="secondary" icon={<RefreshCw size={16} className={cx(loading && 'animate-spin')} />} onClick={() => void load()} disabled={loading}>
+              Obnovit
+            </Button>
+          </div>
         }
       />
 
@@ -129,21 +138,23 @@ export function Group() {
           const s = r.me ? mine : r.stats;
           const active = s.lastActive === today;
           return (
-            <Card key={`${r.name}-${i}`} className={cx('p-4', r.me && 'ring-2 ring-brand-500/60')}>
+            <Card key={`${r.name}-${i}`} onClick={() => setShown({ name: r.name, stats: s, rank: i + 1 })} className={cx('cursor-pointer p-4 transition hover:-translate-y-0.5 hover:shadow-md', r.me && 'ring-2 ring-brand-500/60')}>
               <div className="flex items-center gap-3">
                 <span
                   className={cx(
-                    'grid h-9 w-9 shrink-0 place-items-center rounded-xl font-display text-sm font-bold',
+                    'grid h-7 w-7 shrink-0 place-items-center rounded-lg font-display text-xs font-bold',
                     i === 0 ? 'bg-amber-400 text-amber-950' : i === 1 ? 'bg-slate-300 text-slate-800' : i === 2 ? 'bg-orange-300 text-orange-950' : 'bg-slate-900/[0.06] dark:bg-white/[0.08]',
                   )}
                 >
-                  {i === 0 ? <Trophy size={17} /> : i + 1}
+                  {i === 0 ? <Trophy size={14} /> : i + 1}
                 </span>
+                <Avatar name={r.name} avatar={memberProfile(s).avatar} frame={memberProfile(s).frame} size="md" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="truncate font-display text-[17px] font-bold">{r.name}</span>
                     {r.me && <span className="rounded-md bg-brand-500/15 px-1.5 py-0.5 text-[11px] font-bold uppercase text-brand-700 dark:text-brand-300">ty</span>}
                   </div>
+                  <div className="truncate text-xs font-medium text-brand-700 dark:text-brand-300">{memberTitle(s)}</div>
                   <div className="text-xs text-slate-500 dark:text-slate-400">
                     {active ? `dnes ${s.today} ${plural(s.today, 'otázka', 'otázky', 'otázek')}` : s.lastActive ? `naposledy ${formatDay(s.lastActive)}` : 'zatím bez aktivity'} · úspěšnost <Pct value={s.accuracy} />
                   </div>
@@ -174,6 +185,8 @@ export function Group() {
           );
         })}
       </div>
+
+      <FriendProfile open={!!shown} onClose={() => setShown(null)} name={shown?.name ?? ''} stats={shown?.stats ?? null} rank={shown?.rank} />
 
       {rows && rows.length === 1 && (
         <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Ve skupině zatím nikdo další není. Pošli kamarádům kód tlačítkem Pozvat.</p>

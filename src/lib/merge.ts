@@ -17,6 +17,8 @@ export function mergeData(base: AppData | null, local: AppData, remote: AppData)
   };
   const group = pick3(b?.settings.group ?? null, local.settings.group ?? null, remote.settings.group ?? null, (l) => l);
   if (group || local.settings.group !== undefined) settings.group = group;
+  const profile = pick3(b?.settings.profile, local.settings.profile, remote.settings.profile, (l, r) => l ?? r);
+  if (profile) settings.profile = profile;
   return {
     version: DATA_VERSION,
     books: mergeList(b?.books, local.books, remote.books, (_, l, r) => (r.updatedAt > l.updatedAt ? r : l)),

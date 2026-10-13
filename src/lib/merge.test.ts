@@ -113,3 +113,17 @@ describe('aktualizace', () => {
     expect(newerVersion('1.14.2', '1.15.0')).toBe(false);
   });
 });
+
+describe('profil', () => {
+  it('zamčený rámeček a titul se nezobrazí, odemčený ano', async () => {
+    const { safeProfile } = await import('./profile');
+    const ctx = { level: 4, longest: 3, total: 50, subjects: { cjl: 0.6, site: 0.1, hw: 0, cloud: 0 }, subnet: 0 };
+    expect(safeProfile({ avatar: 'x', frame: 'zlato', title: 'site-80', showcase: [] }, ctx)).toMatchObject({ frame: '', title: 'start' });
+    expect(safeProfile({ avatar: 'x', frame: 'bronz', title: 'cjl-50', showcase: ['perfect', 'neexistuje'] }, ctx)).toMatchObject({ frame: 'bronz', title: 'cjl-50', showcase: ['perfect'] });
+  });
+  it('profil se synchronizuje mezi zařízeními', () => {
+    const base = defaultData();
+    const local = { ...base, settings: { ...base.settings, profile: { avatar: '', frame: 'bronz', title: 'start', showcase: [] } } };
+    expect(mergeData(base, base, local).settings.profile?.frame).toBe('bronz');
+  });
+});

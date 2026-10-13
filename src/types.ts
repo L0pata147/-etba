@@ -390,6 +390,19 @@ export interface Settings {
   reminderTime: string;
   /** Skupina kamarádů (sdílí se jen přezdívka a souhrn pokroku) */
   group?: GroupMembership | null;
+  /** Profil, který vidí kamarádi ve skupině */
+  profile?: Profile;
+}
+
+export interface Profile {
+  /** id předpřipravené profilovky (prázdné = iniciály) */
+  avatar: string;
+  /** id rámečku (prázdné = bez rámečku) */
+  frame: string;
+  /** id titulu */
+  title: string;
+  /** až 3 id odznaků do vitríny */
+  showcase: string[];
 }
 
 export interface GroupMembership {
