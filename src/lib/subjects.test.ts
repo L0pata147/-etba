@@ -317,6 +317,12 @@ describe('ČT edu', () => {
     expect(eduForBook('R.U.R.').length).toBeGreaterThan(0);
     expect(eduForAuthor('Molière').length).toBeGreaterThan(0);
     expect(eduForBook('Neexistující kniha')).toEqual([]);
-    for (const l of [...eduForBook('Kytice'), ...eduForAuthor('Franz Kafka')]) expect(l.url).toMatch(/^https:\/\/edu\.ceskatelevize\.cz\//);
+    for (const l of [...eduForBook('Kytice'), ...eduForAuthor('Franz Kafka'), ...eduForBook('Krysař')])
+      expect(l.url).toMatch(l.source === 'ČT edu' ? /^https:\/\/edu\.ceskatelevize\.cz\// : /^https:\/\/www\.youtube\.com\/watch\?v=[\w-]{11}$/);
+  });
+  it('každá kniha z databáze má aspoň jedno video', async () => {
+    const { eduForBook } = await import('../data/ctedu');
+    const { BOOK_DATABASE } = await import('../data/books');
+    for (const b of BOOK_DATABASE) expect(eduForBook(b.title).length, b.title).toBeGreaterThan(0);
   });
 });

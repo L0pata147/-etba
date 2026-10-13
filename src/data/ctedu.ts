@@ -1,3 +1,5 @@
+import { OTHER_AUTHORS, OTHER_BOOKS } from './videos';
+
 /**
  * Výuková videa ČT edu (edu.ceskatelevize.cz) ke knihám a autorům.
  * Jen odkazy – obsah zůstává na ČT edu. Každý odkaz byl dohledán na webu ČT edu a název odpovídá stránce.
@@ -5,10 +7,12 @@
 export interface EduLink {
   title: string;
   url: string;
+  /** Odkud video je (ČT edu, YouTube – kanál…) */
+  source?: string;
 }
 
-const v = (id: string, title: string): EduLink => ({ title, url: `https://edu.ceskatelevize.cz/video/${id}` });
-const n = (slug: string, title: string): EduLink => ({ title, url: `https://edu.ceskatelevize.cz/namet/${slug}` });
+const v = (id: string, title: string): EduLink => ({ title, url: `https://edu.ceskatelevize.cz/video/${id}`, source: 'ČT edu' });
+const n = (slug: string, title: string): EduLink => ({ title, url: `https://edu.ceskatelevize.cz/namet/${slug}`, source: 'ČT edu' });
 
 /** Klíč = název díla (bez diakritiky, malými písmeny) */
 const BOOKS: Record<string, EduLink[]> = {
@@ -45,8 +49,8 @@ export const eduKey = (s: string) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-export const eduForBook = (title: string): EduLink[] => BOOKS[eduKey(title)] ?? [];
-export const eduForAuthor = (name: string): EduLink[] => AUTHORS[eduKey(name)] ?? [];
+export const eduForBook = (title: string): EduLink[] => [...(BOOKS[eduKey(title)] ?? []), ...(OTHER_BOOKS[eduKey(title)] ?? [])];
+export const eduForAuthor = (name: string): EduLink[] => [...(AUTHORS[eduKey(name)] ?? []), ...(OTHER_AUTHORS[eduKey(name)] ?? [])];
 
 /** Vyhledávání na ČT edu – pro knihy, ke kterým žádné video v aplikaci nemáme */
 export const eduSearchUrl = (q: string) => `https://edu.ceskatelevize.cz/hledani?q=${encodeURIComponent(q)}`;
