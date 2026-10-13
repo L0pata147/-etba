@@ -7,6 +7,8 @@ import { AREA_MAP, CATEGORIES, EXAM_AREAS, KINDS } from '../data/osnova';
 import { areaMastery, bookAreas, bookProgress, isBookLearned, masteryKey } from '../lib/progress';
 import { DIFFICULTY_TYPES, type SessionConfig } from '../lib/session';
 import { useStartSession } from './SessionPage';
+import { EduLinks } from '../components/EduLinks';
+import { eduForAuthor, eduForBook } from '../data/ctedu';
 import { Button, Card, EmptyState, Pct, ProgressBar, Segmented, Tag, cx } from '../components/ui';
 
 type Tab = 'full' | 'quick' | 'exam' | 'notes' | 'progress';
@@ -231,6 +233,9 @@ function FullView({ book: b }: { book: Book }) {
           </Block>
         </div>
       )}
+      <div className="lg:col-span-2">
+        <EduLinks links={[...eduForBook(b.title), ...eduForAuthor(b.author)]} search={b.title || b.author} />
+      </div>
       {b.source === 'database' && (
         <p className="text-xs text-slate-500 lg:col-span-2">
           Údaje z databáze aplikace – nejasnosti vždy ověř v čítance nebo u svého vyučujícího. Knihu můžeš kdykoli upravit.

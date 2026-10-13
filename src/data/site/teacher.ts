@@ -128,6 +128,12 @@ const CLOUD_CHAPTERS: Record<string, [BookId, number][]> = {
   'cloud-uloziste': [['vrt', 8]],
   'cloud-zalohy': [['vrt', 5]],
   'cloud-ha': [['vrt', 5], ['vrt', 6], ['ccc', 1], ['ccc', 2], ['ccc', 3], ['ccc', 7]],
+  'cloud-os': [['vrt', 1]],
+  'cloud-bootovani': [['vrt', 2]],
+  'cloud-procesy': [['vrt', 7]],
+  'cloud-souborove-systemy': [['vrt', 8]],
+  'cloud-ups': [['vrt', 6]],
+  'cloud-clustery-praxe': [['ccc', 4]],
   'cloud-verejny': [['ccc', 8]],
   'cloud-bezpecnost': [['ccc', 9]],
 };

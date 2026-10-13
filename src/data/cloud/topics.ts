@@ -1,9 +1,12 @@
 import { topicFor } from '../site/helpers';
+import { CLOUD_TOPICS_VRT } from './topics2';
+
+export { CLOUD_EXTRA_FROM } from './topics2';
 
 const topic = topicFor('cloud');
 
 /** Okruhy z Programového vybavení cloudu (obecný obsah předmětu) */
-export const CLOUD_TOPICS = [
+const CLOUD_TOPICS_BASE = [
   topic(
     1,
     'zaklady',
@@ -543,3 +546,5 @@ export const CLOUD_TOPICS = [
     ],
   ),
 ];
+
+export const CLOUD_TOPICS = [...CLOUD_TOPICS_BASE, ...CLOUD_TOPICS_VRT];

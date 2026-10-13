@@ -8,6 +8,8 @@ import { shuffle } from '../lib/random';
 import { CATEGORIES, KINDS } from '../data/osnova';
 import type { Book } from '../types';
 import { useStartSession } from './SessionPage';
+import { EduLinks } from '../components/EduLinks';
+import { eduForAuthor, eduForBook } from '../data/ctedu';
 import { Button, Card, EmptyState, PageHeader, ProgressBar, SectionTitle, Tag } from '../components/ui';
 
 function useAuthorTraining() {
@@ -129,6 +131,7 @@ export function AuthorDetail() {
               </ul>
             </Card>
           )}
+          <EduLinks links={[...eduForAuthor(author.name), ...author.books.flatMap((b) => eduForBook(b.title))]} search={author.name} />
           <Card className="p-5">
             <SectionTitle>Směr a období</SectionTitle>
             <div className="flex flex-wrap gap-1.5">

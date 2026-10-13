@@ -1,9 +1,7 @@
 {
-  "version": "1.18.0",
+  "version": "1.19.0",
   "notes": [
-    "Kamarádi přímo na stránce Dnes s mini žebříčkem",
-    "Hledání nahoře na domovské stránce",
-    "Kamarádi ve spodní liště na mobilu",
-    "Připomínka na Androidu ukáže, kdo se už dnes učí"
+    "Cloud: 6 nových témat z učitelových učebnic (OS, bootování, procesy, souborové systémy, UPS, clustery)",
+    "Videa ČT edu u knih a autorů"
   ]
 }

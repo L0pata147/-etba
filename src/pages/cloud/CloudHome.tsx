@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Dumbbell, ListOrdered, Server, Terminal } from 'lucide-react';
 import { useStore } from '../../store';
-import { CLOUD_TOPICS } from '../../data/cloud/topics';
+import { CLOUD_EXTRA_FROM, CLOUD_TOPICS } from '../../data/cloud/topics';
 import { cloudPracticalProgress, topicLastStudied, topicProgress } from '../../lib/progress';
 import { Button, Card, PageHeader, Pct, ProgressBar, SectionTitle } from '../../components/ui';
 import { useStartSession } from '../SessionPage';
@@ -67,7 +67,11 @@ export function CloudHome() {
         </Card>
       </div>
       <SectionTitle sub="Klikni na okruh – výklad, pojmy, kvíz a trénink.">Okruhy</SectionTitle>
-      <TopicGrid rows={rows} />
+      <TopicGrid rows={rows.filter((r) => r.t.number < CLOUD_EXTRA_FROM)} />
+      <div className="mt-6">
+        <SectionTitle sub="Operační systémy, bootování, procesy, souborové systémy, UPS a clustery z učitelových učebnic VRT a CCC.">Další látka z učitelova textu</SectionTitle>
+        <TopicGrid rows={rows.filter((r) => r.t.number >= CLOUD_EXTRA_FROM)} />
+      </div>
     </div>
   );
 }

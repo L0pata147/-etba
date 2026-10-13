@@ -309,3 +309,14 @@ describe('učitelova teorie', () => {
     for (const t of SUBJECT_TOPICS.cloud) for (const c of teacherChapters(t.id)) expect(c.title, `${t.id} ${c.key}`).toBeTruthy();
   });
 });
+
+describe('ČT edu', () => {
+  it('odkazy vedou jen na edu.ceskatelevize.cz a najdou se podle názvu i autora', async () => {
+    const { eduForBook, eduForAuthor } = await import('../data/ctedu');
+    expect(eduForBook('Máj').length).toBeGreaterThan(0);
+    expect(eduForBook('R.U.R.').length).toBeGreaterThan(0);
+    expect(eduForAuthor('Molière').length).toBeGreaterThan(0);
+    expect(eduForBook('Neexistující kniha')).toEqual([]);
+    for (const l of [...eduForBook('Kytice'), ...eduForAuthor('Franz Kafka')]) expect(l.url).toMatch(/^https:\/\/edu\.ceskatelevize\.cz\//);
+  });
+});
