@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { syncCode, syncNow } from './lib/sync';
+import { autoPublish } from './lib/group';
 import type { AnswerResult, AppData, Book, Question, SessionRecord, Settings, StudyPlan, Writing } from './types';
 import { defaultData, loadData, saveData } from './lib/storage';
 import { dayKey, gradeFromScore, masteryKey, questionBookIds, updateMastery, updateSrs } from './lib/progress';
@@ -109,6 +110,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const t = setTimeout(runSync, 4000);
     return () => clearTimeout(t);
   }, [data, runSync]);
+
+  // Skupina kamarádů: odeslat souhrn pokroku (po změnách s prodlevou)
+  useEffect(() => {
+    const t = setTimeout(() => void autoPublish(dataRef.current), 8000);
+    return () => clearTimeout(t);
+  }, [data]);
 
   // Synchronizace mezi záložkami
   useEffect(() => {

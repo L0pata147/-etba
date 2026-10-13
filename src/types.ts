@@ -388,6 +388,16 @@ export interface Settings {
   /** Denní připomínka v Android aplikaci */
   reminderEnabled: boolean;
   reminderTime: string;
+  /** Skupina kamarádů (sdílí se jen přezdívka a souhrn pokroku) */
+  group?: GroupMembership | null;
+}
+
+export interface GroupMembership {
+  /** Kód skupiny, který si kamarádi posílají */
+  code: string;
+  /** Tajný identifikátor člena (ostatní ho nevidí) */
+  member: string;
+  name: string;
 }
 
 export interface AppData {

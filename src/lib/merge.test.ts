@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { mergeData } from './merge';
+import { groupStats } from './group';
 import { defaultData } from './storage';
 import type { AppData, SessionRecord } from '../types';
 
@@ -83,5 +84,22 @@ describe('Sloučení dat ze dvou zařízení', () => {
   it('opakované sloučení stejných dat nic nemění', () => {
     const m = mergeData(base, clone(base), clone(base));
     expect(JSON.stringify(m)).toBe(JSON.stringify({ ...base, lastExport: undefined }));
+  });
+});
+
+describe('skupina kamarádů', () => {
+  it('členství ve skupině se přenese na druhé zařízení', () => {
+    const base = defaultData();
+    const local = { ...base, settings: { ...base.settings, group: { code: 'ABCDEFGHJK', member: 'M'.repeat(24), name: 'Lukáš' } } };
+    expect(mergeData(base, base, local).settings.group?.name).toBe('Lukáš');
+    expect(mergeData(base, local, base).settings.group?.name).toBe('Lukáš');
+  });
+  it('souhrn pro skupinu počítá týden, dnešek a úspěšnost', () => {
+    const d = defaultData();
+    const now = new Date(2026, 9, 13, 12);
+    d.xp = 100;
+    d.activity = { '2026-10-13': { questions: 10, correct: 8, seconds: 60 }, '2026-10-10': { questions: 5, correct: 2, seconds: 30 }, '2026-09-01': { questions: 5, correct: 5, seconds: 30 } };
+    const s = groupStats(d, now);
+    expect(s).toMatchObject({ xp: 100, today: 10, week: 15, total: 20, accuracy: 0.75, lastActive: '2026-10-13' });
   });
 });

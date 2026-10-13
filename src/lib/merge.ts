@@ -9,12 +9,14 @@ import { DATA_VERSION } from './storage';
  */
 export function mergeData(base: AppData | null, local: AppData, remote: AppData): AppData {
   const b = base;
-  const settings = {
+  const settings: AppData['settings'] = {
     ...local.settings,
     examDate: pick3(b?.settings.examDate, local.settings.examDate, remote.settings.examDate, (l, r) => l || r),
     dailyMinutes: pick3(b?.settings.dailyMinutes, local.settings.dailyMinutes, remote.settings.dailyMinutes, (l) => l),
     onboarded: local.settings.onboarded || remote.settings.onboarded,
   };
+  const group = pick3(b?.settings.group ?? null, local.settings.group ?? null, remote.settings.group ?? null, (l) => l);
+  if (group || local.settings.group !== undefined) settings.group = group;
   return {
     version: DATA_VERSION,
     books: mergeList(b?.books, local.books, remote.books, (_, l, r) => (r.updatedAt > l.updatedAt ? r : l)),

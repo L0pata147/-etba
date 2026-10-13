@@ -16,6 +16,7 @@ const STATE_KEY = 'maturitni-trener:sync';
 const BASE_KEY = 'maturitni-trener:sync-base';
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const CODE_LENGTH = 24;
+export const SYNC_ALPHABET = ALPHABET;
 
 export const syncAvailable = (): boolean => !!SYNC_URL && !!SYNC_KEY;
 
@@ -76,7 +77,7 @@ export function newCode(): string {
 export const normalizeCode = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g, '');
 export const formatCode = (c: string) => c.match(/.{1,4}/g)?.join('-') ?? c;
 
-async function rpc<T>(fn: string, body: unknown): Promise<T> {
+export async function rpc<T>(fn: string, body: unknown): Promise<T> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 20000);
   try {
@@ -89,7 +90,15 @@ async function rpc<T>(fn: string, body: unknown): Promise<T> {
     });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
-      throw new Error(text.includes('too_large') ? 'Data jsou na synchronizaci příliš velká.' : `Server odpověděl chybou ${res.status}.`);
+      const known: Record<string, string> = {
+        too_large: 'Data jsou na synchronizaci příliš velká.',
+        group_full: 'Skupina je plná (max. 100 členů).',
+        invalid_name: 'Přezdívka musí mít 1–30 znaků.',
+        invalid_group: 'Neplatný kód skupiny.',
+      };
+      const hit = Object.keys(known).find((k) => text.includes(k));
+      if (!hit && res.status === 404) throw new Error('Na serveru chybí funkce – je potřeba spustit SQL v Supabase.');
+      throw new Error(hit ? known[hit] : `Server odpověděl chybou ${res.status}.`);
     }
     return (await res.json()) as T;
   } finally {

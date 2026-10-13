@@ -32,6 +32,7 @@ import { TerminalPage } from './pages/Terminal';
 import { QuestionOfDay } from './pages/QuestionOfDay';
 import { Exams } from './pages/Exams';
 import { AuthorDetail, Authors } from './pages/Authors';
+import { Group } from './pages/Group';
 
 const Stats = lazy(() => import('./pages/Stats').then((m) => ({ default: m.Stats })));
 
@@ -78,6 +79,7 @@ export function App() {
         <Route path="/zkousky" element={<Exams />} />
         <Route path="/autori" element={<Authors />} />
         <Route path="/autori/:id" element={<AuthorDetail />} />
+        <Route path="/kamaradi" element={<Group />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>

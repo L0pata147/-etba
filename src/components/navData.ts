@@ -26,6 +26,7 @@ import {
   Terminal,
   TriangleAlert,
   UserRound,
+  Users,
   Wrench,
   Zap,
   type LucideIcon,
@@ -166,6 +167,7 @@ export const NAV_SUBJECTS: NavSubject[] = [
 export const NAV_BOTTOM: NavItem[] = [
   { to: '/doucit', label: 'Musím se doučit', icon: TriangleAlert },
   { to: '/pokrok', label: 'Můj pokrok', icon: BarChart3 },
+  { to: '/kamaradi', label: 'Kamarádi', icon: Users },
   { to: '/plan', label: 'Studijní plán', icon: CalendarDays },
   { to: '/ai', label: 'AI učitel', icon: Bot },
   { to: '/nastaveni', label: 'Nastavení', icon: Settings },
