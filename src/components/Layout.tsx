@@ -1,7 +1,7 @@
 import { UpdateBanner } from './UpdateBanner';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ChevronDown, Flame, GraduationCap, Home, Menu, Moon, Search, BarChart3, Sun, X } from 'lucide-react';
+import { ChevronDown, Flame, GraduationCap, Home, Menu, Moon, Search, BarChart3, Sun, Users, X } from 'lucide-react';
 import { useStore } from '../store';
 import { cx } from './ui';
 import { StorageWarning } from './StorageWarning';
@@ -12,7 +12,7 @@ import { SubjectIcon } from './subjectStyle';
 const MOBILE: NavItem[] = [
   { to: '/', label: 'Dnes', icon: Home },
   { to: '/zkousky', label: 'Zkoušky', icon: GraduationCap },
-  { to: '/hledat', label: 'Hledat', icon: Search },
+  { to: '/kamaradi', label: 'Kamarádi', icon: Users },
   { to: '/pokrok', label: 'Pokrok', icon: BarChart3 },
 ];
 

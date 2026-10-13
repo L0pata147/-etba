@@ -18,6 +18,8 @@ javac -source 8 -target 8 -nowarn -encoding UTF-8 -bootclasspath "$SDK_JAR" -cla
 echo "› Převod na DEX"
 java -cp "$TOOLS/dalvik-dx-16.0.1.jar" com.android.dx.command.Main --dex --min-sdk-version=26 \
   --output="$OUT/stage/dex/classes.dex" "$OUT/classes" 2>&1 | grep -v JAVA_TOOL_OPTIONS || true
+# chyba při kompilaci nebo převodu nesmí vyrobit APK bez kódu
+if [ ! -s "$OUT/stage/dex/classes.dex" ]; then echo "CHYBA: chybí classes.dex (kompilace Javy selhala)" >&2; exit 1; fi
 
 echo "› Zdroje a manifest"
 cp "$SRC/AndroidManifest.xml" "$OUT/stage/AndroidManifest.xml"

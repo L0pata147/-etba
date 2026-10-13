@@ -8,7 +8,19 @@ import android.content.Intent;
 public class ReminderReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context ctx, Intent intent) {
-        Reminders.showReminder(ctx, false);
         Reminders.schedule(ctx);
+        // připomínka může načítat kamarády ze sítě – mimo hlavní vlákno
+        final PendingResult result = goAsync();
+        final Context app = ctx.getApplicationContext();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Reminders.showReminder(app, false);
+                } finally {
+                    result.finish();
+                }
+            }
+        }).start();
     }
 }

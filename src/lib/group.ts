@@ -29,7 +29,7 @@ export interface GroupRow {
 
 export const GROUP_CODE_LENGTH = 10;
 
-export const groupAvailable = syncAvailable;
+export const groupAvailable = () => syncAvailable();
 
 function randomCode(n: number): string {
   const bytes = new Uint8Array(n);
@@ -75,7 +75,44 @@ export async function publishStats(g: GroupMembership, data: AppData): Promise<v
 }
 
 export async function fetchGroup(g: Pick<GroupMembership, 'code' | 'member'>): Promise<GroupRow[]> {
-  return rpc<GroupRow[]>('group_list', { p_group: g.code, p_member: g.member });
+  const rows = await rpc<GroupRow[]>('group_list', { p_group: g.code, p_member: g.member });
+  writeCache(g.code, rows);
+  return rows;
+}
+
+// ---------- poslední načtený žebříček (pro domovskou stránku a upozornění) ----------
+const CACHE_KEY = 'maturitni-trener:group-cache';
+const cacheListeners = new Set<() => void>();
+
+function writeCache(code: string, rows: GroupRow[]) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ code, at: Date.now(), rows }));
+  } catch {
+    /* nevadí */
+  }
+  cacheListeners.forEach((l) => l());
+}
+
+/** Naposledy načtený žebříček skupiny (null = zatím nic) */
+export function cachedGroup(code: string): { at: number; rows: GroupRow[] } | null {
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) ?? 'null') as { code: string; at: number; rows: GroupRow[] } | null;
+    return c && c.code === code && Array.isArray(c.rows) ? { at: c.at, rows: c.rows } : null;
+  } catch {
+    return null;
+  }
+}
+
+export function subscribeGroupCache(fn: () => void) {
+  cacheListeners.add(fn);
+  return () => {
+    cacheListeners.delete(fn);
+  };
+}
+
+/** Kamarádi (bez tebe), kteří se dnes učili – podle posledního žebříčku */
+export function friendsActiveToday(code: string, today = dayKey()): { name: string; today: number }[] {
+  return (cachedGroup(code)?.rows ?? []).filter((r) => !r.me && r.stats.lastActive === today && r.stats.today > 0).map((r) => ({ name: r.name, today: r.stats.today }));
 }
 
 /** Nová skupina – vytvoří kód a hned se do ní zapíše */
@@ -115,6 +152,7 @@ export async function autoPublish(data: AppData): Promise<void> {
   try {
     await publishStats(g, data);
     lastSent = key;
+    await fetchGroup(g); // čerstvý žebříček pro domovskou stránku a upozornění
   } catch {
     /* zkusí se příště */
   } finally {

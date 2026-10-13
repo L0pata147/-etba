@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { syncCode, syncNow } from './lib/sync';
-import { autoPublish } from './lib/group';
+import { autoPublish, subscribeGroupCache } from './lib/group';
 import type { AnswerResult, AppData, Book, Question, SessionRecord, Settings, StudyPlan, Writing } from './types';
 import { defaultData, loadData, saveData } from './lib/storage';
 import { dayKey, gradeFromScore, masteryKey, questionBookIds, updateMastery, updateSrs } from './lib/progress';
@@ -84,6 +84,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const t = setTimeout(() => syncNative(data), 1500);
     return () => clearTimeout(t);
   }, [data]);
+  // nový žebříček kamarádů → aktualizovat text připomínky
+  useEffect(() => subscribeGroupCache(() => syncNative(dataRef.current)), []);
 
   // Synchronizace mezi zařízeními (Supabase): při startu, po změnách, při návratu do aplikace a každých 5 minut
   const dataRef = useRef(data);

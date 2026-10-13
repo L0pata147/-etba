@@ -9,14 +9,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
-/** Plánování a zobrazení denní připomínky. Vše běží v telefonu, bez serveru. */
+/** Plánování a zobrazení denní připomínky. Volá se mimo hlavní vlákno (kvůli načtení kamarádů). */
 final class Reminders {
     static final String CHANNEL = "reminders";
     static final String KEY_ENABLED = "enabled";
@@ -114,6 +124,15 @@ final class Reminders {
             text.append("Dnes doporučeno: ").append(rec.isEmpty() ? "dnešní trénink" : rec).append(" · ").append(minutes).append(" min");
         }
         if (due > 0) text.append(" · ").append(due).append(due == 1 ? " otázka čeká" : due <= 4 ? " otázky čekají" : " otázek čeká").append(" na zopakování");
+        if (!studiedToday) {
+            List<String> friends = friendsToday(s, today);
+            if (!friends.isEmpty()) {
+                text.append("\n👥 Dnes už se učí: ");
+                int n = Math.min(3, friends.size());
+                text.append(String.join(", ", friends.subList(0, n)));
+                if (friends.size() > n) text.append(" a další ").append(friends.size() - n);
+            }
+        }
         String shortText = text.toString();
         if (!qotd.isEmpty()) text.append("\n\n❓ Otázka dne:\n").append(qotd).append("\n\nKlepni a odpověz.");
 
@@ -134,5 +153,55 @@ final class Reminders {
                 .build();
         NotificationManager nm = ctx.getSystemService(NotificationManager.class);
         if (nm != null) nm.notify(NOTIFICATION_ID, n);
+    }
+
+    /** Kamarádi ze skupiny, kteří se dnes učili – načte se ze serveru, jinak z posledního stavu aplikace */
+    private static List<String> friendsToday(JSONObject s, LocalDate today) {
+        List<String> out = new ArrayList<>();
+        JSONObject g = s.optJSONObject("group");
+        if (g != null) {
+            HttpURLConnection c = null;
+            try {
+                URL url = new URL(g.getString("url").replaceAll("/$", "") + "/rest/v1/rpc/group_list");
+                c = (HttpURLConnection) url.openConnection();
+                c.setConnectTimeout(5000);
+                c.setReadTimeout(5000);
+                c.setRequestMethod("POST");
+                c.setDoOutput(true);
+                String key = g.getString("key");
+                c.setRequestProperty("apikey", key);
+                if (key.startsWith("eyJ")) c.setRequestProperty("Authorization", "Bearer " + key);
+                c.setRequestProperty("Content-Type", "application/json");
+                JSONObject body = new JSONObject().put("p_group", g.getString("code")).put("p_member", g.getString("member"));
+                try (OutputStream os = c.getOutputStream()) {
+                    os.write(body.toString().getBytes(StandardCharsets.UTF_8));
+                }
+                if (c.getResponseCode() == 200) {
+                    ByteArrayOutputStream buf = new ByteArrayOutputStream();
+                    try (InputStream in = c.getInputStream()) {
+                        byte[] b = new byte[4096];
+                        int r;
+                        while ((r = in.read(b)) > 0) buf.write(b, 0, r);
+                    }
+                    JSONArray rows = new JSONArray(buf.toString("UTF-8"));
+                    for (int i = 0; i < rows.length(); i++) {
+                        JSONObject row = rows.getJSONObject(i);
+                        JSONObject st = row.optJSONObject("stats");
+                        if (row.optBoolean("me") || st == null) continue;
+                        if (today.toString().equals(st.optString("lastActive")) && st.optInt("today", 0) > 0) out.add(row.optString("name"));
+                    }
+                    return out;
+                }
+            } catch (Exception ignored) {
+                // bez připojení – použije se poslední stav z aplikace
+            } finally {
+                if (c != null) c.disconnect();
+            }
+        }
+        if (today.toString().equals(s.optString("friendsDay", ""))) {
+            JSONArray f = s.optJSONArray("friends");
+            if (f != null) for (int i = 0; i < f.length(); i++) out.add(f.optString(i));
+        }
+        return out;
     }
 }

@@ -3,6 +3,8 @@ import { itRecommendations, recommendations } from './insights';
 import { questionOfDay, questionOfDayText } from './qotd';
 import { AREA_MAP } from '../data/osnova';
 import { dayKey, dueCount, streak } from './progress';
+import { friendsActiveToday } from './group';
+import { SYNC_KEY, SYNC_URL } from './syncConfig';
 
 /** Rozhraní, které poskytuje Android aplikace (window.AndroidBridge) */
 interface AndroidBridge {
@@ -41,6 +43,10 @@ export function buildNativeStatus(data: AppData) {
     examDate: data.settings.examDate,
     rec: useIt ? itRec.topic.title : rec ? `${rec.book.title} – ${AREA_MAP[rec.area].short.toLowerCase()}` : '',
     qotd: questionOfDayText(questionOfDay(data)),
+    // kamarádi pro text připomínky (Android si je v čas připomínky načte znovu ze serveru)
+    friends: data.settings.group ? friendsActiveToday(data.settings.group.code).map((f) => f.name) : [],
+    friendsDay: dayKey(),
+    group: data.settings.group && SYNC_URL && SYNC_KEY ? { url: SYNC_URL, key: SYNC_KEY, code: data.settings.group.code, member: data.settings.group.member } : null,
   };
 }
 

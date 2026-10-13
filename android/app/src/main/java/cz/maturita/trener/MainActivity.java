@@ -194,7 +194,13 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void testNotification() {
-            Reminders.showReminder(getApplicationContext(), true);
+            final Context app = getApplicationContext();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Reminders.showReminder(app, true);
+                }
+            }).start();
         }
 
         /** Uloží soubor do složky Stažené soubory; vrátí popis umístění, nebo prázdný řetězec při chybě */

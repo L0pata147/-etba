@@ -176,7 +176,7 @@ export function Group() {
       </div>
 
       {rows && rows.length === 1 && (
-        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Zatím jsi ve skupině sám. Pošli kamarádům kód tlačítkem Pozvat.</p>
+        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Ve skupině zatím nikdo další není. Pošli kamarádům kód tlačítkem Pozvat.</p>
       )}
 
       <div className="mt-6">

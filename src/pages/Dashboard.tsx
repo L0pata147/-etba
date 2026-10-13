@@ -1,6 +1,7 @@
 import { useMemo, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, CircleCheck, Dices, Flame, GraduationCap, HelpCircle, Library, Play, RefreshCw, Timer, TrendingUp, TriangleAlert } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FriendsCard } from '../components/FriendsCard';
+import { ArrowRight, Search, BookOpen, CircleCheck, Dices, Flame, GraduationCap, HelpCircle, Library, Play, RefreshCw, Timer, TrendingUp, TriangleAlert } from 'lucide-react';
 import { SUBJECT_STYLE, SubjectIcon } from '../components/subjectStyle';
 import type { SubjectId } from '../types';
 import { useStore } from '../store';
@@ -53,6 +54,8 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
+      <HomeSearch />
+
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -123,6 +126,8 @@ export function Dashboard() {
           </div>
         )}
       </Card>
+
+      <FriendsCard />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5 [&>*:last-child]:col-span-2 lg:[&>*:last-child]:col-span-1">
         <Stat icon={<Flame size={20} />} label="Série učení" value={`${ov.streak} ${plural(ov.streak, 'den', 'dny', 'dní')}`} tone="amber" />
@@ -423,5 +428,24 @@ function BackupReminder() {
         Zálohovat teď
       </Button>
     </Card>
+  );
+}
+
+/** Vyhledávání na domovské stránce – přejde na stránku Hledat s dotazem */
+function HomeSearch() {
+  const navigate = useNavigate();
+  return (
+    <form
+      role="search"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const q = String(new FormData(e.currentTarget).get('q') ?? '').trim();
+        navigate(q ? `/hledat?q=${encodeURIComponent(q)}` : '/hledat');
+      }}
+      className="relative"
+    >
+      <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+      <input name="q" type="search" className="input !pl-10" placeholder="Hledat knihy, autory, témata, příkazy…" aria-label="Hledat" autoComplete="off" />
+    </form>
   );
 }

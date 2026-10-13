@@ -1,7 +1,9 @@
 {
-  "version": "1.17.0",
+  "version": "1.18.0",
   "notes": [
-    "Ikona aplikace na ploše iPhonu i Androidu",
-    "Po přidání na plochu se otevírá na celou obrazovku"
+    "Kamarádi přímo na stránce Dnes s mini žebříčkem",
+    "Hledání nahoře na domovské stránce",
+    "Kamarádi ve spodní liště na mobilu",
+    "Připomínka na Androidu ukáže, kdo se už dnes učí"
   ]
 }
