@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
@@ -139,14 +140,15 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
     };
   }, [open, onClose]);
   if (!open) return null;
-  return (
+  // vykreslit přímo do <body>: rodič s animací (transform) by jinak okno ořízl a posunul
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 backdrop-blur-sm sm:items-center sm:p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
         className={cx(
-          'animate-fade-up flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-white shadow-2xl dark:bg-slate-900 sm:rounded-2xl',
+          'animate-fade-up flex max-h-[92vh] w-full supports-[height:100dvh]:max-h-[92dvh] flex-col rounded-t-2xl bg-white shadow-2xl dark:bg-slate-900 sm:rounded-2xl',
           wide ? 'sm:max-w-3xl' : 'sm:max-w-lg',
         )}
         onClick={(e) => e.stopPropagation()}
@@ -159,7 +161,8 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
         </div>
         <div className="overflow-y-auto p-5">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

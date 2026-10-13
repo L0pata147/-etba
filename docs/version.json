@@ -1,8 +1,6 @@
 {
-  "version": "1.24.0",
+  "version": "1.25.0",
   "notes": [
-    "Profil: pozadí karty, motto, postup k odemčení a upozornění na nové odemčení",
-    "Karta kamaráda s porovnáním a statistikami",
-    "První titul a úroveň: Nováček"
+    "Oprava: okno s profilem kamaráda se zobrazovalo useknuté"
   ]
 }
