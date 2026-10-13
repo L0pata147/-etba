@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Download, RefreshCw, Sparkles, X } from 'lucide-react';
-import { PAGES_URL, apkUrl, appHost, checkForUpdate, dismissVersion, dismissedVersion, reloadToNewVersion, type UpdateInfo } from '../lib/update';
+import { apkUrl, appHost, checkForUpdate, dismissVersion, dismissedVersion, openNewVersionWithProgress, reloadToNewVersion, type UpdateInfo } from '../lib/update';
+import { useStore } from '../store';
 import { Button } from './ui';
 
 const EVERY = 3 * 60 * 60 * 1000;
 
 /** Lišta s nabídkou nové verze – kontroluje se při spuštění, při návratu do aplikace a každé 3 hodiny */
 export function UpdateBanner() {
+  const { data, toast } = useStore();
   const [info, setInfo] = useState<UpdateInfo | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let last = 0;
@@ -38,7 +41,8 @@ export function UpdateBanner() {
               ))}
             </ul>
           )}
-          {host === 'android' && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Stáhne se nové APK – otevři ho a dej Aktualizovat. Pokrok zůstane.</p>}
+          {host === 'android' && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Stáhne se nové APK – otevři ho a dej Aktualizovat (ne odinstalovat). Pokrok zůstane.</p>}
+          {host === 'other' && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Nová verze se otevře na webu a tvůj pokrok se do ní přenese přes synchronizaci.</p>}
           <div className="mt-3 flex flex-wrap gap-2">
             {host === 'pages' && (
               <Button size="sm" icon={<RefreshCw size={16} />} onClick={() => reloadToNewVersion(info.version)}>
@@ -51,8 +55,18 @@ export function UpdateBanner() {
               </Button>
             )}
             {host === 'other' && (
-              <Button size="sm" icon={<RefreshCw size={16} />} onClick={() => window.open(PAGES_URL, '_blank')}>
-                Otevřít novou verzi
+              <Button
+                size="sm"
+                icon={<RefreshCw size={16} />}
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  const ok = await openNewVersionWithProgress(data);
+                  setBusy(false);
+                  if (!ok) toast('Pokrok se nepodařilo přenést – v nové verzi zadej kód synchronizace nebo importuj zálohu.', 'error');
+                }}
+              >
+                {busy ? 'Přenáším pokrok…' : 'Otevřít novou verzi'}
               </Button>
             )}
           </div>

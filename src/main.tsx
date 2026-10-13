@@ -5,6 +5,11 @@ import './index.css';
 import { StoreProvider } from './store';
 import { App } from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { takeHandoffCode } from './lib/update';
+import { adoptSyncCode } from './lib/sync';
+
+// Přechod ze starší verze (jiný soubor nebo adresa): převzít kód synchronizace, pokrok se pak stáhne ze serveru
+takeHandoffCode(adoptSyncCode);
 
 // Motiv nastavíme hned, aby při načtení neproblikla špatná barva
 try {

@@ -1,6 +1,7 @@
 {
-  "version": "1.20.0",
+  "version": "1.21.0",
   "notes": [
-    "Videa ke všem knihám: Mluvící hlavy FF UK a rozbory k maturitě na YouTube"
+    "Pokrok se při přechodu na novou verzi přenese sám",
+    "Obnovení pokroku hned na úvodní obrazovce (kód nebo záloha)"
   ]
 }

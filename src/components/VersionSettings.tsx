@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { useStore } from '../store';
-import { APP_VERSION, PAGES_URL, apkUrl, appHost, checkForUpdate, reloadToNewVersion } from '../lib/update';
+import { APP_VERSION, apkUrl, appHost, checkForUpdate, openNewVersionWithProgress, reloadToNewVersion } from '../lib/update';
 import { Button, Card, SectionTitle } from './ui';
 
 /** Verze aplikace a ruční kontrola aktualizací */
 export function VersionSettings() {
-  const { toast } = useStore();
+  const { data, toast } = useStore();
   const [busy, setBusy] = useState(false);
   const check = async () => {
     setBusy(true);
@@ -19,7 +19,7 @@ export function VersionSettings() {
     const host = appHost();
     if (host === 'pages') reloadToNewVersion(u.version);
     else if (host === 'android') location.href = apkUrl(u);
-    else window.open(PAGES_URL, '_blank');
+    else if (!(await openNewVersionWithProgress(data))) toast('Pokrok se nepodařilo přenést – v nové verzi zadej kód synchronizace nebo importuj zálohu.', 'error');
   };
   return (
     <Card className="flex flex-wrap items-center gap-3 p-5">

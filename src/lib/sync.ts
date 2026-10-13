@@ -176,6 +176,19 @@ export async function joinSync(code: string): Promise<boolean> {
   return true;
 }
 
+/**
+ * Převezme kód synchronizace bez ověření na serveru (např. z odkazu při přechodu na novou verzi).
+ * Při další synchronizaci se data sloučí. Vrátí false, když už zařízení nějaký kód má.
+ */
+export function adoptSyncCode(code: string): boolean {
+  const c = normalizeCode(code);
+  if (c.length !== CODE_LENGTH || readState()) return false;
+  writeState({ code: c, version: 0, lastSync: 0 });
+  writeBase(null);
+  setStatus({ state: 'ok', lastSync: 0, message: '' });
+  return true;
+}
+
 /** Vypne synchronizaci na tomto zařízení (data na serveru zůstanou) */
 export function disableSync() {
   writeState(null);

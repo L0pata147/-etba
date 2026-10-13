@@ -9,6 +9,7 @@ import { useTheme } from '../components/Layout';
 import { Button, Card, cx, plural } from '../components/ui';
 import { StorageWarning } from '../components/StorageWarning';
 import { ReminderSettings } from '../components/ReminderSettings';
+import { RestoreProgress } from '../components/RestoreProgress';
 
 function defaultExamDate(): string {
   const now = new Date();
@@ -57,6 +58,7 @@ export function Onboarding() {
         </div>
 
         <StorageWarning />
+        {step === 0 && <RestoreProgress />}
         <div className="mb-4 flex gap-2">
           {steps.map((s, i) => (
             <div key={s} className="flex-1">

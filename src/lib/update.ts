@@ -1,4 +1,6 @@
+import type { AppData } from '../types';
 import { isAndroidApp } from './native';
+import { enableSync, getSyncStatus, syncAvailable, syncCode, syncNow } from './sync';
 
 /** Kde je vždy nejnovější verze (GitHub Pages) */
 export const PAGES_URL = 'https://l0pata147.github.io/-etba/';
@@ -65,5 +67,47 @@ export function dismissVersion(v: string) {
     localStorage.setItem(DISMISS_KEY, v);
   } catch {
     /* nevadí */
+  }
+}
+
+/** Parametr v odkazu, kterým nová verze převezme kód synchronizace */
+export const HANDOFF_PARAM = 'pripojit';
+
+/**
+ * Otevře novou verzi na GitHub Pages a přenese do ní pokrok:
+ * nahraje data na server (případně zapne synchronizaci) a předá kód v odkazu (za #, na server se neposílá).
+ * Vrátí false, když se data nepodařilo nahrát – nová verze se pak otevře bez pokroku.
+ */
+export async function openNewVersionWithProgress(data: AppData): Promise<boolean> {
+  // okno otevřít hned (kvůli blokování vyskakovacích oken), adresu doplnit po nahrání
+  const win = window.open('about:blank', '_blank');
+  let ok = false;
+  let code: string | null = null;
+  if (syncAvailable()) {
+    code = syncCode() ?? enableSync();
+    await syncNow(data);
+    ok = getSyncStatus().state === 'ok' && getSyncStatus().lastSync > 0;
+  }
+  const url = ok && code ? `${PAGES_URL}#/?${HANDOFF_PARAM}=${code}` : PAGES_URL;
+  if (win) win.location.href = url;
+  else location.href = url;
+  return ok;
+}
+
+/** Při startu: převzít kód synchronizace z odkazu a odstranit ho z adresy */
+export function takeHandoffCode(adopt: (code: string) => boolean): boolean {
+  try {
+    const hash = location.hash;
+    const i = hash.indexOf('?');
+    if (i < 0) return false;
+    const params = new URLSearchParams(hash.slice(i + 1));
+    const code = params.get(HANDOFF_PARAM);
+    if (!code) return false;
+    params.delete(HANDOFF_PARAM);
+    const rest = params.toString();
+    history.replaceState(history.state, '', `${location.pathname}${location.search}${hash.slice(0, i)}${rest ? `?${rest}` : ''}`);
+    return adopt(code);
+  } catch {
+    return false;
   }
 }
