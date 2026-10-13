@@ -12,6 +12,8 @@ for (const dir of ['stahnout', 'ke-stazeni']) {
 }
 copyFileSync(apk, 'docs/maturitni-trener.apk');
 copyFileSync(html, 'docs/index.html');
+// ikony a manifest pro „Přidat na plochu“ (iPhone, Android)
+for (const f of ['apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'manifest.webmanifest', 'favicon.svg']) copyFileSync(`public/${f}`, `docs/${f}`);
 const notes = process.argv.slice(2);
 writeFileSync('docs/version.json', JSON.stringify({ version, notes }, null, 2) + '\n');
 console.log(`Verze ${version} připravená k vydání.`);

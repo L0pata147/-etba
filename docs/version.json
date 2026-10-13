@@ -1,7 +1,7 @@
 {
-  "version": "1.16.0",
+  "version": "1.17.0",
   "notes": [
-    "Aplikace sama hlídá nové verze a nabídne aktualizaci",
-    "Skupiny kamarádů se žebříčkem pokroku"
+    "Ikona aplikace na ploše iPhonu i Androidu",
+    "Po přidání na plochu se otevírá na celou obrazovku"
   ]
 }
