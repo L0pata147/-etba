@@ -1,7 +1,7 @@
 import { UpdateBanner } from './UpdateBanner';
 import { UnlockWatcher } from './UnlockWatcher';
 import { Avatar } from './Avatar';
-import { myProfile } from '../lib/profile';
+import { displayName, myProfile } from '../lib/profile';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { ChevronDown, Flame, GraduationCap, Home, Menu, Moon, Search, BarChart3, Sun, Users, X } from 'lucide-react';
@@ -156,8 +156,8 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="mt-6 flex-1 overflow-y-auto">{navList}</div>
         <NavLink to="/profil" className="mt-4 block rounded-xl bg-paper p-3 text-sm ring-1 ring-slate-200/70 transition hover:ring-brand-500/50 dark:bg-white/[0.04] dark:ring-white/[0.06]">
           <div className="mb-2 flex items-center gap-2.5">
-            <Avatar name={data.settings.group?.name ?? 'Ty'} avatar={me.avatar} frame={me.frame} size="sm" />
-            <span className="min-w-0 truncate font-semibold">{data.settings.group?.name ?? 'Můj profil'}</span>
+            <Avatar name={displayName(data)} avatar={me.avatar} frame={me.frame} size="sm" />
+            <span className="min-w-0 truncate font-semibold">{displayName(data) === 'Ty' ? 'Můj profil' : displayName(data)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="font-semibold">Úroveň {lvl.level}</span>
@@ -184,7 +184,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-1">
           <span className="mr-1 text-sm font-semibold text-slate-600 dark:text-slate-300">🔥 {st}</span>
           <NavLink to="/profil" className="rounded-full p-1" aria-label="Můj profil">
-            <Avatar name={data.settings.group?.name ?? 'Ty'} avatar={me.avatar} frame={me.frame} size="xs" />
+            <Avatar name={displayName(data)} avatar={me.avatar} frame={me.frame} size="xs" />
           </NavLink>
           <NavLink to="/hledat" className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Hledat">
             <Search size={20} />
@@ -215,7 +215,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
       <main className={cx('mx-auto max-w-6xl px-4 pt-5 sm:px-6 lg:px-10 lg:pt-8', inSession ? 'pb-10 lg:pt-12' : 'pb-28 lg:ml-64 lg:pb-12')}>
         <StorageWarning />
-        <UnlockWatcher />
+        <UnlockWatcher paused={inSession} />
         {!inSession && <UpdateBanner />}
         <div key={loc.pathname} className="animate-fade-up">
           {children}

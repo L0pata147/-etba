@@ -1,6 +1,7 @@
 import type { AppData, GroupMembership, Profile, SubjectId } from '../types';
 import { subjectProgress } from './insights';
-import { areaMastery, dayKey, levelFromXp, longestStreak, streak } from './progress';
+import { LEARNED_THRESHOLD, areaMastery, dayKey, isBookLearned, levelFromXp, longestStreak, streak, topicProgress } from './progress';
+import { ALL_TOPICS } from '../data/subjects';
 import { myProfile, type ProfileCtx } from './profile';
 import { SYNC_ALPHABET, rpc, syncAvailable } from './sync';
 
@@ -29,7 +30,19 @@ export interface GroupStats {
   time?: number;
   /** První den s aktivitou (YYYY-MM-DD) */
   since?: string;
+  /** Počty otázek za posledních 84 dní (poslední = dnes) – kalendář aktivity */
+  days?: number[];
+  /** Získané odznaky (id) */
+  badges?: string[];
+  /** Osobní rekordy */
+  records?: { bestDay: number; bestDayDate: string; sessions: number; bestSim: number; longestSession: number };
+  /** Naučené knihy a témata */
+  learned?: { books: number; booksTotal: number; topics: number; topicsTotal: number };
+  /** Co dotyčný skrývá (accuracy, time, calendar, since) */
+  hidden?: string[];
 }
+
+export const CALENDAR_DAYS = 84;
 
 /** Údaje pro kontrolu rámečků a titulů ze souhrnu kamaráda */
 export const statsCtx = (s: GroupStats): ProfileCtx => ({
@@ -80,7 +93,15 @@ export function groupStats(data: AppData, now = new Date()): GroupStats {
     time += a.seconds;
   }
   const sp = subjectProgress(data);
-  return {
+  const profile = myProfile(data);
+  const hidden = profile.hide ?? [];
+  const calendar: number[] = [];
+  for (let i = CALENDAR_DAYS - 1; i >= 0; i--) calendar.push(data.activity[dayKey(new Date(now.getTime() - i * 86400000))]?.questions ?? 0);
+  let bestDay = 0;
+  let bestDayDate = '';
+  for (const [k, a] of days) if (a.questions > bestDay) [bestDay, bestDayDate] = [a.questions, k];
+  const sims = data.sessions.filter((x) => x.mode === 'simulace' || x.mode === 'simulace-site');
+  const stats: GroupStats = {
     xp: data.xp,
     level: levelFromXp(data.xp).level,
     streak: streak(data, now),
@@ -92,10 +113,32 @@ export function groupStats(data: AppData, now = new Date()): GroupStats {
     lastActive,
     longest: longestStreak(data),
     subnet: round(areaMastery(data, 'site-vypocty', 'it-vypocty')),
-    profile: myProfile(data),
+    profile,
     time: Math.round(time),
     since,
+    days: calendar,
+    badges: Object.keys(data.badges),
+    records: {
+      bestDay,
+      bestDayDate,
+      sessions: data.sessions.length,
+      bestSim: sims.length ? round(Math.max(...sims.map((x) => x.score))) : 0,
+      longestSession: data.sessions.reduce((m, x) => Math.max(m, x.seconds), 0),
+    },
+    learned: {
+      books: data.books.filter((b) => isBookLearned(data, b)).length,
+      booksTotal: data.books.length,
+      topics: ALL_TOPICS.filter((t) => topicProgress(data, t.id) >= LEARNED_THRESHOLD).length,
+      topicsTotal: ALL_TOPICS.length,
+    },
+    hidden,
   };
+  // skryté údaje se vůbec neodesílají
+  if (hidden.includes('accuracy')) stats.accuracy = 0;
+  if (hidden.includes('time')) stats.time = undefined;
+  if (hidden.includes('calendar')) stats.days = undefined;
+  if (hidden.includes('since')) stats.since = undefined;
+  return stats;
 }
 
 /** Odešle vlastní souhrn do skupiny */

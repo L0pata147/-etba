@@ -12,7 +12,7 @@ export function FriendProfile({ name, stats, open, onClose, rank, mine }: { name
   if (!stats) return null;
   return (
     <Modal open={open} onClose={onClose} title="Profil">
-      <ProfileHero name={name} profile={memberProfile(stats)} xp={stats.xp} rank={rank} className="-mx-5 -mt-5 mb-4" />
+      <ProfileHero name={name} profile={memberProfile(stats)} xp={stats.xp} week={stats.week} rank={rank} className="-mx-5 -mt-5 mb-4" />
       <ProfileStats stats={stats} mine={mine} name={name} />
     </Modal>
   );

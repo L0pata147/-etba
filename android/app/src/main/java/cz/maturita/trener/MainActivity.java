@@ -206,12 +206,25 @@ public class MainActivity extends Activity {
         /** Uloží soubor do složky Stažené soubory; vrátí popis umístění, nebo prázdný řetězec při chybě */
         @JavascriptInterface
         public String saveFile(String name, String content) {
-            byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+            return saveBytes(name, "application/json", content.getBytes(StandardCharsets.UTF_8));
+        }
+
+        /** Uloží obrázek (PNG v base64), např. sdílenou profilovou kartu */
+        @JavascriptInterface
+        public String saveImage(String name, String base64) {
+            try {
+                return saveBytes(name, "image/png", android.util.Base64.decode(base64, android.util.Base64.DEFAULT));
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        private String saveBytes(String name, String mime, byte[] bytes) {
             try {
                 if (Build.VERSION.SDK_INT >= 29) {
                     ContentValues v = new ContentValues();
                     v.put(MediaStore.Downloads.DISPLAY_NAME, name);
-                    v.put(MediaStore.Downloads.MIME_TYPE, "application/json");
+                    v.put(MediaStore.Downloads.MIME_TYPE, mime);
                     v.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
                     Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
                     if (uri == null) return "";

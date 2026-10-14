@@ -120,6 +120,12 @@ body {
   100% { background-position: 0% 50%; }
 }
 .frame-shimmer { background-size: 220% 220%; animation: frame-shimmer 4s ease-in-out infinite; }
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0.6; }
+}
+.confetti { animation: confetti-fall 3s linear forwards; }
+.banner-anim { background-size: 200% 200%; animation: frame-shimmer 9s ease-in-out infinite; }
 
 .flip-card { perspective: 1200px; }
 .flip-inner { transition: transform 0.45s cubic-bezier(.2,.7,.2,1); transform-style: preserve-3d; }

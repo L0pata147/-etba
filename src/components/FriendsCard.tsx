@@ -7,6 +7,8 @@ import { dayKey } from '../lib/progress';
 import { Button, Card, Segmented, cx, plural } from './ui';
 import { Avatar } from './Avatar';
 import { FriendProfile, memberProfile } from './FriendProfile';
+import { ColoredName } from './ProfileCard';
+import { STATUS_MAP } from '../lib/profile';
 
 type Mode = 'week' | 'xp';
 const HIDE_KEY = 'maturitni-trener:friends-card-hidden';
@@ -155,7 +157,8 @@ export function FriendsCard() {
                   <span className={cx('absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-white dark:ring-ink', r.stats.lastActive === today && r.stats.today > 0 ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600')} title={r.stats.lastActive === today ? 'dnes se učil(a)' : 'dnes zatím ne'} />
                 </span>
                 <span className="min-w-0 flex-1 truncate font-semibold">
-                  {r.name}
+                  <ColoredName name={r.name} color={memberProfile(r.stats).color} />
+                  {memberProfile(r.stats).status && <span className="ml-1">{STATUS_MAP[memberProfile(r.stats).status!]?.emoji}</span>}
                   {r.me && <span className="ml-1.5 text-xs font-bold uppercase text-brand-700 dark:text-brand-300">ty</span>}
                 </span>
                 <span className="inline-flex items-center gap-0.5 text-xs text-slate-500 dark:text-slate-400">

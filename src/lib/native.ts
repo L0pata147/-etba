@@ -15,6 +15,8 @@ interface AndroidBridge {
   updateStatus(json: string): void;
   testNotification(): void;
   saveFile(name: string, content: string): string;
+  /** od verze 1.26: uloží obrázek (base64 PNG) do Stažených souborů */
+  saveImage?(name: string, base64: string): string;
 }
 
 export function androidBridge(): AndroidBridge | null {
@@ -72,4 +74,11 @@ export function saveFileNative(name: string, content: string): string | null {
   const b = androidBridge();
   if (!b) return null;
   return b.saveFile(name, content) || null;
+}
+
+/** Uloží obrázek přes Android (Stažené soubory); vrátí umístění nebo null, když to verze aplikace neumí */
+export function saveImageNative(name: string, base64: string): string | null {
+  const b = androidBridge();
+  if (!b || typeof b.saveImage !== 'function') return null;
+  return b.saveImage(name, base64) || null;
 }

@@ -4,7 +4,7 @@ import { autoPublish, subscribeGroupCache } from './lib/group';
 import type { AnswerResult, AppData, Book, Question, SessionRecord, Settings, StudyPlan, Writing } from './types';
 import { defaultData, loadData, saveData } from './lib/storage';
 import { dayKey, gradeFromScore, masteryKey, questionBookIds, updateMastery, updateSrs } from './lib/progress';
-import { BADGES, subjectProgress } from './lib/insights';
+import { BADGES, PLATINUM, subjectProgress } from './lib/insights';
 import { applyReminder, syncNative } from './lib/native';
 
 export interface Toast {
@@ -42,12 +42,20 @@ const Ctx = createContext<Store | null>(null);
 
 function withBadges(d: AppData, notify: (t: string) => void): AppData {
   let badges = d.badges;
+  const fresh: typeof BADGES = [];
   for (const b of BADGES) {
     if (!badges[b.id] && b.check(d)) {
       badges = { ...badges, [b.id]: Date.now() };
-      notify(`${b.emoji} Nový odznak: ${b.label}`);
+      fresh.push(b);
     }
   }
+  if (!badges[PLATINUM.id] && PLATINUM.check({ ...d, badges })) {
+    badges = { ...badges, [PLATINUM.id]: Date.now() };
+    fresh.push(PLATINUM);
+  }
+  // víc odznaků najednou (např. po aktualizaci aplikace) = jedno upozornění
+  if (fresh.length === 1) notify(`${fresh[0].emoji} Nový odznak: ${fresh[0].label}`);
+  else if (fresh.length > 1) notify(`🏅 ${fresh.length} nových odznaků: ${fresh.slice(0, 3).map((b) => `${b.emoji} ${b.label}`).join(', ')}${fresh.length > 3 ? '…' : ''}`);
   return badges === d.badges ? d : { ...d, badges };
 }
 
@@ -137,6 +145,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     [toast],
   );
+
+  // nové odznaky (např. po aktualizaci aplikace) přidělit hned při spuštění, ne až po dalším tréninku
+  useEffect(() => {
+    const t = setTimeout(() => update((d) => d, true), 1500);
+    return () => clearTimeout(t);
+  }, [update]);
 
   const store = useMemo<Store>(
     () => ({

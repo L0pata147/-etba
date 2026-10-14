@@ -16,6 +16,8 @@ import {
   topicProgress,
   sitePracticalProgress,
   cloudPracticalProgress,
+  levelFromXp,
+  longestStreak,
 } from './progress';
 import { SITE_TOPICS } from '../data/site';
 import { ALL_TOPICS, SUBJECT_TOPICS } from '../data/subjects';
@@ -177,7 +179,17 @@ export interface BadgeDef {
   label: string;
   description: string;
   check: (data: AppData) => boolean;
+  /** skupina odznaků se stupni (bronz, stříbro, zlato) */
+  family?: string;
+  tier?: 1 | 2 | 3;
 }
+
+/** Pomocné výpočty pro odznaky */
+const totalQuestions = (d: AppData) => Object.values(d.activity).reduce((s, a) => s + a.questions, 0);
+const totalSeconds = (d: AppData) => Object.values(d.activity).reduce((s, a) => s + a.seconds, 0);
+const simCount = (d: AppData) => d.sessions.filter((s) => s.mode === 'simulace' || s.mode === 'simulace-site').length;
+const sessionHour = (s: { date: number }) => new Date(s.date).getHours();
+const subjectAt = (d: AppData, s: SubjectId, min: number) => subjectProgress(d)[s] >= min;
 
 const TOPIC_AREAS_ANY = (d: AppData, id: string) => (['it-pojmy', 'it-teorie', 'it-ustni'] as const).some((a) => (d.mastery[masteryKey(id, a)]?.attempts ?? 0) > 0);
 
@@ -194,8 +206,66 @@ export const BADGES: BadgeDef[] = [
   { id: 'cli-50', emoji: '⌨️', label: 'Příkazová řádka', description: 'Odpověz na 50 otázek z příkazů (Cisco, Linux, Windows).', check: (d) => ['cisco', 'linux', 'windows'].reduce((s, p) => s + (d.mastery[masteryKey(`site-prikazy-${p}`, 'it-prikazy')]?.attempts ?? 0), 0) >= 50 },
   { id: 'hw-test', emoji: '🖥️', label: 'Hardwarový test', description: 'Napiš cvičný test z hardwaru alespoň na 80 %.', check: (d) => d.sessions.some((s) => s.mode === 'hw-test' && s.score >= 0.8) },
   { id: 'sloh', emoji: '✍️', label: 'Slohař', description: 'Dokonči 3 slohové práce.', check: (d) => (d.writings ?? []).filter((w) => w.finished).length >= 3 },
-  { id: 'hours-5', emoji: '⏱️', label: '5 hodin učení', description: 'Stráv učením celkem 5 hodin.', check: (d) => Object.values(d.activity).reduce((s, a) => s + a.seconds, 0) >= 5 * 3600 },
+  { id: 'hours-5', emoji: '⏱️', label: '5 hodin učení', description: 'Stráv učením celkem 5 hodin.', check: (d) => totalSeconds(d) >= 5 * 3600, family: 'cas', tier: 1 },
+  // --- stupňované odznaky ---
+  { id: 'hours-20', emoji: '⏱️', label: '20 hodin učení', description: 'Stráv učením celkem 20 hodin.', check: (d) => totalSeconds(d) >= 20 * 3600, family: 'cas', tier: 2 },
+  { id: 'hours-50', emoji: '⏱️', label: '50 hodin učení', description: 'Stráv učením celkem 50 hodin.', check: (d) => totalSeconds(d) >= 50 * 3600, family: 'cas', tier: 3 },
+  { id: 'streak-30', emoji: '🔥', label: '30 dní v řadě', description: 'Uč se 30 dní po sobě.', check: (d) => longestStreak(d) >= 30, family: 'serie', tier: 2 },
+  { id: 'streak-100', emoji: '🔥', label: '100 dní v řadě', description: 'Uč se 100 dní po sobě.', check: (d) => longestStreak(d) >= 100, family: 'serie', tier: 3 },
+  { id: 'q-100', emoji: '✏️', label: '100 odpovědí', description: 'Odpověz celkem na 100 otázek.', check: (d) => totalQuestions(d) >= 100, family: 'otazky', tier: 1 },
+  { id: 'q-500', emoji: '✏️', label: '500 odpovědí', description: 'Odpověz celkem na 500 otázek.', check: (d) => totalQuestions(d) >= 500, family: 'otazky', tier: 2 },
+  { id: 'q-2000', emoji: '✏️', label: '2 000 odpovědí', description: 'Odpověz celkem na 2 000 otázek.', check: (d) => totalQuestions(d) >= 2000, family: 'otazky', tier: 3 },
+  { id: 'level-5', emoji: '⭐', label: 'Úroveň 5', description: 'Dosáhni úrovně 5.', check: (d) => levelFromXp(d.xp).level >= 5, family: 'uroven', tier: 1 },
+  { id: 'level-10', emoji: '⭐', label: 'Úroveň 10', description: 'Dosáhni úrovně 10.', check: (d) => levelFromXp(d.xp).level >= 10, family: 'uroven', tier: 2 },
+  { id: 'level-15', emoji: '⭐', label: 'Úroveň 15', description: 'Dosáhni úrovně 15.', check: (d) => levelFromXp(d.xp).level >= 15, family: 'uroven', tier: 3 },
+  { id: 'sim-5', emoji: '🎓', label: '5 simulací', description: 'Absolvuj 5 simulací ústní zkoušky.', check: (d) => simCount(d) >= 5, family: 'simulace', tier: 2 },
+  { id: 'sim-20', emoji: '🎓', label: '20 simulací', description: 'Absolvuj 20 simulací ústní zkoušky.', check: (d) => simCount(d) >= 20, family: 'simulace', tier: 3 },
+  { id: 'perfect-5', emoji: '💯', label: '5× na 100 %', description: 'Dokonči 5 tréninků (min. 8 otázek) bez chyby.', check: (d) => d.sessions.filter((s) => s.total >= 8 && s.score >= 0.999).length >= 5, family: 'perfekt', tier: 2 },
+  // --- předměty ---
+  { id: 'cjl-master', emoji: '📕', label: 'Mistr češtiny', description: 'Zvládni češtinu aspoň na 80 %.', check: (d) => subjectAt(d, 'cjl', 0.8) },
+  { id: 'site-master', emoji: '🛰️', label: 'Mistr sítí', description: 'Zvládni počítačové sítě aspoň na 80 %.', check: (d) => subjectAt(d, 'site', 0.8) },
+  { id: 'hw-master', emoji: '🔧', label: 'Mistr hardwaru', description: 'Zvládni hardware aspoň na 80 %.', check: (d) => subjectAt(d, 'hw', 0.8) },
+  { id: 'cloud-master', emoji: '☁️', label: 'Mistr cloudu', description: 'Zvládni cloud aspoň na 80 %.', check: (d) => subjectAt(d, 'cloud', 0.8) },
+  { id: 'subnet', emoji: '🧮', label: 'Subnetting', description: 'Odpověz na 30 příkladů výpočtů adresace s úspěšností aspoň 80 %.', check: (d) => { const m = d.mastery[masteryKey('site-vypocty', 'it-vypocty')]; return !!m && m.attempts >= 30 && m.correct / m.attempts >= 0.8; } },
+  { id: 'site-sim', emoji: '📡', label: 'Ústní ze sítí', description: 'Dokonči simulaci ústní zkoušky ze sítí aspoň na 80 %.', check: (d) => d.sessions.some((s) => s.mode === 'simulace-site' && s.score >= 0.8) },
+  { id: 'terminal-10', emoji: '🖥️', label: 'Terminálový mág', description: 'Dokonči 10 úloh v simulovaném terminálu.', check: (d) => d.sessions.filter((s) => s.mode === 'terminal').length >= 10 },
+  { id: 'books-all', emoji: '🏛️', label: 'Celá četba', description: 'Nauč se všechny knihy ze svého seznamu.', check: (d) => d.books.length > 0 && d.books.every((b) => isBookLearned(d, b)) },
+  // --- zajímavosti ---
+  { id: 'night-owl', emoji: '🦉', label: 'Noční sova', description: 'Dokonči trénink po 22. hodině.', check: (d) => d.sessions.some((s) => sessionHour(s) >= 22) },
+  { id: 'early-bird', emoji: '🐦', label: 'Ranní ptáče', description: 'Dokonči trénink před 7. hodinou ráno.', check: (d) => d.sessions.some((s) => sessionHour(s) < 7 && sessionHour(s) >= 4) },
+  { id: 'all-four', emoji: '🧩', label: 'Všestrannost', description: 'Procvič za jeden den všechny čtyři předměty.', check: (d) => allFourInOneDay(d) },
 ];
+
+/** Platinová trofej: všechny ostatní odznaky */
+export const PLATINUM: BadgeDef = {
+  id: 'platina',
+  emoji: '🏆',
+  label: 'Platinová trofej',
+  description: 'Získej všechny ostatní odznaky.',
+  check: (d) => BADGES.every((b) => !!d.badges[b.id]),
+};
+
+/** Odznaky, které se ve stupních zobrazují pod sebou (první stupeň = původní odznak) */
+const FAMILY_FIRST: Record<string, string> = { serie: 'streak-7', simulace: 'first-sim', perfekt: 'perfect' };
+export const badgeFamily = (b: BadgeDef): string | undefined => b.family ?? Object.keys(FAMILY_FIRST).find((f) => FAMILY_FIRST[f] === b.id);
+export const badgeTier = (b: BadgeDef): 1 | 2 | 3 | undefined => b.tier ?? (badgeFamily(b) ? 1 : undefined);
+
+function allFourInOneDay(d: AppData): boolean {
+  const byDay = new Map<string, Set<SubjectId>>();
+  for (const s of d.sessions) {
+    const day = dayKey(new Date(s.date));
+    const subj = new Set<SubjectId>();
+    for (const id of s.bookIds) subj.add(id.startsWith('site-') ? 'site' : id.startsWith('hw-') ? 'hw' : id.startsWith('cloud-') ? 'cloud' : 'cjl');
+    if (s.mode.startsWith('hw')) subj.add('hw');
+    if (s.mode.startsWith('site') || s.mode === 'simulace-site' || s.mode === 'terminal') subj.add('site');
+    if (s.mode.startsWith('cloud')) subj.add('cloud');
+    const set = byDay.get(day) ?? new Set<SubjectId>();
+    subj.forEach((x) => set.add(x));
+    byDay.set(day, set);
+    if (set.size === 4) return true;
+  }
+  return false;
+}
 
 // ---------- studijní plán ----------
 

@@ -407,6 +407,16 @@ export interface Profile {
   banner?: string;
   /** krátký status (max. 60 znaků) */
   motto?: string;
+  /** barva přezdívky */
+  color?: string;
+  /** emoji status vedle jména */
+  status?: string;
+  /** týdenní cíl otázek (0 = bez cíle) */
+  goal?: number;
+  /** co neukazovat kamarádům */
+  hide?: string[];
+  /** přezdívka, když člověk není ve skupině */
+  nick?: string;
 }
 
 export interface GroupMembership {

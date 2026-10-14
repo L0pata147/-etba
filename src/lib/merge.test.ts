@@ -142,3 +142,34 @@ describe('profil – pozadí, motto, nejsilnější předmět', () => {
     expect(TITLES[0].label).toBe('Nováček');
   });
 });
+
+describe('profil na max', () => {
+  it('souhrn pro skupinu se vejde do limitu serveru a skryté údaje se neodesílají', async () => {
+    const { BADGES } = await import('./insights');
+    const d = defaultData();
+    d.xp = 5000;
+    for (let i = 0; i < 120; i++) d.activity[`2026-0${1 + (i % 9)}-${String(1 + (i % 28)).padStart(2, '0')}`] = { questions: 40, correct: 30, seconds: 1200 };
+    d.badges = Object.fromEntries(BADGES.map((b) => [b.id, Date.now()]));
+    d.settings.profile = { avatar: 'x', frame: 'diamant', title: 'start', showcase: ['perfect'], banner: 'aurora', motto: 'x'.repeat(60), color: 'duha', status: 'raz', goal: 200, hide: ['accuracy', 'calendar'], nick: 'Franc' };
+    const s = groupStats(d);
+    expect(JSON.stringify(s).length).toBeLessThan(4000);
+    expect(s.days).toBeUndefined();
+    expect(s.accuracy).toBe(0);
+    expect(s.hidden).toEqual(['accuracy', 'calendar']);
+    expect(s.profile?.color).toBe('duha');
+    d.settings.profile.hide = [];
+    expect(groupStats(d).days?.length).toBe(84);
+  });
+  it('zamčená barva jména a neznámý status se nezobrazí', async () => {
+    const { safeProfile } = await import('./profile');
+    const ctx = { level: 1, longest: 0, total: 0, subjects: { cjl: 0, site: 0, hw: 0, cloud: 0 }, subnet: 0 };
+    const p = safeProfile({ color: 'duha', status: 'neexistuje', goal: 123, hide: ['accuracy', 'nesmysl'] }, ctx);
+    expect(p).toMatchObject({ color: '', status: '', goal: 0, hide: ['accuracy'] });
+    expect(safeProfile({ color: 'tyrkys', status: 'raz', goal: 100 }, ctx)).toMatchObject({ color: 'tyrkys', status: 'raz', goal: 100 });
+  });
+  it('všechny odznaky jdou vyhodnotit nad prázdnými daty', async () => {
+    const { BADGES, PLATINUM } = await import('./insights');
+    const d = defaultData();
+    for (const b of [...BADGES, PLATINUM]) expect(typeof b.check(d)).toBe('boolean');
+  });
+});

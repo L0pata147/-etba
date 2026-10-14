@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Copy, Flame, LogOut, Pencil, RefreshCw, Share2, Trophy, UserPlus, UserRound, Users } from 'lucide-react';
+import { Copy, Flame, LogOut, Pencil, QrCode, RefreshCw, Share2, Trophy, UserPlus, UserRound, Users } from 'lucide-react';
 import { useStore } from '../store';
 import { SUBJECTS } from '../data/subjects';
 import type { SubjectId } from '../types';
-import { createGroup, fetchGroup, formatGroupCode, groupAvailable, groupStats, joinGroup, leaveGroup, publishStats, type GroupRow } from '../lib/group';
+import { createGroup, fetchGroup, formatGroupCode, groupAvailable, groupStats, joinGroup, leaveGroup, normalizeGroupCode, publishStats, type GroupRow } from '../lib/group';
+import { PAGES_URL } from '../lib/update';
+import { InviteQr } from './Profile';
+import { useSearchParams } from 'react-router-dom';
 import { dayKey } from '../lib/progress';
 import { Avatar } from '../components/Avatar';
 import { FriendProfile, memberProfile, memberTitle } from '../components/FriendProfile';
+import { ColoredName } from '../components/ProfileCard';
+import { STATUS_MAP } from '../lib/profile';
 import type { GroupStats } from '../lib/group';
 import { SUBJECT_STYLE, SubjectIcon } from '../components/subjectStyle';
 import { Button, Card, EmptyState, Modal, PageHeader, Pct, ProgressBar, SectionTitle, Segmented, cx, plural } from '../components/ui';
@@ -24,6 +29,7 @@ export function Group() {
   const [sort, setSort] = useState<SortKey>('xp');
   const [rename, setRename] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
   const [shown, setShown] = useState<{ name: string; stats: GroupStats; rank: number } | null>(null);
 
   const load = useCallback(async () => {
@@ -60,7 +66,7 @@ export function Group() {
   if (!g) return <GroupSetup onDone={(m) => updateSettings({ group: m })} />;
 
   const share = async () => {
-    const text = `Přidej se do mé skupiny v Maturitním trenérovi: Kamarádi → Mám kód skupiny → ${formatGroupCode(g.code)}`;
+    const text = `Přidej se do mé skupiny v Maturitním trenérovi: ${PAGES_URL}#/kamaradi?skupina=${g.code} (nebo Kamarádi → Mám kód skupiny → ${formatGroupCode(g.code)})`;
     try {
       if (navigator.share) await navigator.share({ text });
       else {
@@ -112,6 +118,9 @@ export function Group() {
           <Button size="sm" variant="secondary" icon={<Copy size={16} />} onClick={copy}>
             Kopírovat
           </Button>
+          <Button size="sm" variant="secondary" icon={<QrCode size={16} />} onClick={() => setQrOpen(true)}>
+            QR kód
+          </Button>
           <Button size="sm" variant="ghost" icon={<Pencil size={16} />} onClick={() => setRename(true)}>
             {g.name}
           </Button>
@@ -151,7 +160,8 @@ export function Group() {
                 <Avatar name={r.name} avatar={memberProfile(s).avatar} frame={memberProfile(s).frame} size="md" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="truncate font-display text-[17px] font-bold">{r.name}</span>
+                    <ColoredName name={r.name} color={memberProfile(s).color} className="truncate font-display text-[17px] font-bold" />
+                    {memberProfile(s).status && <span title={STATUS_MAP[memberProfile(s).status!]?.label}>{STATUS_MAP[memberProfile(s).status!]?.emoji}</span>}
                     {r.me && <span className="rounded-md bg-brand-500/15 px-1.5 py-0.5 text-[11px] font-bold uppercase text-brand-700 dark:text-brand-300">ty</span>}
                   </div>
                   <div className="truncate text-xs font-medium text-brand-700 dark:text-brand-300">{memberTitle(s)}</div>
@@ -185,6 +195,10 @@ export function Group() {
           );
         })}
       </div>
+
+      <Modal open={qrOpen} onClose={() => setQrOpen(false)} title="Pozvat kamarády">
+        <InviteQr code={g.code} />
+      </Modal>
 
       <FriendProfile open={!!shown} onClose={() => setShown(null)} name={shown?.name ?? ''} stats={shown?.stats ?? null} rank={shown?.rank} mine={shown && shown.stats !== mine ? mine : undefined} />
 
@@ -240,8 +254,10 @@ const nameOk = (n: string) => n.trim().length >= 1 && n.trim().length <= 30;
 
 function GroupSetup({ onDone }: { onDone: (g: { code: string; member: string; name: string }) => void }) {
   const { data, toast } = useStore();
-  const [name, setName] = useState('');
-  const [code, setCode] = useState('');
+  const [params] = useSearchParams();
+  const invited = params.get('skupina') ?? '';
+  const [name, setName] = useState(data.settings.profile?.nick ?? '');
+  const [code, setCode] = useState(invited ? formatGroupCode(normalizeGroupCode(invited)) : '');
   const [busy, setBusy] = useState<'create' | 'join' | null>(null);
 
   const run = async (kind: 'create' | 'join') => {
@@ -264,6 +280,11 @@ function GroupSetup({ onDone }: { onDone: (g: { code: string; member: string; na
   return (
     <div>
       <PageHeader title="Kamarádi" sub="Porovnej si pokrok s kamarády. Ostatní uvidí jen tvoji přezdívku a souhrn: XP, sérii, počet otázek a procenta po předmětech." />
+      {invited && (
+        <Card className="mb-4 border-brand-500/40 bg-brand-500/10 p-4 text-sm">
+          <b>Máš pozvánku do skupiny {formatGroupCode(normalizeGroupCode(invited))}.</b> Zadej přezdívku a klikni na <b>Připojit se</b>.
+        </Card>
+      )}
       <Card className="mb-4 p-5">
         <label htmlFor="g-name" className="label">
           Tvoje přezdívka

@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useEffect, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { useEffect, type ButtonHTMLAttributes, type MouseEventHandler, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 
@@ -34,7 +34,7 @@ export function Button({ variant = 'primary', size = 'md', icon, to, className, 
   );
   if (to) {
     return (
-      <Link to={to} className={cls}>
+      <Link to={to} className={cls} onClick={rest.onClick as unknown as MouseEventHandler<HTMLAnchorElement> | undefined}>
         {icon}
         {children}
       </Link>
