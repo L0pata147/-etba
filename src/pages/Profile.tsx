@@ -3,7 +3,7 @@ import { Check, Copy, Eye, EyeOff, Lock, Pencil, QrCode as QrIcon, Share2 } from
 import { useStore } from '../store';
 import type { Profile as ProfileT } from '../types';
 import { AVATARS } from '../data/avatars';
-import { BADGES, PLATINUM, badgeFamily, badgeTier, type BadgeDef } from '../lib/insights';
+import { BADGES, CONTEST_BADGES, PLATINUM, badgeFamily, badgeTier, type BadgeDef } from '../lib/insights';
 import { cachedGroup, formatGroupCode, groupStats } from '../lib/group';
 import {
   BANNERS,
@@ -33,7 +33,18 @@ import { Button, Card, Modal, PageHeader, SectionTitle, Toggle, cx, formatDate }
 
 type Tab = 'vzhled' | 'titul' | 'trofeje' | 'statistiky' | 'nastaveni';
 
-const FAMILY_LABEL: Record<string, string> = { serie: 'Série dní', otazky: 'Odpovědi', cas: 'Čas učení', uroven: 'Úroveň', simulace: 'Simulace ústní', perfekt: 'Bez chyby' };
+const FAMILY_LABEL: Record<string, string> = {
+  serie: 'Série dní',
+  otazky: 'Odpovědi',
+  cas: 'Čas učení',
+  uroven: 'Úroveň',
+  simulace: 'Simulace ústní',
+  perfekt: 'Bez chyby',
+  kviz: 'Kvíz dne',
+  'kviz-vyhry': 'Vítězství v kvízu dne',
+  duel: 'Duely',
+  tyden: 'Týdenní výzva',
+};
 const TIER_STYLE = ['', 'from-amber-700 to-orange-400', 'from-slate-300 to-slate-500', 'from-yellow-200 to-amber-500'];
 const TIER_LABEL = ['', 'Bronz', 'Stříbro', 'Zlato'];
 
@@ -451,6 +462,18 @@ function Trophies({ showcase, onShowcase, groupCode }: { showcase: string[]; onS
       <Card className="p-5">
         <SectionTitle>Ostatní odznaky</SectionTitle>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{singles.map((b) => badgeCard(b))}</div>
+      </Card>
+
+      <Card className="p-5">
+        <SectionTitle sub="Za kvíz dne, duely a týdenní výzvu se skupinou. Do platinové trofeje se nepočítají – ne každý má skupinu.">Soutěže ve skupině</SectionTitle>
+        <div className="space-y-4">
+          {[...new Set(CONTEST_BADGES.map(badgeFamily))].map((f) => (
+            <div key={f}>
+              <div className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{FAMILY_LABEL[f ?? ''] ?? f}</div>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{CONTEST_BADGES.filter((b) => badgeFamily(b) === f).map((b) => badgeCard(b, badgeTier(b)))}</div>
+            </div>
+          ))}
+        </div>
       </Card>
     </div>
   );

@@ -1,4 +1,4 @@
-import type { AppData, MasteryItem, SrsItem, Writing } from '../types';
+import type { AppData, ContestLog, MasteryItem, SrsItem, Writing } from '../types';
 import { DATA_VERSION } from './storage';
 
 /**
@@ -19,6 +19,7 @@ export function mergeData(base: AppData | null, local: AppData, remote: AppData)
   if (group || local.settings.group !== undefined) settings.group = group;
   const profile = pick3(b?.settings.profile, local.settings.profile, remote.settings.profile, (l, r) => l ?? r);
   if (profile) settings.profile = profile;
+  const contests = mergeContests(b?.contests, local.contests, remote.contests);
   return {
     version: DATA_VERSION,
     books: mergeList(b?.books, local.books, remote.books, (_, l, r) => (r.updatedAt > l.updatedAt ? r : l)),
@@ -31,6 +32,7 @@ export function mergeData(base: AppData | null, local: AppData, remote: AppData)
       questions: sum3(bv?.questions, l.questions, r.questions),
       correct: sum3(bv?.correct, l.correct, r.correct),
       seconds: sum3(bv?.seconds, l.seconds, r.seconds),
+      ...(l.xp !== undefined || r.xp !== undefined ? { xp: sum3(bv?.xp, l.xp ?? 0, r.xp ?? 0) } : {}),
     })),
     unknown: mergeMap(b?.unknown, local.unknown, remote.unknown, (_, l, r) => (r.addedAt > l.addedAt ? r : l)),
     xp: sum3(b?.xp, local.xp, remote.xp),
@@ -47,6 +49,20 @@ export function mergeData(base: AppData | null, local: AppData, remote: AppData)
       for (const k of Object.keys(r) as (keyof typeof r)[]) out[k] = Math.max(l[k] ?? 0, r[k] ?? 0);
       return out;
     }),
+    ...(contests ? { contests } : {}),
+  };
+}
+
+/** Výsledky soutěží: sjednocení ze všech zařízení (u kvízu dne vyhrává záznam s pořadím) */
+function mergeContests(b: ContestLog | undefined, l: ContestLog | undefined, r: ContestLog | undefined): ContestLog | undefined {
+  if (!l && !r) return undefined;
+  const e: ContestLog = { daily: {}, weeks: {}, duels: {} };
+  const L = l ?? e;
+  const R = r ?? e;
+  return {
+    daily: mergeMap(b?.daily, L.daily, R.daily, (_, x, y) => (x.rank !== undefined ? x : y)),
+    weeks: mergeMap(b?.weeks, L.weeks, R.weeks, (_, x, y) => Math.max(x, y)),
+    duels: mergeMap(b?.duels, L.duels, R.duels, (_, x) => x),
   };
 }
 

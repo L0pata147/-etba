@@ -1,11 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { syncCode, syncNow } from './lib/sync';
-import { autoPublish, subscribeGroupCache } from './lib/group';
-import type { AnswerResult, AppData, Book, Question, SessionRecord, Settings, StudyPlan, Writing } from './types';
+import { autoPublish, cachedGroup, groupStats, subscribeGroupCache } from './lib/group';
+import type { AnswerResult, AppData, Book, ContestLog, Question, SessionRecord, Settings, StudyPlan, Writing } from './types';
 import { defaultData, loadData, saveData } from './lib/storage';
 import { dayKey, gradeFromScore, masteryKey, questionBookIds, updateMastery, updateSrs } from './lib/progress';
-import { BADGES, PLATINUM, subjectProgress } from './lib/insights';
+import { BADGES, CONTEST_BADGES, PLATINUM, subjectProgress } from './lib/insights';
 import { applyReminder, syncNative } from './lib/native';
+import { addXp, applyContests, contestLog, contestMessages } from './lib/arena';
+import { cachedContests, settleDaily, settleDuels, settleWeek, subscribeContests } from './lib/contests';
 
 export interface Toast {
   id: number;
@@ -21,6 +23,8 @@ interface Store {
   setBooks: (books: Book[]) => void;
   recordAnswer: (q: Question, r: AnswerResult) => void;
   recordSession: (rec: SessionRecord, bonusXp?: number) => void;
+  /** Zapíše výsledky soutěží (nové výhry přidají bonusové XP) */
+  recordContests: (patch: Partial<ContestLog>) => void;
   addUnknown: (q: Question) => void;
   removeUnknown: (id: string) => void;
   updateSettings: (patch: Partial<Settings>) => void;
@@ -43,7 +47,7 @@ const Ctx = createContext<Store | null>(null);
 function withBadges(d: AppData, notify: (t: string) => void): AppData {
   let badges = d.badges;
   const fresh: typeof BADGES = [];
-  for (const b of BADGES) {
+  for (const b of [...BADGES, ...CONTEST_BADGES]) {
     if (!badges[b.id] && b.check(d)) {
       badges = { ...badges, [b.id]: Date.now() };
       fresh.push(b);
@@ -146,6 +150,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [toast],
   );
 
+  // Soutěže: zapsat výhry z posledního žebříčku (týdenní výzva), kvízů dne a duelů
+  const announced = useRef(new Set<string>());
+  const settle = useCallback(() => {
+    const d = dataRef.current;
+    const g = d.settings.group;
+    if (!g) return;
+    const log = contestLog(d);
+    const c = cachedContests(g.code);
+    const rows = cachedGroup(g.code)?.rows;
+    const patch: Partial<ContestLog> = {
+      daily: c?.daily ? settleDaily(log, c.daily) : {},
+      duels: c?.duels ? settleDuels(log, c.duels) : {},
+      weeks: rows ? settleWeek(log, rows.map((r) => (r.me ? { ...r, stats: groupStats(d) } : r))) : {},
+    };
+    if (!Object.values(patch).some((x) => Object.keys(x).length)) return;
+    for (const m of contestMessages(log, patch)) {
+      if (announced.current.has(m)) continue;
+      announced.current.add(m);
+      toast(m, 'success');
+    }
+    update((x) => applyContests(x, patch), true);
+  }, [toast, update]);
+  useEffect(() => subscribeContests(settle), [settle]);
+  useEffect(() => subscribeGroupCache(settle), [settle]);
+
   // nové odznaky (např. po aktualizaci aplikace) přidělit hned při spuštění, ne až po dalším tréninku
   useEffect(() => {
     const t = setTimeout(() => update((d) => d, true), 1500);
@@ -188,7 +217,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             if (existing.correctStreak + 1 >= 2) delete unknown[q.id];
             else unknown[q.id] = { ...existing, correctStreak: existing.correctStreak + 1 };
           }
-          return {
+          const next: AppData = {
             ...d,
             srs: { ...d.srs, [q.id]: updateSrs(d.srs[q.id], grade, now) },
             mastery,
@@ -196,20 +225,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             activity: {
               ...d.activity,
               [today]: {
+                ...day,
                 questions: day.questions + 1,
                 correct: day.correct + (score >= 0.7 ? 1 : 0),
                 seconds: day.seconds + Math.min(600, Math.max(0, Math.round(r.seconds))),
               },
             },
-            xp: d.xp + 2 + Math.round(8 * score),
           };
+          return addXp(next, 2 + Math.round(8 * score), now);
         }),
       recordSession: (rec, bonusXp = 20) =>
         update((d) => {
-          const next = { ...d, sessions: [rec, ...d.sessions].slice(0, 300), xp: d.xp + bonusXp };
+          const next = addXp({ ...d, sessions: [rec, ...d.sessions].slice(0, 300) }, bonusXp);
           // denní snímek zvládnutí předmětů (pro graf a odhad)
           return { ...next, progressHistory: { ...d.progressHistory, [dayKey()]: subjectProgress(next) } };
         }, true),
+      recordContests: (patch) => update((d) => applyContests(d, patch), true),
       addUnknown: (q) =>
         update((d) => ({ ...d, unknown: { ...d.unknown, [q.id]: { question: q, addedAt: Date.now(), correctStreak: 0 } } })),
       removeUnknown: (id) =>

@@ -9,6 +9,8 @@ import { Avatar } from './Avatar';
 import { FriendProfile, memberProfile } from './FriendProfile';
 import { ColoredName } from './ProfileCard';
 import { STATUS_MAP } from '../lib/profile';
+import { cachedContests, contestsMissing, contestsVersion, loadStatus, subscribeContests } from '../lib/contests';
+import { ContestStrip } from '../pages/Contests';
 
 type Mode = 'week' | 'xp';
 const HIDE_KEY = 'maturitni-trener:friends-card-hidden';
@@ -58,12 +60,17 @@ export function FriendsCard() {
   const g = data.settings.group ?? null;
   const [hidden, setHidden] = useState(() => read(HIDE_KEY) === '1');
   const [mode, setMode] = useState<Mode>(() => (read(MODE_KEY) === 'xp' ? 'xp' : 'week'));
-  const [opened, setOpened] = useState<{ name: string; stats: GroupStats; rank: number } | null>(null);
+  const [opened, setOpened] = useState<{ name: string; stats: GroupStats; rank: number; pid?: string } | null>(null);
   const cache = useSyncExternalStore(subscribeGroupCache, () => (g ? JSON.stringify(cachedGroup(g.code)) : 'null'));
+  useSyncExternalStore(subscribeContests, contestsVersion);
+  const status = g ? cachedContests(g.code) : null;
 
   useEffect(() => {
     if (!g || !groupAvailable()) return;
-    const load = () => void fetchGroup(g).catch(() => undefined);
+    const load = () => {
+      void fetchGroup(g).catch(() => undefined);
+      if (!contestsMissing()) void loadStatus(g).catch(() => undefined);
+    };
     load();
     const timer = setInterval(() => document.visibilityState === 'visible' && load(), 60000);
     return () => clearInterval(timer);
@@ -141,7 +148,7 @@ export function FriendsCard() {
             {shown.map(({ r, i }) => (
               <li
                 key={`${r.name}-${i}`}
-                onClick={() => setOpened({ name: r.name, stats: r.stats, rank: i + 1 })}
+                onClick={() => setOpened({ name: r.name, stats: r.stats, rank: i + 1, pid: r.me ? undefined : r.pid })}
                 className={cx('flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 transition hover:brightness-110', r.me ? 'bg-brand-500/10 ring-1 ring-brand-500/30' : 'bg-slate-900/[0.03] dark:bg-white/[0.03]')}
               >
                 <span
@@ -173,7 +180,8 @@ export function FriendsCard() {
           </ul>
         </>
       )}
-      <FriendProfile open={!!opened} onClose={() => setOpened(null)} name={opened?.name ?? ''} stats={opened?.stats ?? null} rank={opened?.rank} mine={opened && opened.stats !== mine ? mine : undefined} />
+      {status?.status && status.statusDay === today && <ContestStrip daily={{ played: status.status.played, players: status.status.daily }} waiting={status.status.waiting} />}
+      <FriendProfile open={!!opened} onClose={() => setOpened(null)} name={opened?.name ?? ''} stats={opened?.stats ?? null} rank={opened?.rank} mine={opened && opened.stats !== mine ? mine : undefined} pid={opened?.pid} />
       <Link to="/kamaradi" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline dark:text-brand-300">
         Celý žebříček <ArrowRight size={15} />
       </Link>

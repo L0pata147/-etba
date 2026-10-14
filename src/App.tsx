@@ -34,6 +34,8 @@ import { Exams } from './pages/Exams';
 import { AuthorDetail, Authors } from './pages/Authors';
 import { Group } from './pages/Group';
 import { ProfilePage } from './pages/Profile';
+import { Contests } from './pages/Contests';
+import { ContestPlay } from './pages/ContestPlay';
 
 const Stats = lazy(() => import('./pages/Stats').then((m) => ({ default: m.Stats })));
 
@@ -82,6 +84,8 @@ export function App() {
         <Route path="/autori/:id" element={<AuthorDetail />} />
         <Route path="/kamaradi" element={<Group />} />
         <Route path="/profil" element={<ProfilePage />} />
+        <Route path="/souteze" element={<Contests />} />
+        <Route path="/souteze/hra" element={<ContestPlay />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>

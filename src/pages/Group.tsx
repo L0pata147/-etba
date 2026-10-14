@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Copy, Flame, LogOut, Pencil, QrCode, RefreshCw, Share2, Trophy, UserPlus, UserRound, Users } from 'lucide-react';
+import { Copy, Flame, LogOut, Pencil, QrCode, RefreshCw, Share2, Swords, Trophy, UserPlus, UserRound, Users } from 'lucide-react';
 import { useStore } from '../store';
 import { SUBJECTS } from '../data/subjects';
 import type { SubjectId } from '../types';
 import { createGroup, fetchGroup, formatGroupCode, groupAvailable, groupStats, joinGroup, leaveGroup, normalizeGroupCode, publishStats, type GroupRow } from '../lib/group';
 import { PAGES_URL } from '../lib/update';
 import { InviteQr } from './Profile';
-import { useSearchParams } from 'react-router-dom';
+import { NavLink, useSearchParams } from 'react-router-dom';
 import { dayKey } from '../lib/progress';
 import { Avatar } from '../components/Avatar';
 import { FriendProfile, memberProfile, memberTitle } from '../components/FriendProfile';
@@ -30,7 +30,7 @@ export function Group() {
   const [rename, setRename] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
-  const [shown, setShown] = useState<{ name: string; stats: GroupStats; rank: number } | null>(null);
+  const [shown, setShown] = useState<{ name: string; stats: GroupStats; rank: number; pid?: string } | null>(null);
 
   const load = useCallback(async () => {
     if (!g) return;
@@ -106,6 +106,8 @@ export function Group() {
         }
       />
 
+      <FriendsTabs />
+
       <Card className="mb-5 flex flex-wrap items-center gap-3 p-4">
         <div className="w-full sm:w-auto sm:flex-1">
           <div className="label">Kód skupiny</div>
@@ -147,7 +149,7 @@ export function Group() {
           const s = r.me ? mine : r.stats;
           const active = s.lastActive === today;
           return (
-            <Card key={`${r.name}-${i}`} onClick={() => setShown({ name: r.name, stats: s, rank: i + 1 })} className={cx('cursor-pointer p-4 transition hover:-translate-y-0.5 hover:shadow-md', r.me && 'ring-2 ring-brand-500/60')}>
+            <Card key={`${r.name}-${i}`} onClick={() => setShown({ name: r.name, stats: s, rank: i + 1, pid: r.me ? undefined : r.pid })} className={cx('cursor-pointer p-4 transition hover:-translate-y-0.5 hover:shadow-md', r.me && 'ring-2 ring-brand-500/60')}>
               <div className="flex items-center gap-3">
                 <span
                   className={cx(
@@ -200,7 +202,7 @@ export function Group() {
         <InviteQr code={g.code} />
       </Modal>
 
-      <FriendProfile open={!!shown} onClose={() => setShown(null)} name={shown?.name ?? ''} stats={shown?.stats ?? null} rank={shown?.rank} mine={shown && shown.stats !== mine ? mine : undefined} />
+      <FriendProfile open={!!shown} onClose={() => setShown(null)} name={shown?.name ?? ''} stats={shown?.stats ?? null} rank={shown?.rank} mine={shown && shown.stats !== mine ? mine : undefined} pid={shown?.pid} />
 
       {rows && rows.length === 1 && (
         <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Ve skupině zatím nikdo další není. Pošli kamarádům kód tlačítkem Pozvat.</p>
@@ -238,6 +240,22 @@ export function Group() {
           </Button>
         </div>
       </Modal>
+    </div>
+  );
+}
+
+/** Přepínač Žebříček / Soutěže nahoře na stránkách kamarádů */
+export function FriendsTabs() {
+  const tab = ({ isActive }: { isActive: boolean }) =>
+    cx('inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition sm:flex-none', isActive ? 'bg-white text-slate-900 shadow-sm dark:bg-white/15 dark:text-white' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white');
+  return (
+    <div className="mb-5 flex gap-1 rounded-xl bg-slate-900/[0.05] p-1 dark:bg-white/[0.05] sm:inline-flex">
+      <NavLink to="/kamaradi" end className={tab}>
+        <Users size={16} /> Žebříček
+      </NavLink>
+      <NavLink to="/souteze" className={tab}>
+        <Swords size={16} /> Soutěže
+      </NavLink>
     </div>
   );
 }

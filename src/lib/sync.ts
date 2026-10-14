@@ -95,6 +95,15 @@ export async function rpc<T>(fn: string, body: unknown): Promise<T> {
         group_full: 'Skupina je plná (max. 100 členů).',
         invalid_name: 'Přezdívka musí mít 1–30 znaků.',
         invalid_group: 'Neplatný kód skupiny.',
+        not_member: 'Nejsi členem skupiny – otevři Kamarádi, aby se tvůj profil znovu zapsal.',
+        invalid_opponent: 'Tento kamarád už ve skupině není.',
+        too_many_duels: 'Dnes už je výzev dost (nejvýš 20 za den), zkus to zítra.',
+        too_late: 'Na tuhle soutěž už je pozdě.',
+        contest_not_found: 'Soutěž se nenašla.',
+        invalid_day: 'Zkontroluj datum a čas v zařízení.',
+        invalid_result: 'Výsledek se nepodařilo uložit.',
+        invalid_questions: 'Otázky se nepodařilo uložit.',
+        invalid_subject: 'Neznámý předmět.',
       };
       const hit = Object.keys(known).find((k) => text.includes(k));
       if (!hit && res.status === 404) throw new Error('Na serveru chybí funkce – je potřeba spustit SQL v Supabase.');

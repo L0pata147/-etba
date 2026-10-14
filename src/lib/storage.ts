@@ -74,6 +74,9 @@ export function migrate(raw: unknown): AppData {
     topicNotes: r.topicNotes && typeof r.topicNotes === 'object' ? r.topicNotes : {},
     lastExport: r.lastExport,
     progressHistory: r.progressHistory && typeof r.progressHistory === 'object' ? r.progressHistory : {},
+    ...(r.contests && typeof r.contests === 'object'
+      ? { contests: { daily: r.contests.daily ?? {}, weeks: r.contests.weeks ?? {}, duels: r.contests.duels ?? {} } }
+      : {}),
   };
 }
 

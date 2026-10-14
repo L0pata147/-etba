@@ -4,6 +4,7 @@ import { LEARNED_THRESHOLD, areaMastery, dayKey, isBookLearned, levelFromXp, lon
 import { ALL_TOPICS } from '../data/subjects';
 import { myProfile, type ProfileCtx } from './profile';
 import { SYNC_ALPHABET, rpc, syncAvailable } from './sync';
+import { arenaCounts, contestLog, weekStart, weekXp, type ArenaCounts } from './arena';
 
 /** Souhrn pokroku, který vidí ostatní ve skupině */
 export interface GroupStats {
@@ -40,6 +41,10 @@ export interface GroupStats {
   learned?: { books: number; booksTotal: number; topics: number; topicsTotal: number };
   /** Co dotyčný skrývá (accuracy, time, calendar, since) */
   hidden?: string[];
+  /** Týdenní výzva: XP za tento a minulý týden (týden = pondělí YYYY-MM-DD) */
+  weekly?: { id: string; xp: number; prevId: string; prevXp: number };
+  /** Soutěže: vítězství a odehrané hry */
+  arena?: ArenaCounts;
 }
 
 export const CALENDAR_DAYS = 84;
@@ -51,6 +56,9 @@ export const statsCtx = (s: GroupStats): ProfileCtx => ({
   total: s.total ?? 0,
   subjects: { cjl: s.subjects?.cjl ?? 0, site: s.subjects?.site ?? 0, hw: s.subjects?.hw ?? 0, cloud: s.subjects?.cloud ?? 0 },
   subnet: s.subnet ?? 0,
+  weekWins: s.arena?.weekWins ?? 0,
+  duelWins: s.arena?.duelWins ?? 0,
+  dailyWins: s.arena?.dailyWins ?? 0,
 });
 
 export interface GroupRow {
@@ -58,6 +66,8 @@ export interface GroupRow {
   stats: GroupStats;
   updated_at: string;
   me: boolean;
+  /** veřejný identifikátor člena (kvůli duelům; chybí, dokud není na serveru souteze.sql) */
+  pid?: string;
 }
 
 export const GROUP_CODE_LENGTH = 10;
@@ -101,6 +111,8 @@ export function groupStats(data: AppData, now = new Date()): GroupStats {
   let bestDayDate = '';
   for (const [k, a] of days) if (a.questions > bestDay) [bestDay, bestDayDate] = [a.questions, k];
   const sims = data.sessions.filter((x) => x.mode === 'simulace' || x.mode === 'simulace-site');
+  const weekId = weekStart(now);
+  const prevWeekId = weekStart(now, -1);
   const stats: GroupStats = {
     xp: data.xp,
     level: levelFromXp(data.xp).level,
@@ -132,6 +144,8 @@ export function groupStats(data: AppData, now = new Date()): GroupStats {
       topicsTotal: ALL_TOPICS.length,
     },
     hidden,
+    weekly: { id: weekId, xp: weekXp(data, weekId), prevId: prevWeekId, prevXp: weekXp(data, prevWeekId) },
+    arena: arenaCounts(contestLog(data)),
   };
   // skryté údaje se vůbec neodesílají
   if (hidden.includes('accuracy')) stats.accuracy = 0;

@@ -354,6 +354,8 @@ export interface DayActivity {
   questions: number;
   correct: number;
   seconds: number;
+  /** XP získané ten den (počítá se od verze 1.27 – kvůli týdenní výzvě) */
+  xp?: number;
 }
 
 export interface UnknownItem {
@@ -447,6 +449,40 @@ export interface AppData {
   lastExport?: number;
   /** Denní snímky zvládnutí předmětů (klíč = den YYYY-MM-DD) */
   progressHistory: Record<string, Partial<Record<SubjectId, number>>>;
+  /** Výsledky soutěží ve skupině (kvíz dne, týdenní výzva, duely) */
+  contests?: ContestLog;
+}
+
+/** Předmět kvízu nebo duelu */
+export type ContestSubject = 'mix' | SubjectId;
+
+/** Odehraný kvíz dne; pořadí se doplní, až den skončí */
+export interface DailyLog {
+  points: number;
+  correct: number;
+  total: number;
+  rank?: number;
+  players?: number;
+}
+
+/** Dokončený duel */
+export interface DuelLog {
+  res: 'win' | 'loss' | 'draw';
+  /** přezdívka soupeře */
+  vs: string;
+  me: number;
+  them: number;
+  subject: ContestSubject;
+  at: number;
+}
+
+export interface ContestLog {
+  /** den (YYYY-MM-DD) → můj výsledek v kvízu dne */
+  daily: Record<string, DailyLog>;
+  /** vyhrané týdenní výzvy: pondělí týdne (YYYY-MM-DD) → XP za ten týden */
+  weeks: Record<string, number>;
+  /** id duelu → výsledek */
+  duels: Record<string, DuelLog>;
 }
 
 /** Slohová práce */

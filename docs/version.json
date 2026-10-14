@@ -1,10 +1,8 @@
 {
-  "version": "1.26.0",
+  "version": "1.27.0",
   "notes": [
-    "Trofeje: 38 odznaků se stupni bronz/stříbro/zlato a platinová trofej",
-    "Kalendář aktivity, rekordy a graf po týdnech na profilu",
-    "Barva jména, status, rámečky za předměty, animovaná pozadí",
-    "Sdílení profilové karty jako obrázku, QR pozvánka do skupiny",
-    "Oslava nové úrovně, týdenní cíl, soukromí"
+    "Soutěže s kamarády: kvíz dne pro celou skupinu, týdenní výzva o XP a duely 1 na 1",
+    "Nové odznaky, rámečky Koruna a Zkřížené meče, pozadí Aréna a tituly za výhry",
+    "Android: připomínka ukáže čekající duel a kvíz dne skupiny"
   ]
 }

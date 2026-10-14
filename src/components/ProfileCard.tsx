@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { BookOpen, CalendarDays, Clock, EyeOff, Flame, GraduationCap, Medal, Star, Target, Timer, Trophy } from 'lucide-react';
+import { BookOpen, Brain, CalendarDays, Clock, Crown, EyeOff, Flame, GraduationCap, Medal, Star, Swords, Target, Timer, Trophy } from 'lucide-react';
 import { SUBJECTS } from '../data/subjects';
 import type { Profile, SubjectId } from '../types';
 import type { GroupStats } from '../lib/group';
@@ -163,6 +163,17 @@ export function ProfileStats({ stats, mine, name }: { stats: GroupStats; mine?: 
             <Record icon={<Timer size={15} />} label="Nejdelší trénink" value={rec.longestSession ? formatDuration(rec.longestSession) : '–'} />
             <Record icon={<GraduationCap size={15} />} label="Nejlepší simulace" value={rec.bestSim ? <Pct value={rec.bestSim} /> : '–'} />
             <Record icon={<Star size={15} />} label="Tréninků" value={rec.sessions} />
+          </div>
+        </div>
+      )}
+
+      {stats.arena && stats.arena.daily + stats.arena.duels + stats.arena.weekWins > 0 && (
+        <div>
+          <Heading>Soutěže</Heading>
+          <div className="grid grid-cols-3 gap-2">
+            <Record icon={<Crown size={15} />} label="Vítěz týdne" value={`${stats.arena.weekWins}×`} />
+            <Record icon={<Swords size={15} />} label="Duely" value={`${stats.arena.duelWins} ${plural(stats.arena.duelWins, 'výhra', 'výhry', 'výher')}`} sub={`z ${stats.arena.duels} ${plural(stats.arena.duels, 'duelu', 'duelů', 'duelů')}`} />
+            <Record icon={<Brain size={15} />} label="Kvízy dne" value={`${stats.arena.daily}×`} sub={`${stats.arena.dailyWins} ${plural(stats.arena.dailyWins, 'výhra', 'výhry', 'výher')}`} />
           </div>
         </div>
       )}

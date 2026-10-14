@@ -1,6 +1,7 @@
 import type { AppData, Profile, SubjectId } from '../types';
-import { BADGES, PLATINUM, subjectProgress } from './insights';
+import { BADGES, CONTEST_BADGES, PLATINUM, subjectProgress } from './insights';
 import { areaMastery, levelFromXp, longestStreak } from './progress';
+import { arenaCounts, contestLog } from './arena';
 
 /** Údaje, podle kterých se odemykají rámečky, pozadí a tituly – spočítají se z vlastních dat i ze souhrnu kamaráda */
 export interface ProfileCtx {
@@ -10,16 +11,24 @@ export interface ProfileCtx {
   subjects: Record<SubjectId, number>;
   /** zvládnutí výpočtů adresace (subnetting) 0–1 */
   subnet: number;
+  /** vyhrané týdenní výzvy, duely a kvízy dne */
+  weekWins?: number;
+  duelWins?: number;
+  dailyWins?: number;
 }
 
 export function profileCtx(data: AppData): ProfileCtx {
   const total = Object.values(data.activity).reduce((s, a) => s + a.questions, 0);
+  const arena = arenaCounts(contestLog(data));
   return {
     level: levelFromXp(data.xp).level,
     longest: longestStreak(data),
     total,
     subjects: subjectProgress(data),
     subnet: areaMastery(data, 'site-vypocty', 'it-vypocty'),
+    weekWins: arena.weekWins,
+    duelWins: arena.duelWins,
+    dailyWins: arena.dailyWins,
   };
 }
 
@@ -35,6 +44,7 @@ const totalGoal = (n: number): Goal => (c) => [c.total, n];
 const pct = (v: number) => Math.round(v * 100);
 const subjectGoal = (s: SubjectId, min: number): Goal => (c) => [pct(c.subjects[s] ?? 0), pct(min)];
 const allGoal = (min: number): Goal => (c) => [pct(minSubject(c)), pct(min)];
+const arenaGoal = (key: 'weekWins' | 'duelWins' | 'dailyWins', n: number): Goal => (c) => [c[key] ?? 0, n];
 
 export interface Unlockable {
   id: string;
@@ -73,6 +83,8 @@ export const FRAMES: FrameDef[] = [
   { id: 'kabel', label: 'Síťový kabel', how: 'Zvládni sítě aspoň na 80 %.', goal: subjectGoal('site', 0.8), ring: 'bg-gradient-to-br from-sky-300 via-sky-500 to-blue-800', stops: ['#7dd3fc', '#0ea5e9', '#1e40af'], emblem: '🔌' },
   { id: 'cip', label: 'Procesor', how: 'Zvládni hardware aspoň na 80 %.', goal: subjectGoal('hw', 0.8), ring: 'bg-gradient-to-br from-amber-300 via-lime-500 to-emerald-700', stops: ['#fcd34d', '#84cc16', '#047857'], emblem: '🔧' },
   { id: 'mrak', label: 'Mráček', how: 'Zvládni cloud aspoň na 80 %.', goal: subjectGoal('cloud', 0.8), ring: 'bg-gradient-to-br from-violet-200 via-violet-400 to-indigo-700', stops: ['#ddd6fe', '#a78bfa', '#4338ca'], emblem: '☁️' },
+  { id: 'koruna', label: 'Koruna', how: 'Vyhraj týdenní výzvu ve skupině.', goal: arenaGoal('weekWins', 1), ring: 'frame-shimmer bg-gradient-to-br from-yellow-200 via-amber-500 to-rose-500', stops: ['#fef08a', '#f59e0b', '#f43f5e'], emblem: '👑' },
+  { id: 'mece', label: 'Zkřížené meče', how: 'Vyhraj 5 duelů.', goal: arenaGoal('duelWins', 5), ring: 'bg-gradient-to-br from-slate-200 via-rose-500 to-slate-800', stops: ['#e2e8f0', '#f43f5e', '#1e293b'], emblem: '⚔️' },
   { id: 'maturant', label: 'Maturant', how: 'Zvládni všechny čtyři předměty aspoň na 75 %.', goal: allGoal(0.75), ring: 'frame-shimmer bg-gradient-to-br from-emerald-300 via-teal-400 to-sky-500', stops: ['#6ee7b7', '#2dd4bf', '#0ea5e9'] },
 ];
 
@@ -92,6 +104,7 @@ export const BANNERS: BannerDef[] = [
   { id: 'ocean', label: 'Oceán', how: 'Odpověz celkem na 500 otázek.', goal: totalGoal(500), bg: 'bg-gradient-to-br from-sky-500 via-blue-700 to-indigo-950', stops: ['#0ea5e9', '#1d4ed8', '#1e1b4b'] },
   { id: 'zlata', label: 'Zlatá', how: 'Dosáhni úrovně 7.', goal: levelGoal(7), bg: 'bg-gradient-to-br from-amber-400 via-yellow-700 to-stone-900', stops: ['#fbbf24', '#a16207', '#1c1917'] },
   { id: 'galaxie', label: 'Galaxie', how: 'Zvládni všechny čtyři předměty aspoň na 50 %.', goal: allGoal(0.5), bg: 'bg-gradient-to-br from-fuchsia-600 via-violet-800 to-indigo-950', stops: ['#c026d3', '#5b21b6', '#1e1b4b'] },
+  { id: 'arena', label: 'Aréna', how: 'Vyhraj 3 kvízy dne ve skupině.', goal: arenaGoal('dailyWins', 3), bg: 'bg-gradient-to-br from-rose-600 via-violet-800 to-sky-800', stops: ['#e11d48', '#5b21b6', '#075985'] },
   { id: 'aurora', label: 'Polární záře ✨', how: 'Dosáhni úrovně 8. Pozadí se pomalu přelévá.', goal: levelGoal(8), bg: 'banner-anim bg-gradient-to-br from-emerald-500 via-cyan-600 to-violet-800', stops: ['#10b981', '#0891b2', '#5b21b6'] },
   { id: 'neon', label: 'Neon ✨', how: 'Odpověz celkem na 2 000 otázek. Pozadí se pomalu přelévá.', goal: totalGoal(2000), bg: 'banner-anim bg-gradient-to-br from-pink-500 via-fuchsia-700 to-cyan-700', stops: ['#ec4899', '#a21caf', '#0e7490'] },
   { id: 'magma', label: 'Magma ✨', how: 'Uč se 30 dní v řadě. Pozadí se pomalu přelévá.', goal: streakGoal(30), bg: 'banner-anim bg-gradient-to-br from-red-600 via-orange-600 to-stone-950', stops: ['#dc2626', '#ea580c', '#0c0a09'] },
@@ -159,13 +172,16 @@ export const TITLES: TitleDef[] = [
   { id: 'stovka', label: 'První stovka', how: 'Odpověz celkem na 100 otázek.', goal: totalGoal(100) },
   { id: 'tisic', label: 'Tisíc otázek', how: 'Odpověz celkem na 1 000 otázek.', goal: totalGoal(1000) },
   { id: 'esko', label: 'Maturitní esko', how: 'Dosáhni úrovně 7.', goal: levelGoal(7) },
+  { id: 'jednicka', label: 'Jednička týdne', how: 'Vyhraj týdenní výzvu ve skupině.', goal: arenaGoal('weekWins', 1) },
+  { id: 'mozek', label: 'Kvízový mozek', how: 'Vyhraj 5 kvízů dne ve skupině.', goal: arenaGoal('dailyWins', 5) },
+  { id: 'postrach', label: 'Postrach duelů', how: 'Vyhraj 10 duelů.', goal: arenaGoal('duelWins', 10) },
   { id: 'pripraveno', label: 'Připraveno k maturitě', how: 'Zvládni všechny čtyři předměty aspoň na 75 %.', goal: allGoal(0.75) },
 ];
 
 export const FRAME_MAP = Object.fromEntries(FRAMES.map((f) => [f.id, f]));
 export const BANNER_MAP = Object.fromEntries(BANNERS.map((b) => [b.id, b]));
 export const TITLE_MAP = Object.fromEntries(TITLES.map((t) => [t.id, t]));
-export const BADGE_MAP = Object.fromEntries([...BADGES, PLATINUM].map((b) => [b.id, b]));
+export const BADGE_MAP = Object.fromEntries([...BADGES, ...CONTEST_BADGES, PLATINUM].map((b) => [b.id, b]));
 export const NAME_COLOR_MAP = Object.fromEntries(NAME_COLORS.map((c) => [c.id, c]));
 
 export const DEFAULT_PROFILE: Profile = { avatar: '', frame: '', title: 'start', showcase: [], banner: 'zaklad', motto: '', color: '', status: '', goal: 0, hide: [], nick: '' };

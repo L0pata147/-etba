@@ -48,7 +48,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const me = useMemo(() => myProfile(data), [data]);
   const st = streak(data);
   const unknownCount = Object.keys(data.unknown).length;
-  const inSession = loc.pathname.startsWith('/trenink/relace') || loc.pathname.startsWith('/simulace/') || (loc.pathname === '/terminal' && loc.search.includes('uloha='));
+  const inSession = loc.pathname.startsWith('/trenink/relace') || loc.pathname === '/souteze/hra' || loc.pathname.startsWith('/simulace/') || (loc.pathname === '/terminal' && loc.search.includes('uloha='));
 
   useEffect(() => {
     setMenuOpen(false);

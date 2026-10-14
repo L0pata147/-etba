@@ -20,6 +20,7 @@ import {
   longestStreak,
 } from './progress';
 import { SITE_TOPICS } from '../data/site';
+import { arenaCounts, contestLog } from './arena';
 import { ALL_TOPICS, SUBJECT_TOPICS } from '../data/subjects';
 
 const DAY = 86400000;
@@ -234,6 +235,24 @@ export const BADGES: BadgeDef[] = [
   { id: 'night-owl', emoji: '🦉', label: 'Noční sova', description: 'Dokonči trénink po 22. hodině.', check: (d) => d.sessions.some((s) => sessionHour(s) >= 22) },
   { id: 'early-bird', emoji: '🐦', label: 'Ranní ptáče', description: 'Dokonči trénink před 7. hodinou ráno.', check: (d) => d.sessions.some((s) => sessionHour(s) < 7 && sessionHour(s) >= 4) },
   { id: 'all-four', emoji: '🧩', label: 'Všestrannost', description: 'Procvič za jeden den všechny čtyři předměty.', check: (d) => allFourInOneDay(d) },
+];
+
+const arena = (d: AppData) => arenaCounts(contestLog(d));
+
+/** Odznaky za soutěže ve skupině – do platinové trofeje se nepočítají (ne každý má skupinu) */
+export const CONTEST_BADGES: BadgeDef[] = [
+  { id: 'kviz-1', emoji: '🧠', label: 'První kvíz dne', description: 'Zahraj si kvíz dne se skupinou.', check: (d) => arena(d).daily >= 1, family: 'kviz', tier: 1 },
+  { id: 'kviz-10', emoji: '🧠', label: '10 kvízů dne', description: 'Zahraj si 10 kvízů dne.', check: (d) => arena(d).daily >= 10, family: 'kviz', tier: 2 },
+  { id: 'kviz-30', emoji: '🧠', label: '30 kvízů dne', description: 'Zahraj si 30 kvízů dne.', check: (d) => arena(d).daily >= 30, family: 'kviz', tier: 3 },
+  { id: 'kviz-win', emoji: '🥇', label: 'Vítěz kvízu dne', description: 'Buď první v kvízu dne (hrát musí aspoň dva).', check: (d) => arena(d).dailyWins >= 1, family: 'kviz-vyhry', tier: 1 },
+  { id: 'kviz-win-5', emoji: '🥇', label: '5 vítězství v kvízu', description: 'Vyhraj 5 kvízů dne.', check: (d) => arena(d).dailyWins >= 5, family: 'kviz-vyhry', tier: 2 },
+  { id: 'kviz-win-20', emoji: '🥇', label: '20 vítězství v kvízu', description: 'Vyhraj 20 kvízů dne.', check: (d) => arena(d).dailyWins >= 20, family: 'kviz-vyhry', tier: 3 },
+  { id: 'duel-1', emoji: '⚔️', label: 'První výhra v duelu', description: 'Vyhraj duel s kamarádem.', check: (d) => arena(d).duelWins >= 1, family: 'duel', tier: 1 },
+  { id: 'duel-5', emoji: '⚔️', label: '5 výher v duelu', description: 'Vyhraj 5 duelů.', check: (d) => arena(d).duelWins >= 5, family: 'duel', tier: 2 },
+  { id: 'duel-20', emoji: '⚔️', label: '20 výher v duelu', description: 'Vyhraj 20 duelů.', check: (d) => arena(d).duelWins >= 20, family: 'duel', tier: 3 },
+  { id: 'week-1', emoji: '👑', label: 'Vítěz týdne', description: 'Vyhraj týdenní výzvu (nejvíc XP ve skupině za týden).', check: (d) => arena(d).weekWins >= 1, family: 'tyden', tier: 1 },
+  { id: 'week-3', emoji: '👑', label: '3× vítěz týdne', description: 'Vyhraj týdenní výzvu třikrát.', check: (d) => arena(d).weekWins >= 3, family: 'tyden', tier: 2 },
+  { id: 'week-10', emoji: '👑', label: '10× vítěz týdne', description: 'Vyhraj týdenní výzvu desetkrát.', check: (d) => arena(d).weekWins >= 10, family: 'tyden', tier: 3 },
 ];
 
 /** Platinová trofej: všechny ostatní odznaky */

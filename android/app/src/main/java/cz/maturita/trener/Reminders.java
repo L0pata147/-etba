@@ -133,6 +133,7 @@ final class Reminders {
                 if (friends.size() > n) text.append(" a další ").append(friends.size() - n);
             }
         }
+        text.append(contestsLine(s, today));
         String shortText = text.toString();
         if (!qotd.isEmpty()) text.append("\n\n❓ Otázka dne:\n").append(qotd).append("\n\nKlepni a odpověz.");
 
@@ -155,35 +156,51 @@ final class Reminders {
         if (nm != null) nm.notify(NOTIFICATION_ID, n);
     }
 
+    /** POST na funkci serveru (Supabase RPC); null = bez připojení nebo chyba */
+    private static String rpc(JSONObject g, String fn, JSONObject body) {
+        HttpURLConnection c = null;
+        try {
+            URL url = new URL(g.getString("url").replaceAll("/$", "") + "/rest/v1/rpc/" + fn);
+            c = (HttpURLConnection) url.openConnection();
+            c.setConnectTimeout(5000);
+            c.setReadTimeout(5000);
+            c.setRequestMethod("POST");
+            c.setDoOutput(true);
+            String key = g.getString("key");
+            c.setRequestProperty("apikey", key);
+            if (key.startsWith("eyJ")) c.setRequestProperty("Authorization", "Bearer " + key);
+            c.setRequestProperty("Content-Type", "application/json");
+            try (OutputStream os = c.getOutputStream()) {
+                os.write(body.toString().getBytes(StandardCharsets.UTF_8));
+            }
+            if (c.getResponseCode() != 200) return null;
+            ByteArrayOutputStream buf = new ByteArrayOutputStream();
+            try (InputStream in = c.getInputStream()) {
+                byte[] b = new byte[4096];
+                int r;
+                while ((r = in.read(b)) > 0) buf.write(b, 0, r);
+            }
+            return buf.toString("UTF-8");
+        } catch (Exception ignored) {
+            return null;
+        } finally {
+            if (c != null) c.disconnect();
+        }
+    }
+
+    private static JSONObject groupBody(JSONObject g) throws Exception {
+        return new JSONObject().put("p_group", g.getString("code")).put("p_member", g.getString("member"));
+    }
+
     /** Kamarádi ze skupiny, kteří se dnes učili – načte se ze serveru, jinak z posledního stavu aplikace */
     private static List<String> friendsToday(JSONObject s, LocalDate today) {
         List<String> out = new ArrayList<>();
         JSONObject g = s.optJSONObject("group");
         if (g != null) {
-            HttpURLConnection c = null;
             try {
-                URL url = new URL(g.getString("url").replaceAll("/$", "") + "/rest/v1/rpc/group_list");
-                c = (HttpURLConnection) url.openConnection();
-                c.setConnectTimeout(5000);
-                c.setReadTimeout(5000);
-                c.setRequestMethod("POST");
-                c.setDoOutput(true);
-                String key = g.getString("key");
-                c.setRequestProperty("apikey", key);
-                if (key.startsWith("eyJ")) c.setRequestProperty("Authorization", "Bearer " + key);
-                c.setRequestProperty("Content-Type", "application/json");
-                JSONObject body = new JSONObject().put("p_group", g.getString("code")).put("p_member", g.getString("member"));
-                try (OutputStream os = c.getOutputStream()) {
-                    os.write(body.toString().getBytes(StandardCharsets.UTF_8));
-                }
-                if (c.getResponseCode() == 200) {
-                    ByteArrayOutputStream buf = new ByteArrayOutputStream();
-                    try (InputStream in = c.getInputStream()) {
-                        byte[] b = new byte[4096];
-                        int r;
-                        while ((r = in.read(b)) > 0) buf.write(b, 0, r);
-                    }
-                    JSONArray rows = new JSONArray(buf.toString("UTF-8"));
+                String res = rpc(g, "group_list", groupBody(g));
+                if (res != null) {
+                    JSONArray rows = new JSONArray(res);
                     for (int i = 0; i < rows.length(); i++) {
                         JSONObject row = rows.getJSONObject(i);
                         JSONObject st = row.optJSONObject("stats");
@@ -194,8 +211,6 @@ final class Reminders {
                 }
             } catch (Exception ignored) {
                 // bez připojení – použije se poslední stav z aplikace
-            } finally {
-                if (c != null) c.disconnect();
             }
         }
         if (today.toString().equals(s.optString("friendsDay", ""))) {
@@ -203,5 +218,31 @@ final class Reminders {
             if (f != null) for (int i = 0; i < f.length(); i++) out.add(f.optString(i));
         }
         return out;
+    }
+
+    /** Soutěže: čekající duely a kvíz dne skupiny (prázdné, když server soutěže nemá) */
+    private static String contestsLine(JSONObject s, LocalDate today) {
+        JSONObject g = s.optJSONObject("group");
+        if (g == null) return "";
+        try {
+            String res = rpc(g, "contest_status", groupBody(g).put("p_day", today.toString()));
+            if (res == null) return "";
+            JSONObject st = new JSONObject(res);
+            StringBuilder out = new StringBuilder();
+            JSONArray waiting = st.optJSONArray("waiting");
+            if (waiting != null && waiting.length() > 0) {
+                List<String> names = new ArrayList<>();
+                for (int i = 0; i < Math.min(3, waiting.length()); i++) names.add(waiting.optString(i));
+                out.append("\n⚔️ Výzva na duel od: ").append(String.join(", ", names));
+                if (waiting.length() > 3) out.append(" a další");
+            }
+            int daily = st.optInt("daily", 0);
+            if (!st.optBoolean("played") && daily > 0) {
+                out.append("\n🧠 Kvíz dne skupiny čeká (hráčů: ").append(daily).append(") – přidej se");
+            }
+            return out.toString();
+        } catch (Exception ignored) {
+            return "";
+        }
     }
 }
