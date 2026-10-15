@@ -195,3 +195,25 @@ describe('Témata a otázky ze sítí', () => {
     for (const t of SITE_TOPICS) expect(ids).toContain(t.id);
   });
 });
+
+describe('Windows Server podle hodiny 1. 10.', () => {
+  it('postupy, úkoly zadání a příkazy', () => {
+    const ids = PROCEDURES.map((p) => p.id);
+    for (const id of ['win22-server', 'win22-domena', 'win22-klient', 'win22-profil']) expect(ids).toContain(id);
+    const profil = PROCEDURES.find((p) => p.id === 'win22-profil')!;
+    expect(profil.steps.some((s) => s.cmd?.includes('\\\\SERVER\\profily\\%USERNAME%'))).toBe(true);
+    const order = generateProcedureQuestions(['windows']).filter((q) => q.id.startsWith('win22-'));
+    expect(order).toHaveLength(4);
+    const sc = generateScenario('windows');
+    const taskIds = sc.osTasks.map((t) => t.id);
+    expect(new Set(taskIds).size).toBe(taskIds.length);
+    for (const id of ['win-disk', 'win-home', 'win-profil', 'win-logon']) expect(taskIds).toContain(id);
+    expect(sc.osTasks.find((t) => t.id === 'win-logon')!.solution).toContain(`sysvol\\${sc.domain}\\scripts`);
+    const cmds = generateCommandQuestions(['windows']).filter((q): q is FillQuestion => q.type === 'fill');
+    const netUse = cmds.find((q) => q.answer.startsWith('net use'))!;
+    expect(checkFillAnswer(netUse, 'net use x: \\\\server\\logon')).toBe(true);
+    expect(checkFillAnswer(netUse, 'net use X: \\\\SERVER\\data')).toBe(false);
+    const profilePath = cmds.find((q) => q.answer.includes('-ProfilePath'))!;
+    expect(checkFillAnswer(profilePath, 'set-aduser barta -profilepath \\\\SERVER\\profily\\barta')).toBe(true);
+  });
+});

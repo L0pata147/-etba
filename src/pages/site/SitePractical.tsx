@@ -124,8 +124,8 @@ function ScenarioTab() {
                 <Card className="mb-3 p-4 text-sm">
                   {sc.os === 'windows' ? (
                     <>
-                      VirtualBox · Windows Server 2016 + klient Windows 10 · server <b>{sc.server.host}</b> · vnitřní síť {sc.server.net} · doména {sc.domain}
-                      <div className="mt-1 text-xs text-slate-500">Podle školního cvičení „OS Windows“ – úkoly označené „Navíc“ jsou rozšíření pro trénink.</div>
+                      VirtualBox · Windows Server 2016/2022 + klient Windows 10/11 · server <b>{sc.server.host}</b> · vnitřní síť {sc.server.net} · doména {sc.domain}
+                      <div className="mt-1 text-xs text-slate-500">Podle školního cvičení „OS Windows“ a hodiny 1. 10. (svazek O:, domovská složka, cestovní profil, přihlašovací skript) – úkoly označené „Navíc“ jsou rozšíření pro trénink.</div>
                     </>
                   ) : (
                     <>
@@ -248,7 +248,7 @@ export function ProceduresTab({ platforms = PLATFORMS }: { platforms?: Platform[
                   <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-800 dark:bg-brand-500/20 dark:text-brand-200">{i + 1}</span>
                   <div className="min-w-0 flex-1">
                     <div className="text-[15px]">{s.text}</div>
-                    {s.cmd && <pre className="mt-1 overflow-x-auto whitespace-pre rounded-lg bg-slate-900 px-3 py-2 font-mono text-[13px] text-emerald-300">{s.cmd}</pre>}
+                    {s.cmd && <pre className="mt-1 whitespace-pre-wrap break-words rounded-lg bg-slate-900 px-3 py-2 font-mono text-[13px] text-emerald-300">{s.cmd}</pre>}
                   </div>
                 </li>
               ))}

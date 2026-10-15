@@ -1,8 +1,8 @@
 {
-  "version": "1.27.0",
+  "version": "1.28.0",
   "notes": [
-    "Soutěže s kamarády: kvíz dne pro celou skupinu, týdenní výzva o XP a duely 1 na 1",
-    "Nové odznaky, rámečky Koruna a Zkřížené meče, pozadí Aréna a tituly za výhry",
-    "Android: připomínka ukáže čekající duel a kvíz dne skupiny"
+    "Windows Server 2022 podle hodiny 1. 10.: 4 nové postupy – server, doména server.local, klient Windows 11 Education, sdílené složky s cestovním profilem a přihlašovacím skriptem",
+    "Zadání nanečisto (Windows): nové úkoly svazek O:, domovská složka, cestovní profil, přihlašovací skript",
+    "Najdi chybu: 4 nové úlohy k Windows a nové příkazy (net use, Set-ADUser)"
   ]
 }

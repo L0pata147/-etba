@@ -509,13 +509,14 @@ export function generateScenario(os?: 'linux' | 'windows'): Scenario {
       : (() => {
           const clientIp = intToIp(srvNet + rnd(21, 99));
           const dn = domain.split('.').map((d) => `DC=${d}`).join(',');
+          const nb = domain.split('.')[0].toUpperCase();
           return [
             {
               id: 'win-vm',
               title: 'Virtuální počítače ve VirtualBoxu',
-              detail: 'Vytvoř VM pro Windows Server 2016 Standard (s Desktop prostředím): 2 GB RAM, 2 CPU, disk 50 GB s dynamickou alokací, síťová karta v režimu „Vnitřní síť“. Klient (Windows 10 Pro, příp. 7 Pro): 2 GB RAM (Win 7 stačí 1 GB), 1 CPU, disk 30 GB dynamicky, také vnitřní síť. Do obou doinstaluj přídavky pro hosta.',
+              detail: 'Vytvoř VM pro Windows Server 2016 Standard (s Desktop prostředím): 2 GB RAM, 2 CPU, disk 50 GB s dynamickou alokací, síťová karta v režimu „Vnitřní síť“. Klient (Windows 10 Pro, příp. 7 Pro): 2 GB RAM (Win 7 stačí 1 GB), 1 CPU, disk 30 GB dynamicky, také vnitřní síť. Do obou doinstaluj přídavky pro hosta. (Na hodině 1. 10. se dělal Windows Server 2022 a klient Windows 11 Education.)',
               solution:
-                'VirtualBox → Nový: typ Microsoft Windows, verze Windows 2016 (64-bit)\nPaměť 2048 MB, CPU 2 (Nastavení → Systém → Procesor)\nVytvořit virtuální disk VDI, Dynamicky alokovaný, 50 GB\nNastavení → Síť → Karta 1: Připojena k „Vnitřní síť“, název intnet (u obou VM stejný!)\nNastavení → Úložiště → optická mechanika: ISO Windows Serveru\nPo instalaci: Zařízení → Vložit obraz CD s přídavky pro hosta → spustit VBoxWindowsAdditions.exe → restart\n\nKlient stejně: Windows 10 (64-bit), 2048 MB (Win 7: 1024 MB), 1 CPU, 30 GB dynamicky, vnitřní síť intnet\n\nPříkazy:\nVBoxManage createvm --name ds --ostype Windows2016_64 --register\nVBoxManage modifyvm ds --memory 2048 --cpus 2 --nic1 intnet --intnet1 intnet\nVBoxManage createmedium disk --filename ds.vdi --size 51200 --variant Standard',
+                'VirtualBox → Nový: typ Microsoft Windows, verze Windows 2016 (64-bit)\nPaměť 2048 MB, CPU 2 (Nastavení → Systém → Procesor)\nVytvořit virtuální disk VDI, Dynamicky alokovaný, 50 GB\nNastavení → Síť → Karta 1: Připojena k „Vnitřní síť“, název intnet (u obou VM stejný!)\nNastavení → Úložiště → optická mechanika: ISO Windows Serveru\nPo instalaci: Zařízení → Vložit obraz CD s přídavky pro hosta → spustit VBoxWindowsAdditions.exe → restart\n\nKlient stejně: Windows 10 (64-bit), 2048 MB (Win 7: 1024 MB), 1 CPU, 30 GB dynamicky, vnitřní síť intnet\n\nPříkazy:\nVBoxManage createvm --name ds --ostype Windows2016_64 --register\nVBoxManage modifyvm ds --memory 2048 --cpus 2 --nic1 intnet --intnet1 intnet\nVBoxManage createmedium disk --filename ds.vdi --size 51200 --variant Standard\n\nHodina 1. 10.: Windows Server 2022 Standard (Desktopové prostředí), 4096 MB, 2 CPU, 80 GB dynamicky; klient Windows 11 Education (edice Home do domény nejde), oba ve vnitřní síti intnet',
             },
             {
               id: 'win-ip',
@@ -546,6 +547,30 @@ export function generateScenario(os?: 'linux' | 'windows'): Scenario {
               title: 'Doménová struktura: OU, uživatelé, skupiny',
               detail: 'Vytvoř organizační jednotky (např. Ucetni a Vyroba), v nich uživatelské účty a globální skupiny, uživatele přidej do skupin. Přihlas se na klientovi jako nový uživatel.',
               solution: `dsa.msc (Uživatelé a počítače služby Active Directory) → pravým na doménu → Nový → Organizační jednotka\n→ v OU: Nový → Uživatel (přihlašovací jméno, heslo, „uživatel musí změnit heslo“ dle potřeby)\n→ Nový → Skupina (obor Globální, typ Zabezpečení) → Vlastnosti skupiny → Členové → Přidat\n\n(PowerShell)\nNew-ADOrganizationalUnit -Name Ucetni\nNew-ADUser -Name "Jan Novak" -SamAccountName jnovak -Path "OU=Ucetni,${dn}" -AccountPassword (Read-Host -AsSecureString) -Enabled $true\nNew-ADGroup -Name Ucetni -GroupScope Global -Path "OU=Ucetni,${dn}"\nAdd-ADGroupMember -Identity Ucetni -Members jnovak`,
+            },
+            {
+              id: 'win-disk',
+              title: 'Svazek pro data',
+              detail: 'Zmenši svazek C: a z uvolněného místa vytvoř nový svazek O: (NTFS). Budou na něm sdílené složky data, profily a logon.',
+              solution: 'Správa počítače → Úložiště → Správa disků → pravým na (C:) → Zmenšit svazek\n→ pravým na nepřidělené místo → Nový jednoduchý svazek → písmeno O:, NTFS\n(PowerShell) Resize-Partition -DriveLetter C -Size ((Get-Partition -DriveLetter C).Size - 1GB)\nNew-Partition -DiskNumber 0 -UseMaximumSize -DriveLetter O | Format-Volume -FileSystem NTFS',
+            },
+            {
+              id: 'win-home',
+              title: 'Domovská složka',
+              detail: 'Vytvoř složku O:\\data, sdílej ji uživateli jnovak a nastav mu ji jako domovskou složku připojenou jako O:.',
+              solution: `O:\\data → Vlastnosti → Sdílení → Sdílení… → jnovak → Sdílet → \\\\ds\\data\ndsa.msc → jnovak → Vlastnosti → Profil → Domovská složka: Připojit O: k \\\\ds\\data\n(PowerShell) New-SmbShare -Name data -Path O:\\data -ChangeAccess ${nb}\\jnovak\nSet-ADUser jnovak -HomeDrive "O:" -HomeDirectory "\\\\ds\\data"`,
+            },
+            {
+              id: 'win-profil',
+              title: 'Cestovní profil',
+              detail: 'Vytvoř a sdílej složku O:\\profily a nastav uživateli jnovak cestovní profil. Na klientovi ověř, že profil je cestovní.',
+              solution: `O:\\profily → Sdílení → jnovak: Čtení/zápis (do profilu se při odhlášení zapisuje) → \\\\ds\\profily\ndsa.msc → jnovak → Vlastnosti → Profil → Cesta k profilu: \\\\ds\\profily\\%USERNAME% (pozor na lomítko před %USERNAME%)\n(PowerShell) Set-ADUser jnovak -ProfilePath "\\\\ds\\profily\\jnovak"\nOvěření na klientovi: přihlásit se jako jnovak → sysdm.cpl → Upřesnit → Profily uživatelů → ${nb}\\jnovak: Typ Cestovní`,
+            },
+            {
+              id: 'win-logon',
+              title: 'Přihlašovací skript',
+              detail: 'Vytvoř a sdílej složku O:\\logon a přihlašovací skript logon.bat, který uživateli jnovak připojí tuto složku jako jednotku X:.',
+              solution: `O:\\logon → Sdílení → jnovak (Čtení) → \\\\ds\\logon\nC:\\Windows\\SYSVOL\\sysvol\\${domain}\\scripts\\logon.bat (sdílené jako NETLOGON), obsah:\nnet use X: \\\\ds\\logon\n(Průzkumník → Zobrazení → ☑ Přípony názvů souborů, ať nevznikne logon.bat.txt)\ndsa.msc → jnovak → Vlastnosti → Profil → Přihlašovací skript: logon.bat\n(PowerShell) Set-ADUser jnovak -ScriptPath logon.bat`,
             },
             {
               id: 'win-share',

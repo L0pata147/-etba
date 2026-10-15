@@ -206,6 +206,10 @@ export const COMMANDS: CommandDef[] = [
   c('windows', 'DNS a DHCP', 'Nastav v DHCP volby: bránu 192.168.10.1 a DNS server 192.168.10.5.', 'Set-DhcpServerv4OptionValue -Router 192.168.10.1 -DnsServer 192.168.10.5', [], undefined, ['set-dhcpserverv4optionvalue', '-router 192.168.10.1', '-dnsserver 192.168.10.5']),
   c('windows', 'Sdílení', 'Sdílej složku C:\\Data jako „Data“ s plným přístupem pro skupinu FIRMA\\Ucetni.', 'New-SmbShare -Name Data -Path C:\\Data -FullAccess FIRMA\\Ucetni', [], undefined, ['new-smbshare', '-name data', '-path c:\\data', '-fullaccess']),
   c('windows', 'Sdílení', 'Zobraz sdílené složky na serveru.', 'Get-SmbShare', ['net share']),
+  c('windows', 'Sdílení', 'Připoj sdílenou složku \\\\SERVER\\logon jako jednotku X: (řádek přihlašovacího skriptu).', 'net use X: \\\\SERVER\\logon', [], 'Ve cvičení je tento řádek v logon.bat ve složce C:\\Windows\\SYSVOL\\sysvol\\server.local\\scripts.', ['net use', 'x:', '\\\\server\\logon']),
+  c('windows', 'Active Directory', 'Nastav uživateli barta domovskou složku \\\\SERVER\\data připojenou jako jednotka O:.', 'Set-ADUser barta -HomeDrive "O:" -HomeDirectory "\\\\SERVER\\data"', [], 'V GUI: Vlastnosti uživatele → Profil → Domovská složka → Připojit.', ['set-aduser', 'barta', '-homedrive', 'o:', '-homedirectory', '\\\\server\\data']),
+  c('windows', 'Active Directory', 'Nastav uživateli barta cestovní profil ve sdílené složce \\\\SERVER\\profily.', 'Set-ADUser barta -ProfilePath "\\\\SERVER\\profily\\barta"', [], 'V GUI: Vlastnosti uživatele → Profil → Cesta k profilu: \\\\SERVER\\profily\\%USERNAME%.', ['set-aduser', 'barta', '-profilepath', '\\\\server\\profily\\']),
+  c('windows', 'Active Directory', 'Nastav uživateli barta přihlašovací skript logon.bat.', 'Set-ADUser barta -ScriptPath logon.bat', [], 'Skript leží ve složce SYSVOL\\sysvol\\<doména>\\scripts (sdílené jako NETLOGON).', ['set-aduser', 'barta', '-scriptpath', 'logon.bat']),
 ];
 
 /** Příkazy všech předmětů (sítě + cloud) */
