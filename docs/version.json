@@ -1,8 +1,8 @@
 {
-  "version": "1.28.0",
+  "version": "1.29.0",
   "notes": [
-    "Windows Server 2022 podle hodiny 1. 10.: 4 nové postupy – server, doména server.local, klient Windows 11 Education, sdílené složky s cestovním profilem a přihlašovacím skriptem",
-    "Zadání nanečisto (Windows): nové úkoly svazek O:, domovská složka, cestovní profil, přihlašovací skript",
-    "Najdi chybu: 4 nové úlohy k Windows a nové příkazy (net use, Set-ADUser)"
+    "Zadání nanečisto na čas: 45–120 minut, řešení zamčená do konce, vyhodnocení a uložení do pokroku; rozpracované zadání se pamatuje",
+    "Zásady skupiny (GPO) podrobně: vytvoření a propojení, hesla a uzamčení účtu, Ovládací panely, příkazový řádek, Správce úloh, tapeta, síťová jednotka, dědičnost",
+    "Najdi chybu: 3 nové úlohy k zásadám skupiny, nové příkazy pro GPO a hesla"
   ]
 }

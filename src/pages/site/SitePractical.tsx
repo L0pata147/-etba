@@ -1,13 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Calculator, Check, Dices, ExternalLink, Eye, EyeOff, ListOrdered, RefreshCw, Terminal } from 'lucide-react';
+import { Calculator, Check, Dices, ExternalLink, Eye, EyeOff, Flag, ListOrdered, Lock, RefreshCw, Terminal, Timer } from 'lucide-react';
 import type { Platform } from '../../types';
 import { ALL_COMMANDS, COMMAND_GROUPS, PLATFORM_LABEL } from '../../data/site/commands';
 import { ALL_PROCEDURES } from '../../data/site/procedures';
 import { GENERATORS, generateCalcQuestions, generateScenario, type Scenario, type ScenarioTask } from '../../lib/netgen';
 import { generateCommandQuestions, generateTroubleQuestions } from '../../lib/topicgen';
 import { TROUBLE } from '../../data/troubleshoot';
-import { sample, shuffle } from '../../lib/random';
+import { sample, shuffle, uid } from '../../lib/random';
+import { useStore } from '../../store';
 import { Button, Card, PageHeader, Segmented, SectionTitle, Tag, cx } from '../../components/ui';
 import { useStartSession } from '../SessionPage';
 import { Topology } from './Topology';
@@ -48,18 +49,115 @@ export function SitePractical() {
 
 // ---------- Zadání nanečisto ----------
 
+interface ExamState {
+  sc: Scenario;
+  done: string[];
+  osShown: boolean;
+  /** 0 = bez časového limitu */
+  minutes: number;
+  startedAt: number;
+  finishedAt?: number;
+}
+
+const EXAM_KEY = 'maturitni-trener:prakticka-nanecisto';
+const TIME_OPTIONS = [0, 45, 60, 90, 120] as const;
+
+function loadExam(): ExamState | null {
+  try {
+    const e = JSON.parse(localStorage.getItem(EXAM_KEY) ?? 'null') as ExamState | null;
+    return e && e.sc && Array.isArray(e.done) ? e : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveExam(e: ExamState | null) {
+  try {
+    if (e) localStorage.setItem(EXAM_KEY, JSON.stringify(e));
+    else localStorage.removeItem(EXAM_KEY);
+  } catch {
+    /* úložiště nedostupné */
+  }
+}
+
+const clock = (sec: number) => {
+  const s = Math.max(0, Math.round(sec));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const r = s % 60;
+  return `${h ? `${h}:` : ''}${String(m).padStart(h ? 2 : 1, '0')}:${String(r).padStart(2, '0')}`;
+};
+
 function ScenarioTab() {
+  const { recordSession } = useStore();
   const [osMode, setOsMode] = useState<'los' | 'linux' | 'windows'>('los');
-  const [sc, setSc] = useState<Scenario | null>(null);
-  const [osShown, setOsShown] = useState(false);
-  const [done, setDone] = useState<Set<string>>(new Set());
+  const [minutes, setMinutes] = useState<number>(0);
+  // rozpracované zadání přežije zavření stránky (i zkouška na čas)
+  const [exam, setExam] = useState<ExamState | null>(() => loadExam());
   const [open, setOpen] = useState<Set<string>>(new Set());
+  const [now, setNow] = useState(Date.now());
+
+  const update = useCallback((fn: (e: ExamState) => ExamState) => {
+    setExam((e) => {
+      if (!e) return e;
+      const n = fn(e);
+      saveExam(n);
+      return n;
+    });
+  }, []);
+
+  const sc = exam?.sc ?? null;
+  const done = new Set(exam?.done ?? []);
+  const osShown = exam?.osShown ?? false;
+  const timed = !!exam && exam.minutes > 0;
+  const running = timed && !exam!.finishedAt;
+  const left = timed ? exam!.startedAt + exam!.minutes * 60000 - now : 0;
+  const total = sc ? sc.ptTasks.length + sc.osTasks.length : 0;
+
+  const examRef = useRef(exam);
+  examRef.current = exam;
+  const finish = useCallback(() => {
+    const e = examRef.current;
+    if (!e || e.finishedAt) return;
+    const n = { ...e, finishedAt: Date.now(), osShown: true };
+    examRef.current = n;
+    saveExam(n);
+    setExam(n);
+    const all = n.sc.ptTasks.length + n.sc.osTasks.length;
+    const score = all ? n.done.length / all : 0;
+    recordSession(
+      {
+        id: uid(),
+        date: Date.now(),
+        mode: 'site-zkouska',
+        title: `Praktická zkouška nanečisto – Packet Tracer + ${n.sc.os === 'linux' ? 'Debian 13' : 'Windows Server'}`,
+        difficulty: 'maturita',
+        total: all,
+        score,
+        seconds: Math.round((n.finishedAt - n.startedAt) / 1000),
+        bookIds: ['site-prakticka'],
+        sections: { 'it-prakticke': { score, total: all } },
+      },
+      20 + Math.round(40 * score),
+    );
+  }, [recordSession]);
+
+  // odpočet; po vypršení času se zadání samo ukončí
+  useEffect(() => {
+    if (!running) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [running]);
+  useEffect(() => {
+    if (running && left <= 0) finish();
+  }, [running, left, finish]);
 
   const generate = () => {
-    setSc(generateScenario(osMode === 'los' ? undefined : osMode));
-    setOsShown(osMode !== 'los');
-    setDone(new Set());
+    const e: ExamState = { sc: generateScenario(osMode === 'los' ? undefined : osMode), done: [], osShown: osMode !== 'los', minutes, startedAt: Date.now() };
+    saveExam(e);
+    setExam(e);
     setOpen(new Set());
+    setNow(Date.now());
   };
   const flip = (set: Set<string>, id: string) => {
     const n = new Set(set);
@@ -69,7 +167,16 @@ function ScenarioTab() {
   };
 
   const task = (t: ScenarioTask, i: number) => (
-    <TaskCard key={t.id} t={t} i={i} done={done.has(t.id)} open={open.has(t.id)} onDone={() => setDone((s) => flip(s, t.id))} onOpen={() => setOpen((s) => flip(s, t.id))} />
+    <TaskCard
+      key={t.id}
+      t={t}
+      i={i}
+      done={done.has(t.id)}
+      open={open.has(t.id)}
+      locked={running}
+      onDone={() => update((e) => ({ ...e, done: e.done.includes(t.id) ? e.done.filter((x) => x !== t.id) : [...e.done, t.id] }))}
+      onOpen={() => setOpen((s) => flip(s, t.id))}
+    />
   );
 
   return (
@@ -89,11 +196,31 @@ function ScenarioTab() {
               { value: 'windows', label: 'Windows Server' },
             ]}
           />
-          <Button icon={<RefreshCw size={17} />} onClick={generate}>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+            <Timer size={15} className="mr-1 inline" />
+            Na čas:
+          </span>
+          <Segmented value={minutes} onChange={setMinutes} options={TIME_OPTIONS.map((m) => ({ value: m, label: m ? `${m} min` : 'Bez času' }))} />
+          <Button icon={<RefreshCw size={17} />} onClick={generate} disabled={running}>
             {sc ? 'Nové zadání' : 'Vygenerovat zadání'}
           </Button>
         </div>
+        {minutes > 0 && !running && <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Na čas jsou řešení zamčená až do konce. Délku si nastav podle toho, kolik času máte u zkoušky.</p>}
       </Card>
+
+      {running && (
+        <div className="sticky top-16 z-20 flex flex-wrap items-center gap-3 rounded-2xl border border-brand-500/40 bg-white px-4 py-3 shadow-lg lg:top-3 dark:bg-slate-900">
+          <span className={cx('font-display text-2xl font-bold tabular-nums', left < 5 * 60000 ? 'text-rose-600 dark:text-rose-400' : '')}>{clock(left / 1000)}</span>
+          <span className="text-sm text-slate-500 dark:text-slate-400">zbývá · splněno {done.size}/{total}</span>
+          <Button size="sm" variant="secondary" className="ml-auto" icon={<Flag size={15} />} onClick={finish}>
+            Ukončit a vyhodnotit
+          </Button>
+        </div>
+      )}
+
+      {exam?.finishedAt && timed && sc && <ExamSummary exam={exam} onNew={() => (saveExam(null), setExam(null))} />}
 
       {sc && (
         <>
@@ -107,9 +234,9 @@ function ScenarioTab() {
               </Tag>
             </div>
             <div className="mt-4 rounded-xl bg-slate-50 p-2 dark:bg-slate-800/60">
-              <Topology sc={sc} showAddresses={open.has('adresace')} />
+              <Topology sc={sc} showAddresses={open.has('adresace') || !!exam?.finishedAt} />
             </div>
-            {!open.has('adresace') && <p className="mt-1 text-xs text-slate-500">Adresy se ve schématu ukážou, až si otevřeš řešení adresního plánu.</p>}
+            {!open.has('adresace') && !exam?.finishedAt && <p className="mt-1 text-xs text-slate-500">Adresy se ve schématu ukážou, až si otevřeš řešení adresního plánu.</p>}
           </Card>
 
           <section>
@@ -138,7 +265,7 @@ function ScenarioTab() {
             ) : (
               <Card className="p-6 text-center">
                 <p className="mb-4 text-slate-600 dark:text-slate-300">Až dokončíš Packet Tracer, vylosuj si, jestli dostaneš Linux, nebo Windows Server.</p>
-                <Button size="lg" icon={<Dices size={18} />} onClick={() => setOsShown(true)}>
+                <Button size="lg" icon={<Dices size={18} />} onClick={() => update((e) => ({ ...e, osShown: true }))}>
                   Vylosovat operační systém
                 </Button>
               </Card>
@@ -147,6 +274,63 @@ function ScenarioTab() {
         </>
       )}
     </div>
+  );
+}
+
+/** Vyhodnocení zadání na čas */
+function ExamSummary({ exam, onNew }: { exam: ExamState; onNew: () => void }) {
+  const { sc } = exam;
+  const done = new Set(exam.done);
+  const pt = sc.ptTasks.filter((t) => done.has(t.id)).length;
+  const os = sc.osTasks.filter((t) => done.has(t.id)).length;
+  const all = sc.ptTasks.length + sc.osTasks.length;
+  const pct = all ? Math.round(((pt + os) / all) * 100) : 0;
+  const used = Math.round(((exam.finishedAt ?? exam.startedAt) - exam.startedAt) / 1000);
+  const missing = [...sc.ptTasks, ...sc.osTasks].filter((t) => !done.has(t.id));
+  return (
+    <Card className="overflow-hidden">
+      <div className="bg-gradient-to-br from-brand-600 to-brand-900 p-5 text-white sm:p-6">
+        <div className="text-3xl">{pct >= 80 ? '🏆' : pct >= 50 ? '💪' : '📚'}</div>
+        <h2 className="mt-1 font-display text-2xl font-bold">Praktická zkouška nanečisto – hotovo</h2>
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          <div>
+            <div className="font-display text-3xl font-bold tabular-nums">{pct} %</div>
+            <div className="text-sm text-white/80">splněno</div>
+          </div>
+          <div>
+            <div className="font-display text-3xl font-bold tabular-nums">{clock(used)}</div>
+            <div className="text-sm text-white/80">z {exam.minutes} min</div>
+          </div>
+          <div>
+            <div className="font-display text-3xl font-bold tabular-nums">
+              {pt + os}/{all}
+            </div>
+            <div className="text-sm text-white/80">úkolů</div>
+          </div>
+        </div>
+      </div>
+      <div className="space-y-3 p-5 text-sm">
+        <div className="flex flex-wrap gap-2">
+          <Tag tone="brand">
+            Packet Tracer {pt}/{sc.ptTasks.length}
+          </Tag>
+          <Tag tone="violet">
+            {sc.os === 'linux' ? 'Debian 13' : 'Windows Server'} {os}/{sc.osTasks.length}
+          </Tag>
+        </div>
+        {missing.length > 0 ? (
+          <p className="text-slate-600 dark:text-slate-300">
+            Nesplněné úkoly: <b>{missing.map((t) => t.title).join(', ')}</b>. Řešení jsou teď odemčená níže.
+          </p>
+        ) : (
+          <p className="font-semibold text-emerald-600 dark:text-emerald-400">Všechny úkoly splněné. Výborně!</p>
+        )}
+        <p className="text-xs text-slate-500 dark:text-slate-400">Výsledek se uložil do Mého pokroku. Hodnotíš se sám – odškrtávej jen to, co opravdu funguje.</p>
+        <Button size="sm" icon={<RefreshCw size={15} />} onClick={onNew}>
+          Nové zadání
+        </Button>
+      </div>
+    </Card>
   );
 }
 
@@ -298,7 +482,7 @@ function CalcTab() {
 }
 
 /** Úkol zadání s odškrtnutím a skrytým řešením */
-export function TaskCard({ t, i, done, open, onDone, onOpen }: { t: ScenarioTask; i: number; done: boolean; open: boolean; onDone: () => void; onOpen: () => void }) {
+export function TaskCard({ t, i, done, open, onDone, onOpen, locked }: { t: ScenarioTask; i: number; done: boolean; open: boolean; onDone: () => void; onOpen: () => void; locked?: boolean }) {
   return (
     <div className={cx('rounded-xl border p-4 transition', done ? 'border-emerald-300 bg-emerald-50/60 dark:border-emerald-800 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-white/[0.07]')}>
       <div className="flex items-start gap-3">
@@ -314,10 +498,16 @@ export function TaskCard({ t, i, done, open, onDone, onOpen }: { t: ScenarioTask
             {i + 1}. {t.title}
           </div>
           <p className="mt-1 text-[15px] text-slate-600 dark:text-slate-300">{t.detail}</p>
-          <button onClick={onOpen} className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-400">
-            {open ? <EyeOff size={15} /> : <Eye size={15} />} {open ? 'Skrýt řešení' : 'Ukázat řešení'}
-          </button>
-          {open && <pre className="mt-2 whitespace-pre-wrap break-words rounded-lg bg-slate-900 p-3 font-mono text-[13px] leading-relaxed text-slate-100">{t.solution}</pre>}
+          {locked ? (
+            <div className="mt-2 inline-flex items-center gap-1 text-sm text-slate-400">
+              <Lock size={14} /> Řešení se odemkne po skončení
+            </div>
+          ) : (
+            <button onClick={onOpen} className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-400">
+              {open ? <EyeOff size={15} /> : <Eye size={15} />} {open ? 'Skrýt řešení' : 'Ukázat řešení'}
+            </button>
+          )}
+          {open && !locked && <pre className="mt-2 whitespace-pre-wrap break-words rounded-lg bg-slate-900 p-3 font-mono text-[13px] leading-relaxed text-slate-100">{t.solution}</pre>}
         </div>
       </div>
     </div>

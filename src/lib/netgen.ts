@@ -582,7 +582,13 @@ export function generateScenario(os?: 'linux' | 'windows'): Scenario {
               id: 'win-gpo',
               title: 'Navíc: zásady skupiny',
               detail: 'Vytvoř GPO propojené s OU Vyroba, které uživatelům zakáže přístup k Ovládacím panelům, a ověř na klientovi.',
-              solution: `gpmc.msc → OU Vyroba → Vytvořit objekt GPO v této doméně a propojit jej sem → Upravit\n→ Konfigurace uživatele → Zásady → Šablony pro správu → Ovládací panely → „Zakázat přístup k Ovládacím panelům…“ → Povoleno\n(PowerShell) New-GPO -Name "Vyroba-zasady" | New-GPLink -Target "OU=Vyroba,${dn}"\nNa klientovi: gpupdate /force, gpresult /r`,
+              solution: `gpmc.msc → pravým na OU Vyroba → Vytvořit objekt zásad skupiny v této doméně a propojit jej sem… → Upravit\n→ Konfigurace uživatele → Zásady → Šablony pro správu → Ovládací panely → Zakázat přístup k Ovládacím panelům a nastavení počítače → Povoleno\nUživatelské zásady platí pro uživatele, kteří jsou v OU Vyroba (u Konfigurace počítače by v OU musel být počítač)\n(PowerShell) New-GPO -Name "Vyroba-zasady" | New-GPLink -Target "OU=Vyroba,${dn}"\nNa klientovi: gpupdate /force, gpresult /r`,
+            },
+            {
+              id: 'win-hesla',
+              title: 'Navíc: zásady hesel a uzamčení účtu',
+              detail: 'Nastav pro doménové účty minimální délku hesla 8 znaků se složitostí a uzamčení účtu po 3 chybných pokusech na 30 minut.',
+              solution: `Správa zásad skupiny → ${domain} → Default Domain Policy → Upravit (zásady hesel pro doménové účty platí jen z GPO propojeného s doménou)\nKonfigurace počítače → Zásady → Nastavení systému Windows → Nastavení zabezpečení → Zásady účtů\n→ Zásady hesel: Minimální délka hesla 8, Heslo musí splňovat požadavky na složitost: Povoleno\n→ Zásady uzamčení účtu: Prahová hodnota pro uzamčení účtu 3, Doba uzamčení účtu 30 minut\n(PowerShell) Set-ADDefaultDomainPasswordPolicy -Identity ${domain} -MinPasswordLength 8 -ComplexityEnabled $true -LockoutThreshold 3 -LockoutDuration 00:30:00\nOvěření: Get-ADDefaultDomainPasswordPolicy`,
             },
           ];
         })();
