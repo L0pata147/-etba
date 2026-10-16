@@ -14,6 +14,7 @@ export interface CloudScenario {
   gateway: string;
   srvIp: string;
   dockerIp: string;
+  nfsIp: string;
   webPort: number;
   ram: number;
   cores: number;
@@ -23,7 +24,7 @@ export interface CloudScenario {
 
 const COMPANIES = ['Obaly', 'Tiskarna', 'Papirna', 'Logistika', 'Pekarna', 'Autodily'];
 
-/** Zadání nanečisto k praktické zkoušce z cloudu – virtualizace, kontejnery, zálohy */
+/** Zadání nanečisto k praktické zkoušce z cloudu – virtualizace, kontejnery, sdílená úložiště, zálohy */
 export function generateCloudScenario(hv?: Hypervisor): CloudScenario {
   const hypervisor = hv ?? pick<Hypervisor>(['virtualbox', 'hyperv', 'proxmox']);
   const company = pick(COMPANIES);
@@ -32,6 +33,7 @@ export function generateCloudScenario(hv?: Hypervisor): CloudScenario {
   const gateway = `192.168.${c}.1`;
   const srvIp = `192.168.${c}.${rnd(10, 40)}`;
   const dockerIp = `192.168.${c}.${rnd(50, 90)}`;
+  const nfsIp = `192.168.${c}.${rnd(100, 120)}`;
   const webPort = pick([8080, 8081, 8088, 9000]);
   const ram = pick([2, 4, 6]);
   const cores = pick([2, 4]);
@@ -174,12 +176,24 @@ export function generateCloudScenario(hv?: Hypervisor): CloudScenario {
         'services:\n  db:\n    image: mysql:8\n    environment:\n      MYSQL_ROOT_PASSWORD: heslo\n      MYSQL_DATABASE: wp\n    volumes:\n      - dbdata:/var/lib/mysql\n  wp:\n    image: wordpress\n    ports:\n      - "80:80"\n    environment:\n      WORDPRESS_DB_HOST: db\n      WORDPRESS_DB_USER: root\n      WORDPRESS_DB_PASSWORD: heslo\n      WORDPRESS_DB_NAME: wp\n    depends_on:\n      - db\nvolumes:\n  dbdata:\n\ndocker compose up -d\ndocker compose ps',
     },
     {
+      id: 'st-nfs',
+      title: 'Sdílení přes NFS',
+      detail: `Na Debianu 13 (VM nfs, adresa ${nfsIp}/24) nasdílej složku /srv/${name} pro celou síť ${net} s právem čtení i zápisu. Na Docker hostu ji trvale připoj do /mnt/${name} tak, aby se připojila i po restartu.`,
+      solution: `(nfs) apt install nfs-kernel-server -y\nmkdir -p /srv/${name}\nchown nobody:nogroup /srv/${name}   (root z klienta se mapuje na nobody – root_squash)\n# /etc/exports\n/srv/${name} ${net}(rw,sync,no_subtree_check)\nexportfs -a\nexportfs -v\n(klient) apt install nfs-common -y\nmkdir -p /mnt/${name}\n# /etc/fstab\n${nfsIp}:/srv/${name} /mnt/${name} nfs defaults,_netdev,x-systemd.automount 0 0\nsystemctl daemon-reload\nmount -a\nfindmnt /mnt/${name}\ntouch /mnt/${name}/test.txt`,
+    },
+    {
+      id: 'st-gluster',
+      title: 'Replikované úložiště GlusterFS',
+      detail: `Na třech uzlech gfs1–gfs3 (192.168.${c}.201–203) vytvoř volume vg-${name} typu replica 3 (na každém uzlu brick /srv/brick), připoj ho na Docker hostu do /mnt/gluster a ukaž, že data zůstanou dostupná i po vypnutí jednoho uzlu.`,
+      solution: `# /etc/hosts na všech uzlech i na klientovi\n192.168.${c}.201 gfs1\n192.168.${c}.202 gfs2\n192.168.${c}.203 gfs3\n(uzly) apt install glusterfs-server -y\nsystemctl enable --now glusterd\nmkdir -p /srv/brick\n(gfs1) gluster peer probe gfs2\ngluster peer probe gfs3\ngluster peer status\ngluster volume create vg-${name} replica 3 transport tcp gfs1:/srv/brick gfs2:/srv/brick gfs3:/srv/brick force\ngluster volume start vg-${name}\ngluster volume info\n(klient) apt install glusterfs-client -y\nmkdir -p /mnt/gluster\nmount -t glusterfs gfs1:/vg-${name} /mnt/gluster\nTest: zapsat soubor, vypnout VM gfs2, soubor číst a zapisovat dál; po zapnutí gluster volume heal vg-${name} info`,
+    },
+    {
       id: 'dok',
       title: 'Dokumentace a ověření',
       detail: `Zdokumentuj adresy, přihlašovací údaje a konfiguraci a předveď, že web (port ${webPort}) i WordPress fungují z jiného počítače v síti.`,
-      solution: `Tabulka: hostitel ${hvName}, SRV1 ${srvIp}, Docker ${dockerIp}, brána ${gateway}\nOvěření: ping, curl http://${dockerIp}:${webPort}, prohlížeč http://${dockerIp}`,
+      solution: `Tabulka: hostitel ${hvName}, SRV1 ${srvIp}, Docker ${dockerIp}, NFS ${nfsIp}, gfs1–3 192.168.${c}.201–203, brána ${gateway}\nOvěření: ping, curl http://${dockerIp}:${webPort}, prohlížeč http://${dockerIp}`,
     },
   );
 
-  return { hypervisor, company, net, gateway, srvIp, dockerIp, webPort, ram, cores, disk, tasks };
+  return { hypervisor, company, net, gateway, srvIp, dockerIp, nfsIp, webPort, ram, cores, disk, tasks };
 }

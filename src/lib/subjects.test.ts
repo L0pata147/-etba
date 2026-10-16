@@ -174,7 +174,7 @@ describe('Novinky 1.3', () => {
       expect(t.wrong).not.toContain(t.answer);
       expect(new Set([t.answer, ...t.wrong]).size).toBe(t.wrong.length + 1);
     }
-    const qs = generateTroubleQuestions(['cisco', 'linux', 'windows', 'docker', 'hyperv', 'proxmox', 'virtualbox']);
+    const qs = generateTroubleQuestions(['cisco', 'linux', 'windows', 'docker', 'hyperv', 'proxmox', 'virtualbox', 'storage']);
     expect(qs.length).toBe(TROUBLE.length);
     qs.forEach(validate);
     expect(buildSubjectPool('cloud', { commands: ['docker'], procedures: true }).some((q) => q.factKey === 'tr-dk-port')).toBe(true);
@@ -324,5 +324,39 @@ describe('ČT edu', () => {
     const { eduForBook } = await import('../data/ctedu');
     const { BOOK_DATABASE } = await import('../data/books');
     for (const b of BOOK_DATABASE) expect(eduForBook(b.title).length, b.title).toBeGreaterThan(0);
+  });
+});
+
+describe('Cloud: SSH, NFS a GlusterFS podle zápisků', () => {
+  it('postupy, příkazy, najdi chybu a zadání', async () => {
+    const { TROUBLE } = await import('../data/troubleshoot');
+    const { generateTroubleQuestions } = await import('./topicgen');
+    expect(SUBJECT_TOPICS.cloud.length).toBeGreaterThan(0);
+    const ids = ALL_PROCEDURES.filter((p) => p.platform === 'storage').map((p) => p.id);
+    for (const id of ['st-ssh', 'st-nfs-server', 'st-nfs-klient', 'st-gluster', 'st-gluster-klient', 'st-gluster-vypadek']) expect(ids).toContain(id);
+    expect(itemLabel('cloud-prikazy-storage')).toContain('NFS');
+    generateProcedureQuestions(['storage']).forEach(validate);
+    const cmds = generateCommandQuestions(['storage']).filter((q): q is FillQuestion => q.type === 'fill');
+    expect(cmds.length).toBe(ALL_COMMANDS.filter((c) => c.platform === 'storage').length);
+    const exp = cmds.find((q) => q.answer.startsWith('/mnt/sdileni'))!;
+    expect(checkFillAnswer(exp, '/mnt/sdileni 192.168.123.0/24(rw,sync,no_subtree_check,no_root_squash)')).toBe(true);
+    expect(checkFillAnswer(exp, '/mnt/sdileni 192.168.123.0/24 (rw,sync,no_subtree_check)')).toBe(false);
+    const vol = cmds.find((q) => q.answer.startsWith('gluster volume create'))!;
+    expect(checkFillAnswer(vol, 'gluster volume create vg0 replica 3 gfs1:/srv/brick1 gfs2:/srv/brick2 gfs3:/srv/brick3 force')).toBe(true);
+    expect(checkFillAnswer(vol, 'gluster volume create vg0 replica 3 gfs1:/srv/brick1 gfs2:/srv/brick2 gfs3:/srv/brick3')).toBe(false);
+    const tr = generateTroubleQuestions(['storage']);
+    expect(tr.length).toBe(TROUBLE.filter((t) => t.platform === 'storage').length);
+    expect(tr.length).toBeGreaterThanOrEqual(6);
+    expect(buildSubjectPool('cloud', { commands: ['storage'], procedures: true }).some((q) => q.factKey === 'tr-st-exportfs')).toBe(true);
+    const uloziste = SUBJECT_TOPICS.cloud.find((t) => t.id.endsWith('uloziste'))!;
+    generateTopicQuestions(uloziste).forEach(validate);
+    expect(uloziste.terms.some((t) => t.term === 'brick')).toBe(true);
+    for (const hv of ['virtualbox', 'hyperv', 'proxmox'] as const) {
+      const s = generateCloudScenario(hv);
+      const nfs = s.tasks.find((t) => t.id === 'st-nfs')!;
+      expect(nfs.solution).toContain(`${s.nfsIp}:/srv/`);
+      expect(s.tasks.find((t) => t.id === 'st-gluster')!.solution).toContain('replica 3');
+      expect(new Set(s.tasks.map((t) => t.id)).size).toBe(s.tasks.length);
+    }
   });
 });

@@ -224,6 +224,7 @@ const CLOUD_TOPICS_BASE = [
       ['Virtuální disky', ['formáty VHDX (Hyper-V), VMDK (VMware), qcow2 / raw (KVM)', 'thin provisioning – disk roste podle potřeby × thick – místo alokované předem', 'rozdílové disky / snapshoty']],
       ['Sdílená úložiště', ['DAS – lokální disky', 'NAS – souborový přístup po síti (NFS, SMB)', 'SAN – blokový přístup: iSCSI (přes Ethernet, target a initiator, LUN), Fibre Channel', 'distribuované – Ceph, VMware vSAN, Storage Spaces Direct']],
       ['Úložiště v cloudu', ['blokové – disky VM (AWS EBS, Azure Managed Disks)', 'souborové – sdílené složky (AWS EFS, Azure Files)', 'objektové – objekty v kontejnerech / bucketech přes HTTP API (AWS S3, Azure Blob), prakticky neomezená kapacita', 'třídy úložiště podle četnosti přístupu (hot, cool, archive)']],
+      ['NFS a GlusterFS (cvičení na Debianu)', ['NFS server: balíček nfs-kernel-server, sdílené složky v /etc/exports (komu a s jakými právy), načtení exportfs -a', 'NFS klient: balíček nfs-common, trvalé připojení řádkem v /etc/fstab (_netdev, x-systemd.automount)', 'GlusterFS: distribuované úložiště složené z více uzlů; brick = adresář na uzlu, ze kterého se skládá volume', 'replikovaný volume (replica 3) – každý soubor je na všech třech bricích, výpadek jednoho uzlu data nepřeruší', 'uzly se spojí příkazem gluster peer probe, klient se připojí přes FUSE: mount -t glusterfs']],
     ],
     [
       ['thin provisioning', 'Virtuální disk zabírá jen tolik místa, kolik dat obsahuje.'],
@@ -232,6 +233,9 @@ const CLOUD_TOPICS_BASE = [
       ['objektové úložiště', 'Ukládání dat jako objektů s metadaty, přístup přes HTTP API (S3).'],
       ['Ceph', 'Open-source distribuované úložiště.'],
       ['NFS', 'Síťový souborový systém používaný hlavně v Linuxu.'],
+      ['/etc/exports', 'Soubor NFS serveru se seznamem sdílených složek, povolených klientů a voleb (rw, sync…).'],
+      ['GlusterFS', 'Open-source distribuované souborové úložiště, které spojí disky více serverů do jednoho volume.'],
+      ['brick', 'Adresář na uzlu GlusterFS, ze kterého se skládá volume.'],
     ],
     [
       ['Jaký přístup poskytuje SAN?', 'blokový', ['souborový', 'objektový', 'webový']],
@@ -239,6 +243,9 @@ const CLOUD_TOPICS_BASE = [
       ['Která služba je objektové úložiště?', 'Amazon S3', ['Amazon EBS', 'iSCSI LUN', 'NTFS']],
       ['Přes jakou síť funguje iSCSI?', 'přes běžnou síť Ethernet / TCP/IP', ['jen přes Fibre Channel', 'přes USB', 'přes Wi-Fi Direct']],
       ['Jaké riziko má thin provisioning?', 'přeplnění fyzického úložiště při nadměrném přidělení', ['nižší bezpečnost hesel', 'nemožnost zálohy', 'pomalý start VM']],
+      ['V kterém souboru NFS serveru se nastavuje, co a komu se sdílí?', '/etc/exports', ['/etc/fstab', '/etc/hosts', '/etc/nfs.conf.d/share']],
+      ['Kolik kopií souboru je ve volume GlusterFS typu replica 3 ze tří bricků?', 'tři – na každém bricku jedna', ['jedna – soubory se rozdělí mezi bricky', 'dvě – originál a záloha', 'žádná, replica 3 znamená tři volume']],
+      ['Který balíček potřebuje Debian, aby se připojil k NFS sdílení?', 'nfs-common', ['nfs-kernel-server', 'glusterfs-server', 'samba']],
     ],
     [
       {

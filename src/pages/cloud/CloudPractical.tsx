@@ -13,7 +13,7 @@ export function CloudPractical() {
   const tab = (['zadani', 'prikazy', 'postupy', 'chyby'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
   return (
     <div>
-      <PageHeader title="Praktická zkouška – cloud" emoji="🛠️" sub="Virtualizace, virtuální sítě, snapshoty a zálohy, kontejnery." />
+      <PageHeader title="Praktická zkouška – cloud" emoji="🛠️" sub="Virtualizace, virtuální sítě, snapshoty a zálohy, kontejnery, NFS a GlusterFS." />
       <Segmented
         className="mb-5"
         value={tab}
@@ -84,7 +84,7 @@ function CloudScenarioTab() {
             </Tag>
           </Card>
           <section>
-            <SectionTitle sub="Virtualizace, kontejnery, zálohy">Úkoly</SectionTitle>
+            <SectionTitle sub="Virtualizace, kontejnery, úložiště, zálohy">Úkoly</SectionTitle>
             <div className="space-y-3">
               {sc.tasks.map((t, i) => (
                 <TaskCard key={t.id} t={t} i={i} done={done.has(t.id)} open={open.has(t.id)} onDone={() => setDone((s) => flip(s, t.id))} onOpen={() => setOpen((s) => flip(s, t.id))} />

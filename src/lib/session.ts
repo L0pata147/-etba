@@ -77,7 +77,7 @@ export const ALL_SITE: SitePoolOptions = { commands: ['cisco', 'linux', 'windows
 export const ALL_OPTIONS: Record<ItSubject, SitePoolOptions> = {
   site: ALL_SITE,
   hw: { calc: true },
-  cloud: { commands: ['virtualbox', 'docker', 'hyperv', 'proxmox'], procedures: true },
+  cloud: { commands: ['virtualbox', 'docker', 'hyperv', 'proxmox', 'storage'], procedures: true },
 };
 
 /** Všechny otázky pro dané knihy + pojmy + neumělecké texty */

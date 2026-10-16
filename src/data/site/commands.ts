@@ -29,6 +29,7 @@ export const PLATFORM_LABEL: Record<Platform, string> = {
   hyperv: 'Hyper-V (PowerShell)',
   proxmox: 'Proxmox VE',
   virtualbox: 'VirtualBox (VBoxManage)',
+  storage: 'Debian – SSH, NFS, GlusterFS',
 };
 
 export const COMMANDS: CommandDef[] = [
