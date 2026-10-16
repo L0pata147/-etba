@@ -451,6 +451,8 @@ export interface AppData {
   progressHistory: Record<string, Partial<Record<SubjectId, number>>>;
   /** Výsledky soutěží ve skupině (kvíz dne, týdenní výzva, duely) */
   contests?: ContestLog;
+  /** Později přidané knihy výchozího seznamu, které už byly do dat doplněné (když je uživatel smaže, znovu se nepřidají) */
+  seededBooks?: string[];
 }
 
 /** Předmět kvízu nebo duelu */

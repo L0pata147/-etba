@@ -1,5 +1,6 @@
 import type { AppData, Settings } from '../types';
-import { BOOK_DATABASE, DEFAULT_LIST_IDS, emptyBook, seedToBook } from '../data/books';
+import { BOOK_DATABASE, DEFAULT_LIST_IDS, LATER_DEFAULT_IDS, emptyBook, seedToBook } from '../data/books';
+import type { Book } from '../types';
 import { saveFileNative } from './native';
 
 export const STORAGE_KEY = 'maturitni-trener:data';
@@ -37,7 +38,25 @@ export function defaultData(): AppData {
     writings: [],
     topicNotes: {},
     progressHistory: {},
+    seededBooks: [...LATER_DEFAULT_IDS],
   };
+}
+
+/** Pevný čas doplnění – na všech zařízeních vznikne stejná kopie knihy, takže se při synchronizaci nic nezdvojí ani nepřepíše */
+const LATER_ADDED_AT = Date.UTC(2026, 9, 16);
+
+/** Doplní knihy přidané do výchozího seznamu v nové verzi (každou jen jednou) */
+function addLaterBooks(books: Book[], seeded: unknown): { books: Book[]; seededBooks: string[] } {
+  const done = new Set(Array.isArray(seeded) ? seeded.filter((x): x is string => typeof x === 'string') : []);
+  const out = [...books];
+  for (const id of LATER_DEFAULT_IDS) {
+    if (done.has(id)) continue;
+    done.add(id);
+    if (out.some((b) => b.id === id || b.templateId === id)) continue;
+    const seed = BOOK_DATABASE.find((b) => b.id === id);
+    if (seed) out.push(seedToBook(seed, { createdAt: LATER_ADDED_AT, updatedAt: LATER_ADDED_AT }));
+  }
+  return { books: out, seededBooks: [...done] };
 }
 
 /** Doplní chybějící pole (starší export, ruční úpravy) */
@@ -46,9 +65,8 @@ export function migrate(raw: unknown): AppData {
   const r = raw as Partial<AppData>;
   if (!Array.isArray(r.books)) throw new Error('V souboru chybí seznam knih.');
   const base = defaultData();
-  return {
-    version: DATA_VERSION,
-    books: r.books.map((b) => ({
+  const later = addLaterBooks(
+    r.books.map((b) => ({
       ...emptyBook(),
       ...b,
       motifs: b.motifs ?? [],
@@ -61,6 +79,12 @@ export function migrate(raw: unknown): AppData {
       scenes: b.scenes ?? [],
       deepQuestions: b.deepQuestions ?? [],
     })),
+    r.seededBooks,
+  );
+  return {
+    version: DATA_VERSION,
+    books: later.books,
+    seededBooks: later.seededBooks,
     srs: r.srs ?? {},
     mastery: r.mastery ?? {},
     sessions: r.sessions ?? [],

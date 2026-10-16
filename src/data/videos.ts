@@ -18,6 +18,7 @@ export const OTHER_BOOKS: Record<string, EduLink[]> = {
   'bylo nas pet': [yt('uCxDYroEf7g', 'Rozbor díla: Bylo nás pět – Karel Poláček', OU), yt('mVMPLV7Tdk4', 'Bylo nás pět – Karel Poláček – rozbor díla', 'Lenka Jedličková')],
   'spalovac mrtvol': [yt('F-76Lfw6GN8', 'Spalovač mrtvol (Ladislav Fuks) – děj, postavy, rozbor díla', AP)],
   rur: [yt('gt8vit38KBM', 'Rozbor díla: R.U.R. – Karel Čapek', OU), yt('x1hUYPwobxc', 'R.U.R. – rozbor díla k maturitě', SS)],
+  'valka s mloky': [yt('j7Ln6kqtKFM', 'Rozbor díla: Válka s Mloky – Karel Čapek', OU), yt('k3OcEPsIPcE', 'Válka s mloky – rozbor díla k maturitě', SS)],
   'podkoni a zak': [yt('weRGFONreAY', 'Česká literatura do konce 18. století (přehled, zmínka o Podkoním a žákovi)', 'kurz k maturitě')],
   'gulliverovy cesty': [yt('13BWRcZj34g', 'Jonathan Swift – Gulliverovy cesty (ukázka audioknihy)', 'Tympanum')],
   lakomec: [yt('Y3CEDUmXVn4', 'Rozbor díla: Lakomec – Molière', OU), yt('Fn3ItnucLFI', 'Lakomec – rozbor díla k maturitě', SS)],

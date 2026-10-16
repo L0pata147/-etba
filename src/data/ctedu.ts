@@ -19,6 +19,7 @@ const BOOKS: Record<string, EduLink[]> = {
   maj: [v('9134-ukazka-machuv-maj', 'Ukázka: Máchův Máj'), v('7130-dilo-karla-hynka-machy', 'Dílo Karla Hynka Máchy'), v('17155-k-h-macha-v-dobovem-dokumentu', 'K. H. Mácha v dobovém dokumentu')],
   kytice: [v('17631-erbenova-kytice-s-ilustracemi-mily-fuerstove', 'Erbenova Kytice s ilustracemi Míly Fürstové'), v('17101-dramatizace-erbenovy-kytice', 'Dramatizace Erbenovy Kytice'), v('975-karel-jaromir-erben-jeho-zivot-a-doba', 'Karel Jaromír Erben: Jeho život a doba')],
   rur: [v('14264-100-let-od-vzniku-r-u-r', '100 let od vzniku R.U.R.'), v('10963-slovo-robot', 'Slovo robot')],
+  'valka s mloky': [v('11481-valka-s-mloky-v-podani-pavla-kohouta', 'Válka s mloky v podání Pavla Kohouta')],
   'bylo nas pet': [v('14281-karel-polacek-bylo-nas-pet', 'Karel Poláček: Bylo nás pět'), v('17632-bylo-nas-pet-na-divadle', 'Bylo nás pět na divadle'), v('6782-kralovehradeckym-krajem-za-karlem-polackem', 'Královéhradeckým krajem za Karlem Poláčkem')],
   'spalovac mrtvol': [v('2759-dramatizace-romanu-spalovac-mrtvol', 'Dramatizace románu Spalovač mrtvol')],
   'evzen onegin': [v('15334-v-hlavni-roli-maturita-evzen-onegin', 'V hlavní roli: Maturita! – Evžen Oněgin'), v('3277-dramatizace-romanu-evzen-onegin', 'Dramatizace románu Evžen Oněgin')],

@@ -1,8 +1,7 @@
 {
-  "version": "1.30.0",
+  "version": "1.31.0",
   "notes": [
-    "Cloud: nová platforma Debian – SSH, NFS, GlusterFS podle zápisků ze cvičení (6 postupů, příkazy, 6 úloh Najdi chybu)",
-    "Zadání nanečisto z cloudu má nové úkoly: sdílení přes NFS a replikované úložiště GlusterFS",
-    "Téma Úložiště doplněné o NFS a GlusterFS (pojmy a otázky)"
+    "Válka s mloky (Karel Čapek) je 20. kniha maturitního seznamu – kompletní rozbor, postavy, scény, otázky a videa",
+    "Kniha se sama doplní i do stávajících dat, pokrok zůstává; když ji smažeš, znovu se nepřidá"
   ]
 }

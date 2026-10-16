@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { mergeData } from './merge';
 import { groupStats } from './group';
 import { newerVersion } from './update';
-import { defaultData } from './storage';
+import { defaultData, migrate } from './storage';
 import type { AppData, SessionRecord } from '../types';
 
 const clone = (d: AppData): AppData => structuredClone(d);
@@ -171,5 +171,48 @@ describe('profil na max', () => {
     const { BADGES, PLATINUM } = await import('./insights');
     const d = defaultData();
     for (const b of [...BADGES, PLATINUM]) expect(typeof b.check(d)).toBe('boolean');
+  });
+});
+
+describe('20. kniha (Válka s mloky) u stávajících uživatelů', () => {
+  const old = () => {
+    const d = defaultData() as Partial<AppData>;
+    d.books = d.books!.filter((b) => b.id !== 'valka-s-mloky');
+    delete d.seededBooks;
+    d.books[0] = { ...d.books[0], learned: true, notes: 'moje poznámka' };
+    d.xp = 321;
+    return JSON.parse(JSON.stringify(d));
+  };
+
+  it('doplní se jednou na konec seznamu a pokrok zůstane', () => {
+    const m = migrate(old());
+    expect(m.books).toHaveLength(20);
+    expect(m.books[19].id).toBe('valka-s-mloky');
+    expect(m.books[0]).toMatchObject({ learned: true, notes: 'moje poznámka' });
+    expect(m.xp).toBe(321);
+    expect(m.seededBooks).toContain('valka-s-mloky');
+    const again = migrate(JSON.parse(JSON.stringify(m)));
+    expect(again.books.filter((b) => b.id === 'valka-s-mloky')).toHaveLength(1);
+  });
+
+  it('smazaná kniha se znovu nepřidá', () => {
+    const m = migrate(old());
+    m.books = m.books.filter((b) => b.id !== 'valka-s-mloky');
+    expect(migrate(JSON.parse(JSON.stringify(m))).books.some((b) => b.id === 'valka-s-mloky')).toBe(false);
+  });
+
+  it('dvě zařízení doplní stejnou kopii a synchronizace ji nezdvojí ani nepřepíše', () => {
+    const a = migrate(old());
+    const b = migrate(old());
+    expect(JSON.stringify(a.books[19])).toBe(JSON.stringify(b.books[19]));
+    const base = migrate(old());
+    const local = clone(a);
+    local.books[19] = { ...local.books[19], notes: 'mloci', updatedAt: Date.now() };
+    const m = mergeData(base, local, b);
+    expect(m.books.filter((x) => x.id === 'valka-s-mloky')).toHaveLength(1);
+    expect(m.books.find((x) => x.id === 'valka-s-mloky')!.notes).toBe('mloci');
+    const deleted = clone(a);
+    deleted.books = deleted.books.filter((x) => x.id !== 'valka-s-mloky');
+    expect(mergeData(base, deleted, b).books.some((x) => x.id === 'valka-s-mloky')).toBe(false);
   });
 });

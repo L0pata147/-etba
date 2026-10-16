@@ -50,6 +50,7 @@ export function mergeData(base: AppData | null, local: AppData, remote: AppData)
       return out;
     }),
     ...(contests ? { contests } : {}),
+    seededBooks: [...new Set([...(local.seededBooks ?? []), ...(remote.seededBooks ?? [])])],
   };
 }
 

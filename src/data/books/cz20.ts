@@ -574,4 +574,138 @@ export const BOOKS_CZ20: BookSeed[] = [
       },
     ],
   },
+  {
+    id: 'valka-s-mloky',
+    title: 'Válka s mloky',
+    author: 'Karel Čapek',
+    authorLife: '1890–1938',
+    year: '1936 (časopisecky 1935–1936)',
+    category: 'cz20',
+    kind: 'epika',
+    genre: 'satirický utopický (antiutopický) román; sci-fi, alegorie',
+    period: 'Česká literatura 20. století – meziválečná literatura',
+    movement: 'Meziválečná próza – demokratický proud; satira, antiutopie a sci-fi',
+    narratorShort: 'er-forma, vševědoucí vypravěč s ironickým odstupem',
+    settingShort: 'ostrov Tana Masa, oceány celého světa, Praha; 30. léta 20. století',
+    theme:
+      'Objev inteligentních mloků, jejich využívání jako levné pracovní síly a jejich vzestup, při kterém si násilím berou pevninu – varování před chamtivostí, nacionalismem a fašismem.',
+    motifs: ['mloci (Andrias Scheuchzeri)', 'perly a obchod', 'vykořisťování a otroctví', 'zisk a kapitalismus', 'věda a technika', 'tisk a senzace', 'rasismus a nacionalismus', 'životní prostor', 'zánik civilizace', 'vina a odpovědnost'],
+    mainIdea:
+      'Lidé kvůli zisku a krátkozrakosti sami vychovají, vyzbrojí a rozšíří sílu, která je zničí. Čapek varuje před fašismem a nacistickým „životním prostorem“, před masovou civilizací bez morálky a před tím, že se lidstvo kvůli vlastním zájmům nedokáže spojit proti společnému nebezpečí.',
+    mainCharacters: [
+      ch('Kapitán J. van Toch', 'Kapitán holandské lodi, původem Čech z Jevíčka (Vantoch). Na ostrově Tana Masa objeví mloky, dá jim nože na obranu proti žralokům a oni mu za to nosí perly. Mloky má rád („tapa-boys“), ale rozjede obchod, který vede ke katastrofě.'),
+      ch('G. H. Bondy', 'Průmyslník, prezident společnosti MEAS, van Tochův kamarád z dětství z Jevíčka. V mlocích vidí obchod; po kapitánově smrti z podnikání vyroste Salamander-Syndicate. Představitel kapitalismu, kterému jde hlavně o zisk.'),
+      ch('Pan Povondra', 'Bondyho vrátný, typ „malého českého člověka“. Pustil kapitána k Bondymu, celý život sbírá novinové výstřižky o mlocích (z nich vznikají „Dějiny Mloků“ ve 2. knize) a na konci si vyčítá, že to všechno zavinil.'),
+      ch('Mloci (Andrias Scheuchzeri)', 'Zprvu plachá zvířata, která se od lidí naučí mluvit, pracovat a používat techniku. Rychle se množí, potřebují víc mělčin a nakonec rozbourávají pevniny. Alegorie mas a fašismu, ale i vykořisťovaných.'),
+      ch('Chief Salamander', 'Vůdce mloků, který rádiem klade lidstvu požadavky. Podle autorova vnitřního hlasu je to ve skutečnosti člověk – Andreas Schultze, za světové války šikovatel; bývá chápán jako narážka na Hitlera.'),
+    ],
+    sideCharacters: [
+      ch('Redaktoři Golombek a Valenta', 'Novináři, kteří za kapitánem přijedou do Jevíčka pro reportáž o dalekých ostrovech.'),
+      ch('Abe Loeb a Li (Lily Valley)', 'Mladí Američané z jachty v laguně; Li chce na ostrově točit film, mloci jí nosí perly a „štěkají“ slovo „Najf“ (nůž).'),
+      ch('Andy', 'Mlok (Andrias Scheuchzeri) v londýnské zoo; hlídač Thomas Greggs zjistí, že umí mluvit a číst noviny – opakuje ale jen to, co vyčetl. Kvůli návalu lidí „zašel na následky své popularity“.'),
+      ch('Wolf Meynert', 'Německý filozof, autor díla Untergang der Menschheit (Zánik lidstva); tvrdí, že stejnorodí mloci musí nahradit lidstvo.'),
+      ch('Frantík', 'Povondrův syn; s otcem uvidí z loďky na Vltavě mloka.'),
+      ch('Autor a jeho vnitřní hlas', 'V poslední kapitole spolu rozmlouvají, jak má příběh skončit.'),
+    ],
+    plot:
+      '1. kniha – Andrias Scheuchzeri: Kapitán J. van Toch, Čech z Jevíčka ve službách holandské lodi, objeví na ostrově Tana Masa inteligentní mloky. Dá jim nože na obranu proti žralokům a oni mu za to nosí perly. V Jevíčku ho navštíví redaktoři Golombek a Valenta, pak se kapitán dostane přes vrátného Povondru k průmyslníkovi G. H. Bondymu, svému kamarádovi z dětství, a společně začnou mloky převážet na další ostrovy. O mlocích se dozví svět: američtí mladí lidé z jachty, vědci (zjistí, že jde o miocenního mloka Andrias Scheuchzeri, považovaného za vyhynulého) i londýnská zoo, kde mluví mlok Andy. Po kapitánově smrti vznikne Salamander-Syndicate, který s mloky obchoduje jako s levnou pracovní silou. 2. kniha – Po stupních civilizace: Pan Povondra sbírá novinové výstřižky a z nich se skládají „Dějiny Mloků“ – obchod s mloky jako s otroky, jejich výchova, práce na hrázích a pobřežích, debaty o jejich právech, množení a vyzbrojování. 3. kniha – Válka s mloky: Dochází k prvním střetům lidí s mloky. Němci vyhlásí „nordického“ baltského mloka za vyšší rasu a žádají nový prostor. Mloci způsobí zemětřesení v Louisianě a jejich vůdce Chief Salamander rádiem žádá vyklizení břehů, protože mloci potřebují víc mělčin a pevniny rozbourají. Konference ve Vaduzu nic nevyřeší a mloci zaplavují další území. Pan Povondra se synem Frantíkem uvidí mloka i na Vltavě v Praze a vyčítá si, že pustil kapitána k Bondymu. V závěru autor rozmlouvá se svým vnitřním hlasem: mloci se možná rozdělí na Atlanty a Lemury, vyhubí se ve vzájemné válce a lidé se vrátí z hor – konec ale zůstává otevřený.',
+    plotEvents: [
+      'Kapitán van Toch objeví na ostrově Tana Masa mloky a vymění s nimi nože za perly.',
+      'Přes vrátného Povondru se kapitán dostane k průmyslníkovi Bondymu a společně začnou mloky převážet na další ostrovy.',
+      'Svět se o mlocích dozví; v londýnské zoo mluví mlok Andy.',
+      'Po smrti kapitána vznikne Salamander-Syndicate a s mloky se obchoduje jako s levnou pracovní silou.',
+      'Mloci se množí, učí se a dostávají zbraně a výbušniny.',
+      'Mloci způsobí zemětřesení v Louisianě a Chief Salamander rádiem žádá vyklizení břehů.',
+      'Konference ve Vaduzu nic nevyřeší, mloci zaplavují pevninu.',
+      'Pan Povondra uvidí mloka na Vltavě v Praze a vyčítá si, že to zavinil.',
+      'Autor rozmlouvá se svým vnitřním hlasem o možném konci příběhu.',
+    ],
+    setting: 'Celý svět: ostrov Tana Masa a další tichomořské ostrovy, Jevíčko, Praha, Londýn, Amerika, Německo, oceány a pobřeží všech kontinentů; Vaduz (Lichtenštejnsko).',
+    time: '30. léta 20. století a blízká budoucnost; děj trvá několik desítek let – od objevu mloků až po jejich válku s lidstvem.',
+    composition:
+      'Tři knihy: Andrias Scheuchzeri (objev mloků a jejich přijetí), Po stupních civilizace (Dějiny Mloků z Povondrových výstřižků), Válka s mloky (konflikt, poslední kapitola Autor mluví sám se sebou). Převážně chronologický děj. Montážní (kolážová) kompozice – vyprávění se střídá s novinovými články, vědeckými pojednáními, zápisy, projevy, poznámkami pod čarou a texty v cizích jazycích. Otevřený konec.',
+    narrator:
+      'Er-forma; vševědoucí vypravěč s ironickým a satirickým odstupem. Ve 2. knize jako by vypravěč jen řadil dokumenty (výstřižky), v poslední kapitole promlouvá sám autor se svým vnitřním hlasem.',
+    narrativeModes: 'Vyprávění, popis, úvahy; publicistické, odborné a úřední texty (novinové zprávy, vědecké studie, zápisy ze schůzí), dokumenty a poznámky pod čarou.',
+    speechTypes: 'Pásmo vypravěče, přímá řeč (dialogy postav), nepřímá řeč, citace dokumentů a novinových zpráv, závěrečný dialog autora s vnitřním hlasem.',
+    verse: '',
+    language:
+      'Pestrá směs funkčních stylů – hovorový (kapitán, Povondra), publicistický, odborný, úřední; parodie novinového a vědeckého jazyka a rasových teorií. Cizí jazyky (angličtina, němčina, francouzština…), kapitán mluví lámanou češtinou s cizími slovy („tapa-boys“), mloci opakují „Najf“. Ironie a satira.',
+    tropes:
+      'Alegorie (mloci = masy, fašismus, vykořisťovaní), satira, ironie, groteska, parodie (vědeckého stylu, tisku, rasových teorií – Der Nordmolch), hyperbola, kontrast, aluze (Andrias Scheuchzeri – fosilie popsaná J. J. Scheuchzerem; Atlantida a Lemurie v závěru).',
+    authorContext:
+      'Karel Čapek – spisovatel, dramatik a novinář (Lidové noviny), vůdčí osobnost meziválečné literatury, demokrat a humanista, přítel T. G. Masaryka (Hovory s TGM), hostitel pátečníků. Mnohokrát navržen na Nobelovu cenu. Ve 30. letech reaguje na nástup fašismu: Válka s mloky, dramata Bílá nemoc a Matka. Další díla: R.U.R., Věc Makropulos, Krakatit, Továrna na absolutno, noetická trilogie (Hordubal, Povětroň, Obyčejný život), Povídky z jedné a z druhé kapsy.',
+    historicalContext:
+      'Polovina 30. let – hospodářská krize, Hitler u moci v Německu (od 1933) a nacistická teze o „životním prostoru“, ohrožení Československa, kolonialismus a závody ve zbrojení. Čapkova díla varující před fašismem: Válka s mloky, Bílá nemoc, Matka. Světové antiutopie: A. Huxley – Konec civilizace, J. Zamjatin – My, později G. Orwell – 1984; sci-fi H. G. Wellse.',
+    otherWorks: ['Krakatit', 'Továrna na absolutno', 'Bílá nemoc', 'Matka', 'R.U.R.', 'Věc Makropulos', 'Povídky z jedné a z druhé kapsy'],
+    interpretation:
+      'Mloci jsou zrcadlem lidstva: lidé je kvůli zisku vykořisťují, učí, vyzbrojují a množí, až se jejich vlastní dílo obrátí proti nim. Román je alegorií rozpínavosti nacistického Německa (životní prostor, Chief Salamander), ale i kritikou kolonialismu, rasismu, kapitalismu, senzacechtivého tisku a neschopnosti států se dohodnout. Povondrova vina ukazuje, že odpovědnost nesou i „malí lidé“. Otevřený konec nechává rozhodnutí na čtenáři.',
+    examTips:
+      'Znát stavbu (tři knihy, montáž novinových výstřižků a dokumentů), postavy van Tocha, Bondyho a Povondry, Chief Salamandera (Andreas Schultze), význam Der Nordmolch (parodie rasové teorie), alegorii fašismu a otevřený konec (rozhovor autora s vnitřním hlasem). Srovnat s R.U.R. – vzpoura stvořených proti lidem.',
+    quick: [
+      'K. Čapek, 1936 (Lidové noviny 1935–1936); satirický antiutopický román, sci-fi, alegorie.',
+      'Tři knihy: Andrias Scheuchzeri – Po stupních civilizace – Válka s mloky; montáž novin a dokumentů.',
+      'Kapitán van Toch objeví mloky na Tana Mase, nože za perly; s průmyslníkem Bondym začne obchod.',
+      'Vrátný Povondra sbírá výstřižky a nakonec si vyčítá, že pustil kapitána k Bondymu.',
+      'Mloci se množí, dostanou zbraně, Chief Salamander žádá břehy a mloci zaplavují pevniny.',
+      'Alegorie fašismu (životní prostor, Der Nordmolch), kritika zisku a kolonialismu; otevřený konec.',
+    ],
+    clues: [
+      'Román, v němž kapitán dá inteligentním mořským tvorům nože proti žralokům a oni mu za to nosí perly.',
+      'Satirický román, ve kterém vrátný celý život sbírá novinové výstřižky a nakonec si vyčítá, že pustil kapitána k továrníkovi.',
+      'Román, v jehož poslední kapitole autor rozmlouvá se svým vnitřním hlasem o tom, jak celý příběh skončí.',
+    ],
+    scenes: [
+      {
+        scene: 'Kapitán van Toch dává mlokům nože a ukazuje jim, jak se bránit žralokům a otevírat perlorodky.',
+        context: '1. kniha (Andrias Scheuchzeri), začátek – objev mloků na ostrově Tana Masa; z výměny nožů za perly vznikne obchod, který vede ke katastrofě.',
+      },
+      {
+        scene: 'Z rádia se ozve hlas vůdce mloků, který žádá, aby lidé vyklidili mořské břehy na místech, která předem označí.',
+        context: '3. kniha – Chief Salamander klade požadavky po zemětřesení v Louisianě; mloci potřebují víc mělčin, a proto chtějí rozbourat pevniny.',
+      },
+      {
+        scene: 'Starý pan Povondra sedí se synem v loďce na Vltavě a před Národním divadlem uvidí černou hlavu mloka.',
+        context: 'Předposlední kapitola 3. knihy (Pan Povondra to bere na sebe) – mloci už jsou i v Praze; Povondra si vyčítá, že kdysi pustil kapitána k Bondymu.',
+      },
+    ],
+    deepQuestions: [
+      {
+        q: 'Jak lze vyložit alegorii mloků ve Válce s mloky?',
+        area: 'theme',
+        answer:
+          'Mloci představují především fašismus a nacistické Německo – masu bez individuality, vůdce Chief Salamandera (Andreas Schultze, bývalý šikovatel) a požadavek „životního prostoru“; kapitola Der Nordmolch paroduje rasovou teorii. Zároveň jsou obrazem vykořisťovaných – otroků a kolonizovaných – a zrcadlem samotného lidstva, které kvůli zisku vychová vlastní zkázu.',
+        points: [
+          { label: 'fašismus / nacismus, Německo', keywords: ['fašis', 'nacis', 'němec', 'hitler'] },
+          { label: 'životní prostor, vůdce', keywords: ['prostor', 'chief', 'vůdce', 'schultze'] },
+          { label: 'rasová teorie (Der Nordmolch)', keywords: ['ras', 'nordmolch', 'nordick'] },
+          { label: 'vykořisťování, kolonialismus, zisk', keywords: ['vykořis', 'kolon', 'otrok', 'zisk'] },
+        ],
+      },
+      {
+        q: 'Jaká je kompozice Války s mloky a proč ji Čapek zvolil?',
+        area: 'composition',
+        answer:
+          'Román má tři knihy (Andrias Scheuchzeri, Po stupních civilizace, Válka s mloky). Vyprávění se střídá s novinovými výstřižky, vědeckými pojednáními, zápisy a poznámkami pod čarou – montáž (koláž). Druhá kniha je složená z výstřižků pana Povondry. Čapek tak ukazuje dění očima tisku a veřejnosti, paroduje jejich styl a zachycuje celý svět najednou. Konec je otevřený – autor rozmlouvá se svým vnitřním hlasem.',
+        points: [
+          { label: 'tři knihy', keywords: ['tři', '3', 'knih'] },
+          { label: 'montáž / koláž dokumentů a novin', keywords: ['montáž', 'koláž', 'novin', 'výstřiž', 'dokument'] },
+          { label: 'parodie stylů, pohled tisku', keywords: ['parod', 'tisk', 'styl'] },
+          { label: 'otevřený konec, autor s vnitřním hlasem', keywords: ['otevř', 'vnitřní', 'autor'] },
+        ],
+      },
+      {
+        q: 'Proč si pan Povondra na konci vyčítá, že zavinil zkázu světa?',
+        area: 'characters',
+        answer:
+          'Jako Bondyho vrátný kdysi pustil kapitána van Tocha k Bondymu – kdyby to neudělal, obchod s mloky by možná nevznikl. Povondra je „malý český člověk“; Čapek přes něj ukazuje, že odpovědnost za dějiny nesou i obyčejní lidé, kteří nic velkého nerozhodují, a zároveň s ironií jeho přecenění vlastní role.',
+        points: [
+          { label: 'pustil kapitána k Bondymu', keywords: ['pustil', 'kapitán', 'bondy'] },
+          { label: 'vrátný, malý člověk', keywords: ['vrátn', 'malý', 'obyčejn'] },
+          { label: 'odpovědnost obyčejných lidí', keywords: ['odpověd', 'vin'] },
+          { label: 'ironie', keywords: ['ironi', 'přecen'] },
+        ],
+      },
+    ],
+  },
 ];

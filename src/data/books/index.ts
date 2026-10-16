@@ -29,7 +29,11 @@ export const DEFAULT_LIST_IDS = [
   'bylo-nas-pet',
   'spalovac-mrtvol',
   'rur',
+  'valka-s-mloky',
 ];
+
+/** Knihy přidané do výchozího seznamu později – doplní se i stávajícím uživatelům (jen jednou) */
+export const LATER_DEFAULT_IDS = ['valka-s-mloky'];
 
 export function seedToBook(seed: BookSeed, overrides: Partial<Book> = {}): Book {
   const now = Date.now();

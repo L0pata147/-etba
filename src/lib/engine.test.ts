@@ -47,8 +47,8 @@ function validate(q: Question) {
 describe('generátor otázek', () => {
   const data = defaultData();
 
-  it('výchozí seznam obsahuje 19 knih', () => {
-    expect(data.books).toHaveLength(19);
+  it('výchozí seznam obsahuje 20 knih', () => {
+    expect(data.books).toHaveLength(20);
   });
 
   it.each(defaultData().books.map((b) => [b.title, b.id]))('%s – generuje platné otázky všech typů', (_t, id) => {
