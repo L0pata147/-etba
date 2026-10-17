@@ -147,3 +147,108 @@ describe('Linux – úlohy', () => {
     expect(s.exec('apt install neexistuje').out.join()).toMatch(/Nelze najít/);
   });
 });
+
+describe('Linux – NFS a GlusterFS', () => {
+  const task = (id: string) => LINUX_TASKS.find((x) => x.id === id)!;
+
+  it('NFS server: bez exportfs -a se nic nesdílí, mezera před závorkou varuje', () => {
+    const t = task('lx-nfs-server');
+    const s = t.create();
+    expect(s.exec('exportfs -v').out.join()).toMatch(/příkaz nenalezen/);
+    s.exec('apt install nfs-kernel-server -y');
+    expect(s.read('/etc/exports')).toMatch(/access control list/);
+    s.saveFile('/etc/exports', (s.read('/etc/exports') ?? '') + '/mnt/sdileni 192.168.123.0/24(rw,sync,no_subtree_check)\n');
+    expect(s.exec('exportfs -a').out.join()).toMatch(/Failed to stat \/mnt\/sdileni/);
+    s.exec('mkdir -p /mnt/sdileni');
+    expect(allOk(t.check(s))).toEqual(['sdílení je načtené (exportfs -a) pro síť /24 s rw']);
+    expect(s.exec('exportfs -a').out).toEqual([]);
+    expect(s.exec('exportfs -v').out.join()).toMatch(/^\/mnt\/sdileni\s+192\.168\.123\.0\/24\(sync,wdelay,hide,no_subtree_check,sec=sys,rw,secure,root_squash,no_all_squash\)/);
+    expect(allOk(t.check(s))).toEqual([]);
+    s.saveFile('/etc/exports', '/mnt/sdileni 192.168.123.0/24 (rw,sync)\n');
+    expect(s.exec('exportfs -ra').out.join('\n')).toMatch(/No options for \/mnt\/sdileni 192\.168\.123\.0\/24[\s\S]*No host name given/);
+  });
+
+  it('NFS klient: chybějící nfs-common, přípojný bod a daemon-reload', () => {
+    const t = task('lx-nfs-klient');
+    const s = t.create();
+    const line = '10.0.3.251:/data /mnt/nfs nfs defaults,_netdev,x-systemd.automount 0 0\n';
+    s.saveFile('/etc/fstab', (s.read('/etc/fstab') ?? '') + line);
+    let out = s.exec('mount -a').out.join('\n');
+    expect(out).toMatch(/systemctl daemon-reload/);
+    expect(out).toMatch(/mount point does not exist/);
+    s.exec('mkdir -p /mnt/nfs');
+    expect(s.exec('mount -a').out.join('\n')).toMatch(/bad option[\s\S]*helper program/);
+    s.exec('apt install nfs-common -y');
+    s.exec('systemctl daemon-reload');
+    out = s.exec('mount -a').out.join('\n');
+    expect(out).toBe('');
+    expect(s.exec('findmnt /mnt/nfs').out.join('\n')).toMatch(/\/mnt\/nfs\s+10\.0\.3\.251:\/data\s+nfs4/);
+    expect(allOk(t.check(s))).toEqual([]);
+    expect(s.exec('mount -t nfs 10.0.3.251:/zaloha /mnt').out.join()).toMatch(/access denied by server/);
+  });
+
+  it('GlusterFS: hosts, glusterd, peer probe, replica a force', () => {
+    const t = task('lx-gluster');
+    const s = t.create();
+    s.exec('apt install glusterfs-server -y');
+    expect(s.exec('gluster peer status').out.join()).toMatch(/gluster daemon is operational/);
+    s.exec('systemctl enable --now glusterd');
+    expect(s.exec('gluster peer probe gfs2').out.join()).toMatch(/Transport endpoint is not connected/);
+    expect(s.exec('gluster peer probe gfs1').out.join()).toMatch(/localhost not needed/);
+    s.saveFile('/etc/hosts', (s.read('/etc/hosts') ?? '') + '10.0.3.201  gfs1\n10.0.3.202  gfs2\n10.0.3.203  gfs3\n');
+    expect(s.exec('gluster peer probe gfs2').out).toEqual(['peer probe: success']);
+    expect(s.exec('gluster volume create vg0 replica 3 transport tcp gfs1:/srv/brick1 gfs2:/srv/brick2 gfs3:/srv/brick3 force').out.join()).toMatch(/Host gfs3 is not in 'Peer in Cluster' state/);
+    s.exec('gluster peer probe gfs3');
+    expect(s.exec('gluster peer status').out.join('\n')).toMatch(/Number of Peers: 2[\s\S]*Hostname: gfs3/);
+    expect(s.exec('gluster volume create vg0 replica 3 transport tcp gfs1:/srv/brick1 gfs2:/srv/brick2 force').out.join()).toMatch(/not a multiple of replica count/);
+    expect(s.exec('gluster volume create vg0 replica 3 transport tcp gfs1:/srv/brick1 gfs2:/srv/brick2 gfs3:/srv/brick3').out.join()).toMatch(/root partition[\s\S]*force/);
+    expect(s.exec('gluster volume create vg0 replica 3 transport tcp gfs1:/srv/brick1 gfs2:/srv/brick2 gfs3:/srv/brick3 force').out.join()).toMatch(/success: please start/);
+    expect(s.files.get('/srv/brick1')?.dir).toBe(true);
+    expect(s.exec('gluster volume status vg0').out.join()).toMatch(/not started/);
+    s.exec('gluster volume start vg0');
+    expect(s.exec('gluster volume info').out.join('\n')).toMatch(/Type: Replicate[\s\S]*Status: Started[\s\S]*Number of Bricks: 1 x 3 = 3[\s\S]*Brick3: gfs3:\/srv\/brick3/);
+    expect(s.exec('gluster volume heal vg0 info').out.join('\n')).toMatch(/Number of entries: 0/);
+    expect(s.exec('gluster peer detach gfs2').out.join()).toMatch(/hosts one or more bricks/);
+    expect(allOk(t.check(s))).toEqual([]);
+  });
+
+  it('GlusterFS klient', () => {
+    const t = task('lx-gluster-klient');
+    const s = t.create();
+    s.exec('mkdir -p /mnt/gluster');
+    expect(s.exec('mount -t glusterfs gfs1:/vg0 /mnt/gluster').out.join()).toMatch(/unknown filesystem type 'glusterfs'/);
+    s.exec('apt install glusterfs-client -y');
+    expect(s.exec('mount -t glusterfs gfs1:/vg0 /mnt/gluster').out.join()).toMatch(/Mount failed/);
+    s.saveFile('/etc/hosts', (s.read('/etc/hosts') ?? '') + '10.0.3.201  gfs1\n10.0.3.202  gfs2\n10.0.3.203  gfs3\n');
+    expect(s.exec('mount -t glusterfs gfs1:/vg0 /mnt/gluster').out).toEqual([]);
+    s.exec('echo "test replikace" > /mnt/gluster/test.txt');
+    expect(s.exec('findmnt /mnt/gluster').out.join()).toMatch(/fuse\.glusterfs/);
+    expect(allOk(t.check(s))).toEqual([]);
+  });
+
+  it('vzorová řešení nových úloh (příkazy + obsah souborů z editoru)', () => {
+    for (const id of ['lx-nfs-server', 'lx-nfs-klient', 'lx-gluster', 'lx-gluster-klient']) {
+      const t = task(id);
+      const s = t.create();
+      expect(allOk(t.check(s)).length, id).toBeGreaterThan(0);
+      // řešení: příkazy, „nano soubor“, prázdný řádek, obsah souboru, prázdný řádek, další příkazy
+      const lines = t.solution.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        const m = lines[i].match(/^nano (\S+)$/);
+        if (m && lines[i + 1] === '') {
+          const end = lines.indexOf('', i + 2);
+          const block = lines.slice(i + 2, end).join('\n') + '\n';
+          s.saveFile(m[1], (s.read(m[1]) ?? '') + block);
+          i = end;
+        } else if (lines[i]) s.exec(lines[i]);
+      }
+      expect(allOk(t.check(s)), id).toEqual([]);
+    }
+    // apt install ssh nainstaluje openssh-server (jako ve cvičení)
+    const s = new LinuxSim({});
+    s.exec('apt install ssh -y');
+    expect(s.packages.has('openssh-server')).toBe(true);
+    expect(s.exec('sshd -t').out).toEqual([]);
+    expect(s.exec('systemctl reload ssh').out).toEqual([]);
+  });
+});

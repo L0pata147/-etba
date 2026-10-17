@@ -60,7 +60,7 @@ interface ExamState {
 }
 
 const EXAM_KEY = 'maturitni-trener:prakticka-nanecisto';
-const TIME_OPTIONS = [0, 45, 60, 90, 120] as const;
+export const TIME_OPTIONS = [0, 45, 60, 90, 120] as const;
 
 function loadExam(): ExamState | null {
   try {
@@ -80,7 +80,7 @@ function saveExam(e: ExamState | null) {
   }
 }
 
-const clock = (sec: number) => {
+export const clock = (sec: number) => {
   const s = Math.max(0, Math.round(sec));
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);

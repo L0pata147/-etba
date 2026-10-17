@@ -159,6 +159,7 @@ export const NAV_SUBJECTS: NavSubject[] = [
           { to: '/cloud/prakticka?tab=prikazy', label: 'Příkazy', icon: Terminal },
           { to: '/cloud/prakticka?tab=postupy', label: 'Postupy', icon: ListOrdered },
           { to: '/cloud/prakticka?tab=chyby', label: 'Najdi chybu', icon: Wrench },
+          { to: '/terminal?os=linux', label: 'Terminál (NFS, GlusterFS)', icon: SquareTerminal },
           { to: '/cloud/trenink', label: 'Trénink', icon: Dumbbell },
         ],
       },

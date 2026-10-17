@@ -197,3 +197,18 @@ export function generateCloudScenario(hv?: Hypervisor): CloudScenario {
 
   return { hypervisor, company, net, gateway, srvIp, dockerIp, nfsIp, webPort, ram, cores, disk, tasks };
 }
+
+/** Části zadání pro vyhodnocení – podle předpony id úkolu */
+const PARTS: { label: string; tone: 'brand' | 'violet' | 'emerald' | 'amber'; test: (t: ScenarioTask) => boolean }[] = [
+  { label: 'Virtualizace', tone: 'brand', test: (t) => !/^(dk-|st-|dok$)/.test(t.id) },
+  { label: 'Kontejnery', tone: 'violet', test: (t) => t.id.startsWith('dk-') },
+  { label: 'Úložiště NFS a GlusterFS', tone: 'emerald', test: (t) => t.id.startsWith('st-') },
+  { label: 'Dokumentace', tone: 'amber', test: (t) => t.id === 'dok' },
+];
+
+export function cloudExamParts(sc: CloudScenario, done: string[]) {
+  return PARTS.map((p) => {
+    const tasks = sc.tasks.filter(p.test);
+    return { label: p.label, tone: p.tone, tasks, done: tasks.filter((t) => done.includes(t.id)).length };
+  }).filter((p) => p.tasks.length);
+}

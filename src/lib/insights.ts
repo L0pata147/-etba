@@ -274,9 +274,11 @@ function allFourInOneDay(d: AppData): boolean {
   for (const s of d.sessions) {
     const day = dayKey(new Date(s.date));
     const subj = new Set<SubjectId>();
-    for (const id of s.bookIds) subj.add(id.startsWith('site-') ? 'site' : id.startsWith('hw-') ? 'hw' : id.startsWith('cloud-') ? 'cloud' : 'cjl');
+    // u terminálu jsou v bookIds i id úloh – předmět určí jen položky pokroku
+    const ids = s.mode === 'terminal' ? s.bookIds.filter((id) => /^(site|hw|cloud)-/.test(id)) : s.bookIds;
+    for (const id of ids) subj.add(id.startsWith('site-') ? 'site' : id.startsWith('hw-') ? 'hw' : id.startsWith('cloud-') ? 'cloud' : 'cjl');
     if (s.mode.startsWith('hw')) subj.add('hw');
-    if (s.mode.startsWith('site') || s.mode === 'simulace-site' || s.mode === 'terminal') subj.add('site');
+    if (s.mode.startsWith('site') || s.mode === 'simulace-site' || (s.mode === 'terminal' && !ids.length)) subj.add('site');
     if (s.mode.startsWith('cloud')) subj.add('cloud');
     const set = byDay.get(day) ?? new Set<SubjectId>();
     subj.forEach((x) => set.add(x));

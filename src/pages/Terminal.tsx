@@ -42,7 +42,7 @@ export function TerminalPage() {
       <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
         {platform === 'cisco'
           ? 'Funguje jako CLI v Packet Traceru: režimy Router> / # / (config)#, zkratky (en, conf t, int g0/0, sh ip int br), „do“ v konfiguraci, ? pro nápovědu.'
-          : 'Debian 13 ve VirtualBoxu jako root (síťovky enp0s3, enp0s8): soubory upravuješ v editoru (nano / vim), síť v /etc/network/interfaces, služby přes systemctl, balíčky přes apt. Napiš help pro seznam příkazů.'}
+          : 'Debian 13 ve VirtualBoxu jako root (síťovky enp0s3, enp0s8): soubory upravuješ v editoru (nano / vim), síť v /etc/network/interfaces, služby přes systemctl, balíčky přes apt. Úlohy NFS a GlusterFS se počítají do cloudu. Napiš help pro seznam příkazů.'}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {TASKS[platform].map((t) => (
@@ -94,7 +94,7 @@ function TerminalRun({ task, platform, onBack }: { task: TermTask; platform: Pla
       const score = solution ? 0.3 : hints >= 2 ? 0.6 : 1;
       const q: FlashcardQuestion = {
         id: `term|${task.id}`,
-        bookId: `site-prikazy-${platform}`,
+        bookId: task.bookId ?? `site-prikazy-${platform}`,
         area: 'it-prikazy',
         factKey: `term-${task.id}`,
         difficulty: 'hard',
@@ -104,7 +104,7 @@ function TerminalRun({ task, platform, onBack }: { task: TermTask; platform: Pla
         answer: task.solution,
       };
       recordAnswer(q, { questionId: q.id, score, userAnswer: '(terminál)', seconds: 0 });
-      const rec: SessionRecord = { id: uid(), date: Date.now(), mode: 'terminal', title: `Terminál ${LABEL[platform]}: ${task.title}`, difficulty: 'hard', total: 1, score, seconds: 0, bookIds: [task.id], sections: { 'it-prakticke': { score, total: 1 } } };
+      const rec: SessionRecord = { id: uid(), date: Date.now(), mode: 'terminal', title: `Terminál ${LABEL[platform]}: ${task.title}`, difficulty: 'hard', total: 1, score, seconds: 0, bookIds: [task.id, task.bookId ?? `site-prikazy-${platform}`], sections: { 'it-prakticke': { score, total: 1 } } };
       recordSession(rec, 30);
     }
   };

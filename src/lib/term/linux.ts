@@ -30,7 +30,37 @@ export interface LinuxOptions {
   hosts?: string[];
   files?: Record<string, string>;
   packages?: string[];
+  /** Vzdálené NFS servery: adresa → sdílené adresáře a síť, které je smí připojit */
+  nfsExports?: Record<string, { path: string; net: string }[]>;
+  /** Ostatní uzly GlusterFS (název → adresa), na kterých už běží glusterd */
+  glusterNodes?: Record<string, string>;
+  /** Spuštěné volume GlusterFS na vzdálených uzlech: adresa → názvy volume */
+  glusterVolumes?: Record<string, string[]>;
 }
+
+interface Mount {
+  src: string;
+  target: string;
+  type: string;
+}
+
+interface Volume {
+  replica: number;
+  bricks: string[];
+  started: boolean;
+}
+
+const DEFAULT_FSTAB =
+  '# /etc/fstab: static file system information.\n#\n# <file system> <mount point>   <type>  <options>       <dump>  <pass>\n# / was on /dev/sda1 during installation\nUUID=3f1c2b7e-8d4a-4c1e-9b2f-5a6d7e8f9012 /               ext4    errors=remount-ro 0       1\n# swap was on /dev/sda5 during installation\nUUID=9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d none            swap    sw              0       0\n';
+
+/** Pevné „UUID“ podle názvu – stejný výstup při každém spuštění */
+const fakeUuid = (s: string) => {
+  let h = 2166136261;
+  for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
+  const x = (n: number) => ((h = Math.imul(h ^ n, 2654435761) >>> 0), h.toString(16).padStart(8, '0'));
+  const a = x(1) + x(2) + x(3) + x(4);
+  return `${a.slice(0, 8)}-${a.slice(8, 12)}-4${a.slice(13, 16)}-a${a.slice(17, 20)}-${a.slice(20, 32)}`;
+};
 
 const ipToInt = (ip: string) => ip.split('.').reduce((a, o) => ((a << 8) | Number(o)) >>> 0, 0);
 const sameNet = (cidr: string, ip: string) => {
@@ -55,7 +85,7 @@ const PERM = (m: number, dir: boolean) =>
     .join('');
 
 /** Balíčky, které simulace zná – co vytvoří a jakou službu */
-const PACKAGES: Record<string, { files?: Record<string, string>; service?: string; autostart?: boolean }> = {
+const PACKAGES: Record<string, { files?: Record<string, string>; service?: string; autostart?: boolean; enabled?: boolean }> = {
   apache2: { files: { '/var/www/html/index.html': '<html><body><h1>Apache2 Default Page</h1><p>It works!</p></body></html>\n' }, service: 'apache2', autostart: true },
   nginx: { files: { '/var/www/html/index.nginx-debian.html': '<h1>Welcome to nginx!</h1>\n' }, service: 'nginx', autostart: true },
   'openssh-server': {
@@ -73,11 +103,24 @@ const PACKAGES: Record<string, { files?: Record<string, string>; service?: strin
   },
   bind9: { files: { '/etc/bind/named.conf.local': '//\n// Do any local configuration here\n//\n' }, service: 'named', autostart: true },
   'docker.io': { service: 'docker', autostart: true },
+  'nfs-kernel-server': {
+    files: {
+      '/etc/exports':
+        '# /etc/exports: the access control list for filesystems which may be exported\n#\t\tto NFS clients.  See exports(5).\n#\n# Example for NFSv2 and NFSv3:\n# /srv/homes       hostname1(rw,sync,no_subtree_check) hostname2(ro,sync,no_subtree_check)\n#\n# Example for NFSv4:\n# /srv/nfs4        gss/krb5i(rw,sync,fsid=0,crossmnt,no_subtree_check)\n# /srv/nfs4/homes  gss/krb5i(rw,sync,no_subtree_check)\n#\n',
+    },
+    service: 'nfs-server',
+    autostart: true,
+  },
+  'nfs-common': {},
+  'glusterfs-server': { service: 'glusterd', autostart: false, enabled: false },
+  'glusterfs-client': {},
   mc: {},
   curl: {},
   'net-tools': {},
 };
-const SERVICE_ALIAS: Record<string, string> = { sshd: 'ssh', bind9: 'named', 'apache2.service': 'apache2', 'ssh.service': 'ssh' };
+const SERVICE_ALIAS: Record<string, string> = { sshd: 'ssh', bind9: 'named', 'apache2.service': 'apache2', 'ssh.service': 'ssh', 'nfs-kernel-server': 'nfs-server', 'glusterfs-server': 'glusterd' };
+/** Metabalíček ssh v Debianu nainstaluje openssh-server */
+const PACKAGE_ALIAS: Record<string, string> = { ssh: 'openssh-server' };
 
 export class LinuxSim implements Simulator {
   hostname: string;
@@ -92,19 +135,33 @@ export class LinuxSim implements Simulator {
   services = new Map<string, Service>();
   ipForward = 0;
   history: string[] = [];
+  /** Aktivní sdílení NFS (po exportfs -a) */
+  exports: { path: string; client: string; opts: string[] }[] = [];
+  mounts: Mount[] = [];
+  /** Obsah /etc/fstab, který zná systemd (po systemctl daemon-reload) */
+  fstabLoaded = DEFAULT_FSTAB;
+  nfsRemote: Record<string, { path: string; net: string }[]>;
+  glusterNodes: Record<string, string>;
+  glusterRemote: Record<string, string[]>;
+  peers = new Set<string>();
+  volumes = new Map<string, Volume>();
 
   constructor(o: LinuxOptions) {
     this.hostname = o.hostname ?? 'server';
     this.ifaces = (o.ifaces ?? [{ name: 'enp0s3', addr: '192.168.1.57/24' }]).map((i) => ({ ...i, up: true }));
     this.gateway = o.gateway ?? null;
     this.hosts = o.hosts ?? [];
+    this.nfsRemote = o.nfsExports ?? {};
+    this.glusterNodes = o.glusterNodes ?? {};
+    this.glusterRemote = o.glusterVolumes ?? {};
     this.users.set('root', new Set(['root']));
-    for (const d of ['/', '/root', '/etc', '/etc/network', '/home', '/var', '/var/www', '/tmp', '/data', '/proc', '/proc/sys', '/proc/sys/net', '/proc/sys/net/ipv4'])
+    for (const d of ['/', '/root', '/etc', '/etc/network', '/home', '/var', '/var/www', '/tmp', '/data', '/mnt', '/srv', '/proc', '/proc/sys', '/proc/sys/net', '/proc/sys/net/ipv4'])
       this.files.set(d, { dir: true, content: '', mode: 0o755, owner: 'root', group: 'root' });
     this.write('/etc/hostname', `${this.hostname}\n`);
     this.write('/etc/hosts', `127.0.0.1\tlocalhost\n127.0.1.1\t${this.hostname}\n`);
     this.write('/etc/sysctl.conf', '#\n# /etc/sysctl.conf - Configuration file for setting system variables\n#\n# Uncomment the next line to enable packet forwarding for IPv4\n#net.ipv4.ip_forward=1\n');
     this.write('/etc/resolv.conf', 'nameserver 127.0.0.53\n');
+    this.write('/etc/fstab', DEFAULT_FSTAB);
     // výchozí /etc/network/interfaces podle rozhraní (statická adresa, nebo DHCP)
     this.write(
       '/etc/network/interfaces',
@@ -204,7 +261,7 @@ export class LinuxSim implements Simulator {
     if (!def) return false;
     this.packages.add(pkg);
     for (const [p, c] of Object.entries(def.files ?? {})) if (!this.files.has(p)) this.write(p, c);
-    if (def.service) this.services.set(def.service, { active: !!def.autostart && this.serviceOk(def.service) === null, enabled: true });
+    if (def.service) this.services.set(def.service, { active: !!def.autostart && this.serviceOk(def.service) === null, enabled: def.enabled ?? true });
     return true;
   }
 
@@ -267,6 +324,8 @@ export class LinuxSim implements Simulator {
             '  systemctl start|stop|restart|enable|disable|status <služba>',
             '  useradd, adduser, groupadd, usermod -aG, passwd, id, groups',
             '  chmod, chown, chgrp, sysctl, curl, whoami, clear',
+            '  NFS: exportfs -a / -v, mount, umount, findmnt, df -h, systemctl daemon-reload',
+            '  GlusterFS: gluster peer probe|status, gluster volume create|start|info|status',
           ],
         };
       case 'clear':
@@ -393,12 +452,13 @@ export class LinuxSim implements Simulator {
         if (pos[0] === 'update') return { out: ['Načítání seznamů balíků… Hotovo', 'Všechny balíky jsou aktuální.'] };
         if (pos[0] === 'install') {
           const out: string[] = [];
-          for (const p of pos.slice(1)) {
-            if (!PACKAGES[p]) return { out: [`E: Nelze najít balík ${p}`] };
-            if (this.packages.has(p)) out.push(`${p} je již nejnovější verze.`);
+          for (const name of pos.slice(1)) {
+            const p = PACKAGE_ALIAS[name] ?? name;
+            if (!PACKAGES[p]) return { out: [`E: Nelze najít balík ${name}`] };
+            if (this.packages.has(p)) out.push(`${name} je již nejnovější verze.`);
             else {
               this.install(p);
-              out.push(`Nastavuje se ${p} …`);
+              out.push(`Nastavuje se ${name} …`);
             }
           }
           return { out };
@@ -513,6 +573,35 @@ export class LinuxSim implements Simulator {
         if (!web?.active) return { out: [`curl: (7) Failed to connect to ${host} port 80: Spojení odmítnuto`] };
         return { out: (this.read('/var/www/html/index.html') ?? '').replace(/\n$/, '').split('\n') };
       }
+      case 'exportfs':
+        return this.exportfs(flags);
+      case 'mount':
+        return this.mountCmd(a);
+      case 'umount': {
+        const t = this.abs(pos[0] ?? '');
+        const i = this.mounts.findIndex((m) => m.target === t || m.src === pos[0]);
+        if (i < 0) return { out: [`umount: ${pos[0] ?? ''}: not mounted.`] };
+        this.mounts.splice(i, 1);
+        return { out: [] };
+      }
+      case 'findmnt': {
+        const list = pos[0] ? this.mounts.filter((m) => m.target === this.abs(pos[0]) || m.src === pos[0]) : this.mounts;
+        if (pos[0] && !list.length) return { out: [] };
+        const rows = [...(pos[0] ? [] : [{ target: '/', src: '/dev/sda1', type: 'ext4', opts: 'rw,relatime,errors=remount-ro' }]), ...list.map((m) => ({ target: m.target, src: m.src, type: fsType(m.type), opts: m.type === 'glusterfs' ? 'rw,relatime,user_id=0,group_id=0,allow_other' : 'rw,relatime,vers=4.2,proto=tcp' }))];
+        return { out: [`${'TARGET'.padEnd(14)} ${'SOURCE'.padEnd(18)} ${'FSTYPE'.padEnd(15)} OPTIONS`, ...rows.map((r) => `${r.target.padEnd(14)} ${r.src.padEnd(18)} ${r.type.padEnd(15)} ${r.opts}`)] };
+      }
+      case 'df': {
+        const rows = [{ src: '/dev/sda1', size: '19G', used: '2,1G', avail: '16G', pct: '12%', target: '/' }, ...this.mounts.map((m) => ({ src: m.src, size: '19G', used: '2,3G', avail: '16G', pct: '13%', target: m.target }))];
+        const shown = pos[0] ? rows.filter((r) => r.target === this.abs(pos[0])) : rows;
+        return { out: [`${'Souborový systém'.padEnd(20)} Velikost Užito Volno Uži% Připojeno do`, ...shown.map((r) => `${r.src.padEnd(20)} ${r.size.padStart(8)} ${r.used.padStart(5)} ${r.avail.padStart(5)} ${r.pct.padStart(4)} ${r.target}`)] };
+      }
+      case 'gluster':
+        return this.gluster(a);
+      case 'sshd':
+        if (!this.packages.has('openssh-server')) return { out: ['bash: sshd: příkaz nenalezen'] };
+        return { out: [] };
+      case 'ssh':
+        return { out: ['(v simulaci se na jiný počítač nepřipojíš – na serveru zkontroluj systemctl status ssh)'] };
       case 'exit':
       case 'logout':
         return { out: ['(v simulaci zůstáváš přihlášený)'] };
@@ -569,6 +658,10 @@ export class LinuxSim implements Simulator {
   systemctl(pos: string[], flags: string[]): TermResult {
     const [action, rawName] = pos;
     if (!action) return { out: ['Použití: systemctl start|stop|restart|enable|disable|status SLUŽBA'] };
+    if (action === 'daemon-reload') {
+      this.fstabLoaded = this.read('/etc/fstab') ?? '';
+      return { out: [] };
+    }
     if (!rawName) return { out: ['Too few arguments.'] };
     const name = SERVICE_ALIAS[rawName] ?? rawName.replace(/\.service$/, '');
     if (name === 'networking') {
@@ -618,6 +711,275 @@ export class LinuxSim implements Simulator {
         return { out: [`Unknown command verb ${action}.`] };
     }
   }
+  // ---------- NFS ----------
+
+  /** Překlad názvu přes /etc/hosts (DNS v simulaci není) */
+  resolve(name: string): string | null {
+    if (isIp(name)) return name;
+    if (name === 'localhost') return '127.0.0.1';
+    for (const line of (this.read('/etc/hosts') ?? '').split('\n')) {
+      const t = line.replace(/#.*/, '').trim().split(/\s+/);
+      if (t.length >= 2 && isIp(t[0]) && t.slice(1).includes(name)) return t[0];
+    }
+    return null;
+  }
+  isSelf(host: string): boolean {
+    if (host === this.hostname || host === 'localhost') return true;
+    const ip = this.resolve(host);
+    return !!ip && (ip.startsWith('127.') || this.ifaces.some((i) => i.addr?.split('/')[0] === ip));
+  }
+  myIp(): string {
+    return this.ifaces.find((i) => i.addr)?.addr?.split('/')[0] ?? '127.0.0.1';
+  }
+
+  parseExports(): { entries: { path: string; client: string; opts: string[] }[]; warnings: string[] } {
+    const entries: { path: string; client: string; opts: string[] }[] = [];
+    const warnings: string[] = [];
+    for (const raw of (this.read('/etc/exports') ?? '').split('\n')) {
+      const line = raw.replace(/#.*/, '').trim();
+      if (!line) continue;
+      const [path, ...rest] = line.split(/\s+/);
+      for (const tok of rest.length ? rest : ['']) {
+        const m = tok.match(/^([^()]*)(?:\(([^)]*)\))?$/);
+        const client = m?.[1] ?? tok;
+        const opts = m?.[2] !== undefined ? m[2].split(',').map((x) => x.trim()).filter(Boolean) : [];
+        if (!client && opts.length) warnings.push(`exportfs: No host name given with ${path} (${opts.join(',')}), suggest *(${opts.join(',')}) to avoid warning`);
+        if (client && !opts.length) warnings.push(`exportfs: No options for ${path} ${client}: suggest ${client}(sync) to avoid warning`);
+        entries.push({ path, client: client || '*', opts });
+      }
+    }
+    return { entries, warnings };
+  }
+
+  exportfs(flags: string[]): TermResult {
+    if (!this.packages.has('nfs-kernel-server')) return { out: ['bash: exportfs: příkaz nenalezen (nainstaluj nfs-kernel-server)'] };
+    const f = flags.join('');
+    if (/[ar]/.test(f)) {
+      const { entries, warnings } = this.parseExports();
+      const out = [...warnings];
+      const ok: typeof entries = [];
+      for (const e of entries) {
+        if (!this.files.get(e.path)?.dir) out.push(`exportfs: Failed to stat ${e.path}: No such file or directory`);
+        else ok.push(e);
+      }
+      this.exports = ok;
+      if (!/v/.test(f)) return { out };
+      return { out: [...out, ...this.exports.map((e) => `exporting ${e.client}:${e.path}`)] };
+    }
+    if (/v/.test(f)) return { out: this.exports.map((e) => `${e.path.padEnd(14)}\t${e.client}(${fullExportOpts(e.opts)})`) };
+    return { out: this.exports.map((e) => `${e.path.padEnd(14)}\t${e.client}`) };
+  }
+
+  parseFstab(): { mounts: Mount[]; errors: string[] } {
+    const mounts: Mount[] = [];
+    const errors: string[] = [];
+    (this.read('/etc/fstab') ?? '').split('\n').forEach((raw, i) => {
+      const line = raw.replace(/#.*/, '').trim();
+      if (!line) return;
+      const t = line.split(/\s+/);
+      if (t.length < 4) {
+        errors.push(`mount: /etc/fstab: parse error at line ${i + 1} -- ignored`);
+        return;
+      }
+      if (t[1] === '/' || t[2] === 'swap' || /^(UUID=|\/dev\/)/.test(t[0])) return;
+      mounts.push({ src: t[0], target: t[1], type: t[2] });
+    });
+    return { mounts, errors };
+  }
+
+  mountOne(src: string, target: string, type: string): string[] {
+    const t = this.abs(target);
+    if (!this.files.get(t)?.dir) return [`mount: ${target}: mount point does not exist.`];
+    if (this.mounts.some((m) => m.target === t)) return [`mount: ${target}: ${src} already mounted on ${t}.`];
+    const colon = src.indexOf(':');
+    const host = colon > 0 ? src.slice(0, colon) : '';
+    const path = colon > 0 ? src.slice(colon + 1) : '';
+    if (type === 'nfs' || type === 'nfs4') {
+      if (!this.packages.has('nfs-common')) return [`mount: ${target}: bad option; for several filesystems (e.g. nfs, cifs) you might need a /sbin/mount.<type> helper program.`];
+      if (!host) return [`mount.nfs: remote share not in 'host:dir' format`];
+      const ip = this.resolve(host);
+      if (!ip) return [`mount.nfs: Failed to resolve server ${host}: Name or service not known`];
+      if (!this.reachable(ip)) return ['mount.nfs: Connection timed out'];
+      const ex = this.nfsRemote[ip];
+      if (!ex) return ['mount.nfs: Connection refused'];
+      if (!ex.some((e) => e.path === path && sameNet(e.net, this.myIp()))) return [`mount.nfs: access denied by server while mounting ${src}`];
+    } else if (type === 'glusterfs') {
+      if (!this.packages.has('glusterfs-client') && !this.packages.has('glusterfs-server')) return [`mount: ${target}: unknown filesystem type 'glusterfs'.`];
+      const ip = host ? this.resolve(host) : null;
+      const vol = path.replace(/^\//, '');
+      if (!ip || !this.reachable(ip) || !(this.glusterRemote[ip] ?? []).includes(vol)) return ['Mount failed. Check the log file for more details.'];
+    } else {
+      return [`mount: ${target}: special device ${src} does not exist.`];
+    }
+    this.mounts.push({ src, target: t, type });
+    return [];
+  }
+
+  mountCmd(a: string[]): TermResult {
+    let type = '';
+    let all = false;
+    const pos: string[] = [];
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] === '-t') type = a[++i] ?? '';
+      else if (a[i] === '-o') i++;
+      else if (a[i].startsWith('-')) all ||= a[i].includes('a');
+      else pos.push(a[i]);
+    }
+    if (all) {
+      const out: string[] = [];
+      if ((this.read('/etc/fstab') ?? '') !== this.fstabLoaded) out.push("mount: (hint) your fstab has been modified, but systemd still uses", "       the old version; use 'systemctl daemon-reload' to reload.");
+      const { mounts, errors } = this.parseFstab();
+      out.push(...errors);
+      for (const m of mounts) if (!this.mounts.some((x) => x.target === this.abs(m.target))) out.push(...this.mountOne(m.src, m.target, m.type));
+      return { out };
+    }
+    if (!pos.length) return { out: ['/dev/sda1 on / type ext4 (rw,relatime,errors=remount-ro)', ...this.mounts.map((m) => `${m.src} on ${m.target} type ${fsType(m.type)} (rw,relatime)`)] };
+    if (pos.length === 1) {
+      const m = this.parseFstab().mounts.find((x) => this.abs(x.target) === this.abs(pos[0]) || x.src === pos[0]);
+      if (!m) return { out: [`mount: ${pos[0]}: can't find in /etc/fstab.`] };
+      return { out: this.mountOne(m.src, m.target, m.type) };
+    }
+    return { out: this.mountOne(pos[0], pos[1], type || (pos[0].includes(':') ? 'nfs' : 'ext4')) };
+  }
+
+  // ---------- GlusterFS ----------
+
+  /** Uzel clusteru podle názvu nebo adresy */
+  glusterNode(host: string): string | null {
+    const ip = this.resolve(host);
+    if (!ip) return null;
+    return Object.entries(this.glusterNodes).find(([, nip]) => nip === ip)?.[0] ?? null;
+  }
+
+  gluster(a: string[]): TermResult {
+    if (!this.packages.has('glusterfs-server')) return { out: ['bash: gluster: příkaz nenalezen (nainstaluj glusterfs-server)'] };
+    if (!this.services.get('glusterd')?.active) return { out: ['Connection failed. Please check if gluster daemon is operational.'] };
+    const [area, action, ...rest] = a;
+    if (area === 'peer' && action === 'probe') {
+      const host = rest[0];
+      if (!host) return { out: ['Usage:', 'peer probe { <HOSTNAME> | <IP-address> }'] };
+      if (this.isSelf(host)) return { out: ['peer probe: Probe on localhost not needed'] };
+      const node = this.glusterNode(host);
+      if (!node || !this.reachable(this.resolve(host)!)) return { out: ['peer probe: failed: Probe returned with Transport endpoint is not connected'] };
+      if (this.peers.has(node)) return { out: [`peer probe: Host ${host} port 24007 already in peer list`] };
+      this.peers.add(node);
+      return { out: ['peer probe: success'] };
+    }
+    if (area === 'peer' && action === 'status') {
+      return { out: [`Number of Peers: ${this.peers.size}`, ...[...this.peers].flatMap((n) => ['', `Hostname: ${n}`, `Uuid: ${fakeUuid(n)}`, 'State: Peer in Cluster (Connected)'])] };
+    }
+    if (area === 'peer' && action === 'detach') {
+      const node = rest[0] ? (this.glusterNode(rest[0]) ?? rest[0]) : '';
+      if (!this.peers.has(node)) return { out: [`peer detach: failed: ${rest[0] ?? ''} is not part of cluster`] };
+      for (const v of this.volumes.values()) if (v.bricks.some((b) => this.glusterNode(b.split(':')[0]) === node)) return { out: [`peer detach: failed: Peer ${rest[0]} hosts one or more bricks. If the peer is in not recoverable state then use either replace-brick or remove-brick command with force to remove all bricks from the peer and attempt the peer detach again.`] };
+      this.peers.delete(node);
+      return { out: ['peer detach: success'] };
+    }
+    if (area === 'pool' && action === 'list') {
+      return { out: ['UUID\t\t\t\t\tHostname \tState', ...[...this.peers].map((n) => `${fakeUuid(n)}\t${n}\tConnected`), `${fakeUuid(this.hostname)}\tlocalhost\tConnected`] };
+    }
+    if (area !== 'volume') return { out: ['unrecognized command', 'Usage: gluster [options] <help> <peer> <pool> <volume>'] };
+    const name = rest[0];
+    const vol = name ? this.volumes.get(name) : undefined;
+    switch (action) {
+      case 'create': {
+        if (!name) return { out: ['Usage:', 'volume create <NEW-VOLNAME> [replica <COUNT>] [transport <tcp|rdma>] <NEW-BRICK>... [force]'] };
+        if (vol) return { out: [`volume create: ${name}: failed: Volume ${name} already exists`] };
+        const args = rest.slice(1);
+        const ri = args.indexOf('replica');
+        const replica = ri >= 0 ? Number(args[ri + 1]) : 1;
+        const force = args.includes('force');
+        const bricks = args.filter((x) => /^[^:\s]+:\/\S*$/.test(x));
+        if (!bricks.length || !replica) return { out: ['Usage:', 'volume create <NEW-VOLNAME> [replica <COUNT>] [transport <tcp|rdma>] <NEW-BRICK>... [force]'] };
+        if (bricks.length % replica !== 0) return { out: ['number of bricks is not a multiple of replica count', '', 'Usage:', 'volume create <NEW-VOLNAME> [replica <COUNT>] [transport <tcp|rdma>] <NEW-BRICK>... [force]'] };
+        const owners: string[] = [];
+        for (const b of bricks) {
+          const host = b.split(':')[0];
+          const owner = this.isSelf(host) ? this.hostname : this.glusterNode(host);
+          if (!owner || (owner !== this.hostname && !this.peers.has(owner))) return { out: [`volume create: ${name}: failed: Host ${host} is not in 'Peer in Cluster' state`] };
+          owners.push(owner);
+        }
+        if (!force && replica > 1 && new Set(owners).size < owners.length)
+          return { out: [`volume create: ${name}: failed: Multiple bricks of a replicate volume are present on the same server. This setup is not optimal. Bricks should be on different nodes to have best fault tolerant configuration. Use 'force' at the end of the command if you want to override this behavior.`] };
+        if (!force) return { out: [`volume create: ${name}: failed: The brick ${bricks[0]} is being created in the root partition. It is recommended that you don't use the system's root partition for storage backend. Or use 'force' at the end of the command if you want to override this behavior.`] };
+        for (let i = 0; i < bricks.length; i++) {
+          if (owners[i] !== this.hostname) continue;
+          const path = bricks[i].slice(bricks[i].indexOf(':') + 1);
+          if (!this.files.get(this.parent(path))?.dir) return { out: [`volume create: ${name}: failed: Failed to create brick directory for brick ${bricks[i]}. Reason : No such file or directory`] };
+          this.mkdirp(path);
+        }
+        this.volumes.set(name, { replica, bricks, started: false });
+        return { out: [`volume create: ${name}: success: please start the volume to access data`] };
+      }
+      case 'start':
+        if (!vol) return { out: [`volume start: ${name ?? ''}: failed: Volume ${name ?? ''} does not exist`] };
+        if (vol.started) return { out: [`volume start: ${name}: failed: Volume ${name} already started`] };
+        vol.started = true;
+        return { out: [`volume start: ${name}: success`] };
+      case 'stop':
+        if (!vol) return { out: [`volume stop: ${name ?? ''}: failed: Volume ${name ?? ''} does not exist`] };
+        if (!vol.started) return { out: [`volume stop: ${name}: failed: Volume ${name} is not in the started state`] };
+        vol.started = false;
+        return { out: ['Stopping volume will make its data inaccessible. Do you want to continue? (y/n) y', `volume stop: ${name}: success`] };
+      case 'delete':
+        if (!vol) return { out: [`volume delete: ${name ?? ''}: failed: Volume ${name ?? ''} does not exist`] };
+        if (vol.started) return { out: [`volume delete: ${name}: failed: Volume ${name} has been started.Volume needs to be stopped before deletion.`] };
+        this.volumes.delete(name!);
+        return { out: ['Deleting volume will erase all information about the volume. Do you want to continue? (y/n) y', `volume delete: ${name}: success`] };
+      case 'list':
+        return { out: this.volumes.size ? [...this.volumes.keys()] : ['No volumes present in cluster'] };
+      case 'info': {
+        const list = name ? (vol ? [[name, vol] as const] : []) : [...this.volumes.entries()];
+        if (name && !vol) return { out: [`Volume ${name} does not exist`] };
+        if (!list.length) return { out: ['No volumes present'] };
+        return {
+          out: list.flatMap(([n, v]) => [
+            '',
+            `Volume Name: ${n}`,
+            `Type: ${v.replica > 1 ? 'Replicate' : 'Distribute'}`,
+            `Volume ID: ${fakeUuid('vol:' + n)}`,
+            `Status: ${v.started ? 'Started' : 'Created'}`,
+            'Snapshot Count: 0',
+            `Number of Bricks: ${v.replica > 1 ? `${v.bricks.length / v.replica} x ${v.replica} = ${v.bricks.length}` : v.bricks.length}`,
+            'Transport-type: tcp',
+            'Bricks:',
+            ...v.bricks.map((b, i) => `Brick${i + 1}: ${b}`),
+            'Options Reconfigured:',
+            'transport.address-family: inet',
+            'nfs.disable: on',
+          ]),
+        };
+      }
+      case 'status': {
+        const list = name ? (vol ? [[name, vol] as const] : []) : [...this.volumes.entries()];
+        if (name && !vol) return { out: [`Volume ${name} does not exist`] };
+        if (!list.length) return { out: ['No volumes present'] };
+        return {
+          out: list.flatMap(([n, v]) =>
+            v.started
+              ? [
+                  `Status of volume: ${n}`,
+                  'Gluster process                             TCP Port  RDMA Port  Online  Pid',
+                  '------------------------------------------------------------------------------',
+                  ...v.bricks.map((b, i) => `${`Brick ${b}`.padEnd(44)}${String(49152 + i).padEnd(10)}0          Y       ${1200 + i * 37}`),
+                  ...(v.replica > 1 ? [`${'Self-heal Daemon on localhost'.padEnd(44)}N/A       N/A        Y       1301`] : []),
+                  '',
+                  `Task Status of Volume ${n}`,
+                  '------------------------------------------------------------------------------',
+                  'There are no active volume tasks',
+                ]
+              : [`Volume ${n} is not started`],
+          ),
+        };
+      }
+      case 'heal':
+        if (!vol) return { out: [`Volume ${name ?? ''} does not exist`] };
+        if (vol.replica < 2) return { out: [`Launching heal operation to perform index self heal on volume ${name} has been unsuccessful:`, 'Volume is not of type replicate/disperse'] };
+        return { out: vol.bricks.flatMap((b) => [`Brick ${b}`, 'Status: Connected', 'Number of entries: 0', '']) };
+      default:
+        return { out: ['unrecognized word: ' + (action ?? ''), 'Usage: gluster volume create|start|stop|info|status|list|heal|delete'] };
+    }
+  }
 }
 
 // ---------- pomocné funkce ----------
@@ -629,6 +991,24 @@ function tokenize(line: string): string[] {
   while ((m = re.exec(line))) out.push(m[1] ?? m[2] ?? m[3]);
   return out;
 }
+
+/** Úplné volby sdílení, jak je vypíše exportfs -v */
+function fullExportOpts(opts: string[]): string {
+  const has = (o: string) => opts.includes(o);
+  return [
+    has('async') ? 'async' : 'sync',
+    'wdelay',
+    'hide',
+    has('subtree_check') ? 'subtree_check' : 'no_subtree_check',
+    'sec=sys',
+    has('rw') ? 'rw' : 'ro',
+    has('insecure') ? 'insecure' : 'secure',
+    has('no_root_squash') ? 'no_root_squash' : 'root_squash',
+    has('all_squash') ? 'all_squash' : 'no_all_squash',
+  ].join(',');
+}
+
+const fsType = (t: string) => (t === 'glusterfs' ? 'fuse.glusterfs' : t === 'nfs' ? 'nfs4' : t);
 
 function prefixToMask(p: number) {
   const m = p === 0 ? 0 : (0xffffffff << (32 - p)) >>> 0;
@@ -843,5 +1223,102 @@ export const LINUX_TASKS: TermTask<LinuxSim>[] = [
       { label: 'v /etc/sysctl.conf je aktivní net.ipv4.ip_forward=1', ok: has(s.read('/etc/sysctl.conf'), /^\s*net\.ipv4\.ip_forward\s*=\s*1/m) },
       { label: 'přeposílání je zapnuté (ip_forward = 1)', ok: s.ipForward === 1 },
     ],
+  },
+  {
+    id: 'lx-nfs-server',
+    bookId: 'cloud-prikazy-storage',
+    title: 'NFS server – sdílení adresáře',
+    goal: 'Server nfs (192.168.123.10) má sdílet adresář /mnt/sdileni všem počítačům ze sítě 192.168.123.0/24 pro čtení i zápis.',
+    steps: ['balíček nfs-kernel-server', 'adresář /mnt/sdileni', 'řádek v /etc/exports: síť 192.168.123.0/24 s volbami rw, sync, no_subtree_check (bez mezery před závorkou)', 'načíst sdílení a ověřit: exportfs -v'],
+    hints: ['apt install nfs-kernel-server -y', 'mkdir -p /mnt/sdileni', 'nano /etc/exports → /mnt/sdileni 192.168.123.0/24(rw,sync,no_subtree_check)', 'Po úpravě /etc/exports se sdílení načte příkazem exportfs -a (nebo exportfs -ra)'],
+    solution: 'apt update\napt install nfs-kernel-server -y\nmkdir -p /mnt/sdileni\nnano /etc/exports\n\n/mnt/sdileni 192.168.123.0/24(rw,sync,no_subtree_check)\n\nexportfs -a\nexportfs -v',
+    create: () => new LinuxSim({ hostname: 'nfs', ifaces: [{ name: 'enp0s3', addr: '192.168.123.10/24' }], gateway: '192.168.123.1' }),
+    check: (s) => {
+      const e = s.exports.find((x) => x.path === '/mnt/sdileni');
+      return [
+        { label: 'nfs-kernel-server je nainstalovaný a služba běží', ok: s.packages.has('nfs-kernel-server') && !!s.services.get('nfs-server')?.active },
+        { label: 'adresář /mnt/sdileni existuje', ok: !!s.files.get('/mnt/sdileni')?.dir },
+        { label: 'v /etc/exports je /mnt/sdileni 192.168.123.0/24(rw,sync,…)', ok: has(s.read('/etc/exports'), /^\s*\/mnt\/sdileni\s+192\.168\.123\.0\/24\((?=[^)]*\brw\b)(?=[^)]*\bsync\b)[^)]*\)/m) },
+        { label: 'sdílení je načtené (exportfs -a) pro síť /24 s rw', ok: !!e && e.client === '192.168.123.0/24' && e.opts.includes('rw') },
+      ];
+    },
+  },
+  {
+    id: 'lx-nfs-klient',
+    bookId: 'cloud-prikazy-storage',
+    title: 'NFS klient – trvalé připojení přes /etc/fstab',
+    goal: 'NFS server 10.0.3.251 sdílí adresář /data. Na klientovi ho připoj do /mnt/nfs tak, aby se připojil i po restartu.',
+    steps: ['balíček nfs-common (pomocný program mount.nfs)', 'přípojný bod /mnt/nfs', 'řádek v /etc/fstab: typ nfs, volby defaults,_netdev', 'načíst změnu fstabu do systemd a připojit', 'ověřit: findmnt /mnt/nfs'],
+    hints: ['apt install nfs-common -y', 'mkdir -p /mnt/nfs', 'nano /etc/fstab → 10.0.3.251:/data /mnt/nfs nfs defaults,_netdev 0 0', 'systemctl daemon-reload, potom mount -a'],
+    solution: 'apt install nfs-common -y\nmkdir -p /mnt/nfs\nnano /etc/fstab\n\n10.0.3.251:/data /mnt/nfs nfs defaults,_netdev,x-systemd.automount 0 0\n\nsystemctl daemon-reload\nmount -a\nfindmnt /mnt/nfs',
+    create: () =>
+      new LinuxSim({
+        hostname: 'klient',
+        ifaces: [{ name: 'enp0s3', addr: '10.0.3.50/24' }],
+        gateway: '10.0.3.1',
+        hosts: ['10.0.3.1', '10.0.3.251'],
+        nfsExports: { '10.0.3.251': [{ path: '/data', net: '10.0.3.0/24' }] },
+      }),
+    check: (s) => [
+      { label: 'nfs-common je nainstalovaný', ok: s.packages.has('nfs-common') },
+      { label: 'v /etc/fstab je 10.0.3.251:/data /mnt/nfs nfs … _netdev', ok: has(s.read('/etc/fstab'), /^\s*10\.0\.3\.251:\/data\s+\/mnt\/nfs\/?\s+nfs4?\s+\S*_netdev\S*/m) },
+      { label: 'systemd zná aktuální fstab (systemctl daemon-reload)', ok: s.fstabLoaded === (s.read('/etc/fstab') ?? '') },
+      { label: 'sdílení je připojené v /mnt/nfs', ok: s.mounts.some((m) => m.target === '/mnt/nfs' && m.src === '10.0.3.251:/data') },
+    ],
+  },
+  {
+    id: 'lx-gluster',
+    bookId: 'cloud-prikazy-storage',
+    title: 'GlusterFS – replikovaný volume ze tří uzlů',
+    goal: 'Jsi na uzlu gfs1 (10.0.3.201). Na gfs2 (10.0.3.202) a gfs3 (10.0.3.203) už GlusterFS běží a bricky /srv/brick2 a /srv/brick3 jsou připravené. Spoj uzly do clusteru a vytvoř volume vg0, kde je každý soubor na všech třech uzlech.',
+    steps: ['/etc/hosts: gfs1, gfs2, gfs3 s jejich adresami (řádek localhost nech)', 'glusterfs-server, služba glusterd běží a startuje po bootu', 'brick /srv/brick1 na gfs1', 'gfs2 a gfs3 v clusteru (peer probe)', 'volume vg0: replica 3 z gfs1:/srv/brick1, gfs2:/srv/brick2, gfs3:/srv/brick3 (bricky leží na systémovém disku)', 'volume vg0 je spuštěný'],
+    hints: ['nano /etc/hosts – doplň 10.0.3.201 gfs1, 10.0.3.202 gfs2, 10.0.3.203 gfs3', 'apt install glusterfs-server -y, pak systemctl enable --now glusterd', 'gluster peer probe gfs2 a gluster peer probe gfs3, kontrola: gluster peer status', 'gluster volume create vg0 replica 3 transport tcp gfs1:/srv/brick1 gfs2:/srv/brick2 gfs3:/srv/brick3 force – „force“ kvůli systémovému disku', 'gluster volume start vg0, kontrola: gluster volume info'],
+    solution: 'nano /etc/hosts\n\n10.0.3.201  gfs1\n10.0.3.202  gfs2\n10.0.3.203  gfs3\n\napt install glusterfs-server -y\nsystemctl enable --now glusterd\nmkdir -p /srv/brick1\ngluster peer probe gfs2\ngluster peer probe gfs3\ngluster peer status\ngluster volume create vg0 replica 3 transport tcp gfs1:/srv/brick1 gfs2:/srv/brick2 gfs3:/srv/brick3 force\ngluster volume start vg0\ngluster volume info',
+    create: () =>
+      new LinuxSim({
+        hostname: 'gfs1',
+        ifaces: [{ name: 'enp0s3', addr: '10.0.3.201/24' }],
+        gateway: '10.0.3.1',
+        hosts: ['10.0.3.1', '10.0.3.202', '10.0.3.203'],
+        glusterNodes: { gfs2: '10.0.3.202', gfs3: '10.0.3.203' },
+      }),
+    check: (s) => {
+      const v = s.volumes.get('vg0');
+      const hosts = s.read('/etc/hosts');
+      return [
+        { label: '/etc/hosts: gfs1, gfs2 a gfs3', ok: has(hosts, /^10\.0\.3\.201\s+.*\bgfs1\b/m) && has(hosts, /^10\.0\.3\.202\s+.*\bgfs2\b/m) && has(hosts, /^10\.0\.3\.203\s+.*\bgfs3\b/m) },
+        { label: 'glusterd běží a je povolený', ok: !!s.services.get('glusterd')?.active && !!s.services.get('glusterd')?.enabled },
+        { label: 'gfs2 a gfs3 jsou v clusteru', ok: s.peers.has('gfs2') && s.peers.has('gfs3') },
+        { label: 'vg0 je replica 3 ze tří uzlů', ok: !!v && v.replica === 3 && v.bricks.length === 3 && ['gfs1:/srv/brick1', 'gfs2:/srv/brick2', 'gfs3:/srv/brick3'].every((b) => v.bricks.includes(b)) },
+        { label: 'vg0 je spuštěný', ok: !!v?.started },
+      ];
+    },
+  },
+  {
+    id: 'lx-gluster-klient',
+    bookId: 'cloud-prikazy-storage',
+    title: 'GlusterFS – připojení klienta',
+    goal: 'Volume vg0 na uzlech gfs1–gfs3 (10.0.3.201–203) běží. Na klientovi ho připoj do /mnt/gluster a zapiš do něj testovací soubor test.txt.',
+    steps: ['/etc/hosts: gfs1, gfs2, gfs3 (klient se po připojení spojuje se všemi bricky)', 'balíček glusterfs-client', 'přípojný bod /mnt/gluster', 'připojit gfs1:/vg0 jako typ glusterfs', 'soubor /mnt/gluster/test.txt'],
+    hints: ['nano /etc/hosts – doplň všechny tři uzly', 'apt install glusterfs-client -y', 'mkdir -p /mnt/gluster', 'mount -t glusterfs gfs1:/vg0 /mnt/gluster', 'echo "test replikace" > /mnt/gluster/test.txt'],
+    solution: 'nano /etc/hosts\n\n10.0.3.201  gfs1\n10.0.3.202  gfs2\n10.0.3.203  gfs3\n\napt install glusterfs-client -y\nmkdir -p /mnt/gluster\nmount -t glusterfs gfs1:/vg0 /mnt/gluster\necho "test replikace" > /mnt/gluster/test.txt\nfindmnt /mnt/gluster',
+    create: () =>
+      new LinuxSim({
+        hostname: 'klient',
+        ifaces: [{ name: 'enp0s3', addr: '10.0.3.50/24' }],
+        gateway: '10.0.3.1',
+        hosts: ['10.0.3.1', '10.0.3.201', '10.0.3.202', '10.0.3.203'],
+        glusterVolumes: { '10.0.3.201': ['vg0'], '10.0.3.202': ['vg0'], '10.0.3.203': ['vg0'] },
+      }),
+    check: (s) => {
+      const hosts = s.read('/etc/hosts');
+      const mounted = s.mounts.some((m) => m.target === '/mnt/gluster' && m.type === 'glusterfs' && /:\/?vg0$/.test(m.src));
+      return [
+        { label: '/etc/hosts: gfs1, gfs2 a gfs3', ok: has(hosts, /^10\.0\.3\.201\s+.*\bgfs1\b/m) && has(hosts, /^10\.0\.3\.202\s+.*\bgfs2\b/m) && has(hosts, /^10\.0\.3\.203\s+.*\bgfs3\b/m) },
+        { label: 'glusterfs-client je nainstalovaný', ok: s.packages.has('glusterfs-client') },
+        { label: 'vg0 je připojený v /mnt/gluster', ok: mounted },
+        { label: 'v připojeném volume je test.txt', ok: mounted && s.files.has('/mnt/gluster/test.txt') },
+      ];
+    },
   },
 ];

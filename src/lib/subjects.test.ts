@@ -6,7 +6,7 @@ import { ALL_PROCEDURES } from '../data/site/procedures';
 import { teacherChapters } from '../data/site/teacher';
 import { WRITING_FORMS, WRITING_PROMPTS } from '../data/writing';
 import { HW_GENERATORS, generateHwCalcQuestions } from './hwgen';
-import { generateCloudScenario } from './cloudgen';
+import { cloudExamParts, generateCloudScenario } from './cloudgen';
 import { analyzeWriting, countWords } from './writingcheck';
 import { checkFillAnswer } from './answers';
 import { buildSubjectPool, generateCommandQuestions, generateProcedureQuestions, generateTopicQuestions, itemLabel } from './topicgen';
@@ -357,6 +357,11 @@ describe('Cloud: SSH, NFS a GlusterFS podle zápisků', () => {
       expect(nfs.solution).toContain(`${s.nfsIp}:/srv/`);
       expect(s.tasks.find((t) => t.id === 'st-gluster')!.solution).toContain('replica 3');
       expect(new Set(s.tasks.map((t) => t.id)).size).toBe(s.tasks.length);
+      const parts = cloudExamParts(s, ['st-nfs', 'dk-web']);
+      expect(parts.reduce((n, p) => n + p.tasks.length, 0)).toBe(s.tasks.length);
+      expect(parts.find((p) => p.label.startsWith('Úložiště'))).toMatchObject({ done: 1 });
+      expect(parts.find((p) => p.label === 'Kontejnery')!.done).toBe(1);
+      expect(parts.find((p) => p.label === 'Virtualizace')!.tasks.length).toBeGreaterThanOrEqual(5);
     }
   });
 });

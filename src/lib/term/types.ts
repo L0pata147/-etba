@@ -32,6 +32,8 @@ export interface TermTask<S extends Simulator = Simulator> {
   hints: string[];
   /** Vzorové řešení */
   solution: string;
+  /** Položka pokroku, do které se úloha počítá (výchozí site-prikazy-<platforma>) */
+  bookId?: string;
   create(): S;
   check(s: S): CheckItem[];
 }
