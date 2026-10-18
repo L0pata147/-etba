@@ -173,10 +173,10 @@ export const TROUBLE: TroubleItem[] = [
     platform: 'windows',
     title: 'DHCP v doméně',
     symptom: 'Role DHCP je nainstalovaná a rozsah aktivní, ale klienti v doméně adresu nedostanou; v protokolu je hlášení o neautorizovaném serveru.',
-    config: 'PS> Install-WindowsFeature DHCP -IncludeManagementTools\nPS> Add-DhcpServerv4Scope -Name LAN -StartRange 192.168.10.100 -EndRange 192.168.10.200 -SubnetMask 255.255.255.0\nPS> Set-DhcpServerv4OptionValue -Router 192.168.10.1 -DnsServer 192.168.10.5',
+    config: 'Konzola DHCP (Nástroje → DHCP):\n  dc1.firma.local\n    IPv4  (u ikony červená šipka dolů)\n      Obor [192.168.10.0] LAN – aktivní, 192.168.10.100–192.168.10.200\n      Možnosti oboru: Směrovač 192.168.10.1, Servery DNS 192.168.10.5\nSprávce serveru: vlaječka s upozorněním – konfigurace služby DHCP nebyla dokončena',
     answer: 'DHCP server není autorizovaný v Active Directory',
-    wrong: ['rozsah musí začínat na .1', 'chybí role DNS na stejném serveru', 'volba Router se nastavuje jen v GUI'],
-    fix: 'V doméně musí být DHCP server autorizovaný:\nAdd-DhcpServerInDC',
+    wrong: ['rozsah musí začínat na .1', 'chybí role DNS na stejném serveru', 'obor musí obsahovat i adresu serveru'],
+    fix: 'V doméně musí být DHCP server autorizovaný:\nvlaječka ve Správci serveru → Dokončit konfiguraci služby DHCP\n(nebo v konzoli DHCP pravým na server → Autorizovat)',
   },
   {
     id: 'tr-win-join',
@@ -186,7 +186,7 @@ export const TROUBLE: TroubleItem[] = [
     config: 'C:\\> ipconfig /all\n   IPv4 adresa . . . . : 192.168.10.120\n   Výchozí brána . . . : 192.168.10.1\n   Servery DNS . . . . : 8.8.8.8',
     answer: 'klient používá veřejný DNS místo DNS serveru domény',
     wrong: ['adresa klienta je mimo rozsah DHCP', 'chybí výchozí brána', 'doména .local nejde použít'],
-    fix: 'Řadič domény se hledá přes DNS (záznamy SRV). Klient musí mít jako DNS řadič domény:\nSet-DnsClientServerAddress -InterfaceAlias Ethernet -ServerAddresses 192.168.10.5',
+    fix: 'Řadič domény se hledá přes DNS (záznamy SRV). Klient musí mít jako DNS řadič domény:\nVlastnosti protokolu IPv4 → upřednostňovaný server DNS 192.168.10.5',
   },
   {
     id: 'tr-win-profil-cesta',

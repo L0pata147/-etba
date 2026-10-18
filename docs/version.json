@@ -1,6 +1,8 @@
 {
-  "version": "1.32.1",
+  "version": "1.33.0",
   "notes": [
-    "Nová profilovka „kapuce“"
+    "Windows Server jen přes GUI: postupy (DNS, DHCP, uživatelé, sdílení, doména) přepsané na klikání ve Správci serveru a konzolích, bez PowerShellu",
+    "Příkazy u Windows jen z příkazového řádku, které se k tomu hodí: ipconfig, ping, nslookup, whoami, gpupdate, gpresult, net use v logon.bat",
+    "Zadání nanečisto a Najdi chybu u Windows bez PowerShellu"
   ]
 }

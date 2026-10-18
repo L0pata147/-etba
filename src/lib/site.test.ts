@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { FillQuestion, Question } from '../types';
 import { SITE_TOPICS } from '../data/site';
 import { ALL_TOPICS } from '../data/subjects';
-import { COMMANDS } from '../data/site/commands';
+import { ALL_COMMANDS, COMMANDS, PLATFORM_LABEL } from '../data/site/commands';
+import { TROUBLE } from '../data/troubleshoot';
 import { PROCEDURES } from '../data/site/procedures';
 import {
   GENERATORS,
@@ -213,7 +214,15 @@ describe('Windows Server podle hodiny 1. 10.', () => {
     const netUse = cmds.find((q) => q.answer.startsWith('net use'))!;
     expect(checkFillAnswer(netUse, 'net use x: \\\\server\\logon')).toBe(true);
     expect(checkFillAnswer(netUse, 'net use X: \\\\SERVER\\data')).toBe(false);
-    const profilePath = cmds.find((q) => q.answer.includes('-ProfilePath'))!;
-    expect(checkFillAnswer(profilePath, 'set-aduser barta -profilepath \\\\SERVER\\profily\\barta')).toBe(true);
+  });
+  it('Windows Server jen přes GUI – bez PowerShellu', () => {
+    const PS = /\b(New|Set|Get|Add|Install|Rename|Resize|Remove|Resolve|Restart)-[A-Z][A-Za-z]+|PowerShell|^PS>/m;
+    const winCmds = ALL_COMMANDS.filter((c) => c.platform === 'windows');
+    expect(winCmds.length).toBeGreaterThan(5);
+    for (const c of winCmds) expect([c.command, ...(c.accepted ?? [])].join(' '), c.command).not.toMatch(PS);
+    for (const p of PROCEDURES.filter((x) => x.platform === 'windows')) for (const st of p.steps) expect(`${st.text} ${st.cmd ?? ''}`, p.id).not.toMatch(PS);
+    for (const t of TROUBLE.filter((x) => x.platform === 'windows')) expect(`${t.config}\n${t.fix}`, t.id).not.toMatch(PS);
+    for (let r = 0; r < 5; r++) for (const t of generateScenario('windows').osTasks) expect(`${t.detail}\n${t.solution}`, t.id).not.toMatch(PS);
+    expect(PLATFORM_LABEL.windows).not.toMatch(/PowerShell/);
   });
 });

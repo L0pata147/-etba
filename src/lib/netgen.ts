@@ -508,7 +508,6 @@ export function generateScenario(os?: 'linux' | 'windows'): Scenario {
         ]
       : (() => {
           const clientIp = intToIp(srvNet + rnd(21, 99));
-          const dn = domain.split('.').map((d) => `DC=${d}`).join(',');
           const nb = domain.split('.')[0].toUpperCase();
           return [
             {
@@ -516,79 +515,79 @@ export function generateScenario(os?: 'linux' | 'windows'): Scenario {
               title: 'Virtuální počítače ve VirtualBoxu',
               detail: 'Vytvoř VM pro Windows Server 2016 Standard (s Desktop prostředím): 2 GB RAM, 2 CPU, disk 50 GB s dynamickou alokací, síťová karta v režimu „Vnitřní síť“. Klient (Windows 10 Pro, příp. 7 Pro): 2 GB RAM (Win 7 stačí 1 GB), 1 CPU, disk 30 GB dynamicky, také vnitřní síť. Do obou doinstaluj přídavky pro hosta. (Na hodině 1. 10. se dělal Windows Server 2022 a klient Windows 11 Education.)',
               solution:
-                'VirtualBox → Nový: typ Microsoft Windows, verze Windows 2016 (64-bit)\nPaměť 2048 MB, CPU 2 (Nastavení → Systém → Procesor)\nVytvořit virtuální disk VDI, Dynamicky alokovaný, 50 GB\nNastavení → Síť → Karta 1: Připojena k „Vnitřní síť“, název intnet (u obou VM stejný!)\nNastavení → Úložiště → optická mechanika: ISO Windows Serveru\nPo instalaci: Zařízení → Vložit obraz CD s přídavky pro hosta → spustit VBoxWindowsAdditions.exe → restart\n\nKlient stejně: Windows 10 (64-bit), 2048 MB (Win 7: 1024 MB), 1 CPU, 30 GB dynamicky, vnitřní síť intnet\n\nPříkazy:\nVBoxManage createvm --name ds --ostype Windows2016_64 --register\nVBoxManage modifyvm ds --memory 2048 --cpus 2 --nic1 intnet --intnet1 intnet\nVBoxManage createmedium disk --filename ds.vdi --size 51200 --variant Standard\n\nHodina 1. 10.: Windows Server 2022 Standard (Desktopové prostředí), 4096 MB, 2 CPU, 80 GB dynamicky; klient Windows 11 Education (edice Home do domény nejde), oba ve vnitřní síti intnet',
+                'VirtualBox → Nový: typ Microsoft Windows, verze Windows 2016 (64-bit)\nPaměť 2048 MB, CPU 2 (Nastavení → Systém → Procesor)\nVytvořit virtuální disk VDI, Dynamicky alokovaný, 50 GB\nNastavení → Síť → Karta 1: Připojena k „Vnitřní síť“, název intnet (u obou VM stejný!)\nNastavení → Úložiště → optická mechanika: ISO Windows Serveru\nPo instalaci: Zařízení → Vložit obraz CD s přídavky pro hosta → spustit VBoxWindowsAdditions.exe → restart\n\nKlient stejně: Windows 10 (64-bit), 2048 MB (Win 7: 1024 MB), 1 CPU, 30 GB dynamicky, vnitřní síť intnet\n\nHodina 1. 10.: Windows Server 2022 Standard (Desktopové prostředí), 4096 MB, 2 CPU, 80 GB dynamicky; klient Windows 11 Education (edice Home do domény nejde), oba ve vnitřní síti intnet',
             },
             {
               id: 'win-ip',
               title: 'Název serveru a IP adresy',
               detail: `Přejmenuj server na ds. Nastav statické adresy ze sítě 192.168.100.0/24: server ${server.ip}, klient ${clientIp}. Jako DNS server použij u obou adresu serveru.`,
-              solution: `Server – Správce serveru → Místní server → Název počítače → Změnit → ds → restart\n(PowerShell) Rename-Computer -NewName ds -Restart\n\nncpa.cpl → Ethernet → Vlastnosti → Protokol IPv4:\n  IP ${server.ip}, maska 255.255.255.0, DNS ${server.ip}\n(PowerShell) New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress ${server.ip} -PrefixLength 24\nSet-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses ${server.ip}\n\nKlient: IP ${clientIp}, maska 255.255.255.0, DNS ${server.ip}\nOvěření: ping ${server.ip} z klienta (když neprojde, povol ve firewallu pravidlo „Sdílení souborů a tiskáren (požadavek na odezvu – ICMPv4)“)\nVe vnitřní síti VirtualBoxu není router – výchozí brána není potřeba.`,
+              solution: `Server – Správce serveru → Místní server → Název počítače → Změnit → ds → restartovat\n\nSíťová připojení (ncpa.cpl) → Ethernet → Vlastnosti → Protokol IP verze 4 (TCP/IPv4) → Vlastnosti:\n  IP ${server.ip}, maska 255.255.255.0, upřednostňovaný DNS ${server.ip}\n\nKlient: IP ${clientIp}, maska 255.255.255.0, DNS ${server.ip}\nOvěření: ping ${server.ip} z klienta (když neprojde, povol ve firewallu pravidlo „Sdílení souborů a tiskáren (požadavek na odezvu – ICMPv4)“)\nVe vnitřní síti VirtualBoxu není router – výchozí brána není potřeba.`,
             },
             {
               id: 'win-role',
               title: 'Role DNS a Active Directory Domain Services',
               detail: 'Na server doinstaluj role DNS server a Active Directory Domain Services.',
-              solution: 'Správce serveru → Spravovat → Přidat role a funkce → Instalace na základě rolí → server ds → zaškrtnout „Active Directory Domain Services“ a „DNS Server“ (přidat požadované funkce) → Nainstalovat\n(PowerShell) Install-WindowsFeature AD-Domain-Services, DNS -IncludeManagementTools',
+              solution: 'Správce serveru → Spravovat → Přidat role a funkce → vybrat server ds → Role serveru: ☑ Server DNS, ☑ Služba Active Directory Domain Services → Přidat funkce → Nainstalovat',
             },
             {
               id: 'win-dc',
               title: 'Primární řadič domény',
               detail: `Povyš server na primární řadič domény v nové doménové struktuře (lese). Doména: ${domain}.`,
-              solution: `Správce serveru → vlaječka s upozorněním → „Zvýšit úroveň tohoto serveru na řadič domény“\n→ Přidat novou doménovou strukturu → Název kořenové domény: ${domain}\n→ heslo pro režim obnovení adresářových služeb (DSRM) → Další… → Nainstalovat → server se restartuje\n(PowerShell) Install-ADDSForest -DomainName ${domain} -InstallDns\nPo restartu se přihlásíš jako ${domain.split('.')[0].toUpperCase()}\\Administrator`,
+              solution: `Správce serveru → vlaječka s upozorněním → Povýšit tento server na řadič domény\n→ Přidat novou doménovou strukturu → Název kořenové domény: ${domain}\n→ heslo pro režim obnovení adresářových služeb (DSRM) → Další… → Nainstalovat → server se restartuje\nPo restartu se přihlásíš jako ${domain.split('.')[0].toUpperCase()}\\Administrator`,
             },
             {
               id: 'win-klient',
               title: 'Klient v doméně',
               detail: `Připoj klientskou stanici do domény ${domain}.`,
-              solution: `Klient musí mít jako DNS ${server.ip} (jinak řadič domény nenajde)\nsysdm.cpl → Název počítače → Změnit → Člen domény: ${domain} → přihlásit se doménovým účtem (Administrator) → restart\n(PowerShell, Windows 10) Add-Computer -DomainName ${domain} -Restart\nOvěření: na serveru v „Uživatelé a počítače služby Active Directory“ → Computers je klient`,
+              solution: `Klient musí mít jako DNS ${server.ip} (jinak řadič domény nenajde)\nNastavení → Systém → O systému → Doména nebo pracovní skupina → Změnit → Je členem: Domény: ${domain} → účet Administrator → restartovat\n(klasicky: sysdm.cpl → Název počítače → Změnit)\nOvěření: na serveru v „Uživatelé a počítače služby Active Directory“ → Computers je klient`,
             },
             {
               id: 'win-users',
               title: 'Doménová struktura: OU, uživatelé, skupiny',
               detail: 'Vytvoř organizační jednotky (např. Ucetni a Vyroba), v nich uživatelské účty a globální skupiny, uživatele přidej do skupin. Přihlas se na klientovi jako nový uživatel.',
-              solution: `dsa.msc (Uživatelé a počítače služby Active Directory) → pravým na doménu → Nový → Organizační jednotka\n→ v OU: Nový → Uživatel (přihlašovací jméno, heslo, „uživatel musí změnit heslo“ dle potřeby)\n→ Nový → Skupina (obor Globální, typ Zabezpečení) → Vlastnosti skupiny → Členové → Přidat\n\n(PowerShell)\nNew-ADOrganizationalUnit -Name Ucetni\nNew-ADUser -Name "Jan Novak" -SamAccountName jnovak -Path "OU=Ucetni,${dn}" -AccountPassword (Read-Host -AsSecureString) -Enabled $true\nNew-ADGroup -Name Ucetni -GroupScope Global -Path "OU=Ucetni,${dn}"\nAdd-ADGroupMember -Identity Ucetni -Members jnovak`,
+              solution: `dsa.msc (Uživatelé a počítače služby Active Directory) → pravým na doménu → Nový → Organizační jednotka\n→ v OU: Nový → Uživatel (přihlašovací jméno, heslo, „uživatel musí změnit heslo“ dle potřeby)\n→ Nový → Skupina (obor Globální, typ Zabezpečení) → Vlastnosti skupiny → Členové → Přidat\nNa klientovi: Jiný uživatel → přihlašovací jméno nového uživatele`,
             },
             {
               id: 'win-disk',
               title: 'Svazek pro data',
               detail: 'Zmenši svazek C: a z uvolněného místa vytvoř nový svazek O: (NTFS). Budou na něm sdílené složky data, profily a logon.',
-              solution: 'Správa počítače → Úložiště → Správa disků → pravým na (C:) → Zmenšit svazek\n→ pravým na nepřidělené místo → Nový jednoduchý svazek → písmeno O:, NTFS\n(PowerShell) Resize-Partition -DriveLetter C -Size ((Get-Partition -DriveLetter C).Size - 1GB)\nNew-Partition -DiskNumber 0 -UseMaximumSize -DriveLetter O | Format-Volume -FileSystem NTFS',
+              solution: 'Správa počítače → Úložiště → Správa disků → pravým na (C:) → Zmenšit svazek\n→ pravým na nepřidělené místo → Nový jednoduchý svazek → písmeno O:, NTFS',
             },
             {
               id: 'win-home',
               title: 'Domovská složka',
               detail: 'Vytvoř složku O:\\data, sdílej ji uživateli jnovak a nastav mu ji jako domovskou složku připojenou jako O:.',
-              solution: `O:\\data → Vlastnosti → Sdílení → Sdílení… → jnovak → Sdílet → \\\\ds\\data\ndsa.msc → jnovak → Vlastnosti → Profil → Domovská složka: Připojit O: k \\\\ds\\data\n(PowerShell) New-SmbShare -Name data -Path O:\\data -ChangeAccess ${nb}\\jnovak\nSet-ADUser jnovak -HomeDrive "O:" -HomeDirectory "\\\\ds\\data"`,
+              solution: `O:\\data → Vlastnosti → Sdílení → Sdílení… → jnovak → Sdílet → \\\\ds\\data\ndsa.msc → jnovak → Vlastnosti → Profil → Domovská složka: Připojit O: k \\\\ds\\data`,
             },
             {
               id: 'win-profil',
               title: 'Cestovní profil',
               detail: 'Vytvoř a sdílej složku O:\\profily a nastav uživateli jnovak cestovní profil. Na klientovi ověř, že profil je cestovní.',
-              solution: `O:\\profily → Sdílení → jnovak: Čtení/zápis (do profilu se při odhlášení zapisuje) → \\\\ds\\profily\ndsa.msc → jnovak → Vlastnosti → Profil → Cesta k profilu: \\\\ds\\profily\\%USERNAME% (pozor na lomítko před %USERNAME%)\n(PowerShell) Set-ADUser jnovak -ProfilePath "\\\\ds\\profily\\jnovak"\nOvěření na klientovi: přihlásit se jako jnovak → sysdm.cpl → Upřesnit → Profily uživatelů → ${nb}\\jnovak: Typ Cestovní`,
+              solution: `O:\\profily → Sdílení → jnovak: Čtení/zápis (do profilu se při odhlášení zapisuje) → \\\\ds\\profily\ndsa.msc → jnovak → Vlastnosti → Profil → Cesta k profilu: \\\\ds\\profily\\%USERNAME% (pozor na lomítko před %USERNAME%)\nOvěření na klientovi: přihlásit se jako jnovak → sysdm.cpl → Upřesnit → Profily uživatelů → ${nb}\\jnovak: Typ Cestovní`,
             },
             {
               id: 'win-logon',
               title: 'Přihlašovací skript',
               detail: 'Vytvoř a sdílej složku O:\\logon a přihlašovací skript logon.bat, který uživateli jnovak připojí tuto složku jako jednotku X:.',
-              solution: `O:\\logon → Sdílení → jnovak (Čtení) → \\\\ds\\logon\nC:\\Windows\\SYSVOL\\sysvol\\${domain}\\scripts\\logon.bat (sdílené jako NETLOGON), obsah:\nnet use X: \\\\ds\\logon\n(Průzkumník → Zobrazení → ☑ Přípony názvů souborů, ať nevznikne logon.bat.txt)\ndsa.msc → jnovak → Vlastnosti → Profil → Přihlašovací skript: logon.bat\n(PowerShell) Set-ADUser jnovak -ScriptPath logon.bat`,
+              solution: `O:\\logon → Sdílení → jnovak (Čtení) → \\\\ds\\logon\nC:\\Windows\\SYSVOL\\sysvol\\${domain}\\scripts\\logon.bat (sdílené jako NETLOGON), obsah:\nnet use X: \\\\ds\\logon\n(Průzkumník → Zobrazení → ☑ Přípony názvů souborů, ať nevznikne logon.bat.txt)\ndsa.msc → jnovak → Vlastnosti → Profil → Přihlašovací skript: logon.bat`,
             },
             {
               id: 'win-share',
               title: 'Navíc: sdílená složka pro skupinu',
               detail: 'Vytvoř na serveru složku C:\\Ucetni sdílenou jen pro skupinu Ucetni (sdílení i NTFS) a ověř přístup z klienta.',
-              solution: `New-Item -Path C:\\Ucetni -ItemType Directory\nNew-SmbShare -Name Ucetni -Path C:\\Ucetni -FullAccess ${domain.split('.')[0].toUpperCase()}\\Ucetni\n(NTFS: Vlastnosti → Zabezpečení → přidat skupinu Ucetni, odebrat Users)\nZ klienta: \\\\ds\\Ucetni`,
+              solution: `Průzkumník → C: → Nová složka: Ucetni\nUcetni → Vlastnosti → Sdílení → Sdílení… → přidat skupinu Ucetni → Čtení/zápis → Sdílet → \\\\ds\\Ucetni\nNTFS: Vlastnosti → Zabezpečení → Upravit → Přidat… → Ucetni, odebrat Users\nZ klienta: Průzkumník → \\\\ds\\Ucetni`,
             },
             {
               id: 'win-gpo',
               title: 'Navíc: zásady skupiny',
               detail: 'Vytvoř GPO propojené s OU Vyroba, které uživatelům zakáže přístup k Ovládacím panelům, a ověř na klientovi.',
-              solution: `gpmc.msc → pravým na OU Vyroba → Vytvořit objekt zásad skupiny v této doméně a propojit jej sem… → Upravit\n→ Konfigurace uživatele → Zásady → Šablony pro správu → Ovládací panely → Zakázat přístup k Ovládacím panelům a nastavení počítače → Povoleno\nUživatelské zásady platí pro uživatele, kteří jsou v OU Vyroba (u Konfigurace počítače by v OU musel být počítač)\n(PowerShell) New-GPO -Name "Vyroba-zasady" | New-GPLink -Target "OU=Vyroba,${dn}"\nNa klientovi: gpupdate /force, gpresult /r`,
+              solution: `gpmc.msc → pravým na OU Vyroba → Vytvořit objekt zásad skupiny v této doméně a propojit jej sem… → Upravit\n→ Konfigurace uživatele → Zásady → Šablony pro správu → Ovládací panely → Zakázat přístup k Ovládacím panelům a nastavení počítače → Povoleno\nUživatelské zásady platí pro uživatele, kteří jsou v OU Vyroba (u Konfigurace počítače by v OU musel být počítač)\nNa klientovi: gpupdate /force, gpresult /r`,
             },
             {
               id: 'win-hesla',
               title: 'Navíc: zásady hesel a uzamčení účtu',
               detail: 'Nastav pro doménové účty minimální délku hesla 8 znaků se složitostí a uzamčení účtu po 3 chybných pokusech na 30 minut.',
-              solution: `Správa zásad skupiny → ${domain} → Default Domain Policy → Upravit (zásady hesel pro doménové účty platí jen z GPO propojeného s doménou)\nKonfigurace počítače → Zásady → Nastavení systému Windows → Nastavení zabezpečení → Zásady účtů\n→ Zásady hesel: Minimální délka hesla 8, Heslo musí splňovat požadavky na složitost: Povoleno\n→ Zásady uzamčení účtu: Prahová hodnota pro uzamčení účtu 3, Doba uzamčení účtu 30 minut\n(PowerShell) Set-ADDefaultDomainPasswordPolicy -Identity ${domain} -MinPasswordLength 8 -ComplexityEnabled $true -LockoutThreshold 3 -LockoutDuration 00:30:00\nOvěření: Get-ADDefaultDomainPasswordPolicy`,
+              solution: `Správa zásad skupiny → ${domain} → Default Domain Policy → Upravit (zásady hesel pro doménové účty platí jen z GPO propojeného s doménou)\nKonfigurace počítače → Zásady → Nastavení systému Windows → Nastavení zabezpečení → Zásady účtů\n→ Zásady hesel: Minimální délka hesla 8, Heslo musí splňovat požadavky na složitost: Povoleno\n→ Zásady uzamčení účtu: Prahová hodnota pro uzamčení účtu 3, Doba uzamčení účtu 30 minut\nOvěření: v Uživatelích a počítačích služby AD zkus uživateli nastavit heslo kratší než 8 znaků – server ho odmítne`,
             },
           ];
         })();

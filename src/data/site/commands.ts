@@ -3,7 +3,7 @@ import { CLOUD_COMMANDS } from '../cloud/commands';
 
 /**
  * Příkazy pro trenažér. `accepted` = další přijatelné zápisy (zkratky).
- * U dlouhých příkazů (PowerShell) se kontroluje přítomnost povinných částí – viz `required`.
+ * U dlouhých příkazů se kontroluje přítomnost povinných částí – viz `required`.
  */
 export interface CommandDef extends CommandItem {
   required?: string[];
@@ -24,7 +24,7 @@ const c = (platform: Platform, group: string, task: string, command: string, acc
 export const PLATFORM_LABEL: Record<Platform, string> = {
   cisco: 'Cisco IOS (Packet Tracer)',
   linux: 'Linux (Debian 13)',
-  windows: 'Windows Server (PowerShell)',
+  windows: 'Windows Server',
   docker: 'Docker a kontejnery',
   hyperv: 'Hyper-V (PowerShell)',
   proxmox: 'Proxmox VE',
@@ -185,36 +185,17 @@ export const COMMANDS: CommandDef[] = [
   c('linux', 'Uživatelé a oprávnění', 'Nastav soukromému klíči id_rsa oprávnění jen pro vlastníka (čtení a zápis).', 'chmod 600 id_rsa', ['chmod 600 ./id_rsa', 'chmod u=rw,go= id_rsa']),
 
   // ===== Windows Server =====
-  c('windows', 'Síť a počítač', 'Zobraz úplnou konfiguraci IP (příkazový řádek).', 'ipconfig /all'),
-  c('windows', 'Síť a počítač', 'Nastav statickou adresu 192.168.10.5/24 s bránou 192.168.10.1 na rozhraní „Ethernet“.', 'New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress 192.168.10.5 -PrefixLength 24 -DefaultGateway 192.168.10.1', [], undefined, ['new-netipaddress', '-interfacealias ethernet', '-ipaddress 192.168.10.5', '-prefixlength 24', '-defaultgateway 192.168.10.1']),
-  c('windows', 'Síť a počítač', 'Nastav rozhraní „Ethernet“ DNS server 192.168.10.5.', 'Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 192.168.10.5', [], undefined, ['set-dnsclientserveraddress', '-interfacealias ethernet', '-serveraddresses 192.168.10.5']),
-  c('windows', 'Síť a počítač', 'Přejmenuj počítač na DC1 a restartuj ho.', 'Rename-Computer -NewName DC1 -Restart', [], undefined, ['rename-computer', 'dc1', '-restart']),
-  c('windows', 'Síť a počítač', 'Zobraz nainstalované role a funkce.', 'Get-WindowsFeature'),
-  c('windows', 'Síť a počítač', 'Otestuj překlad jména firma.local.', 'nslookup firma.local', ['resolve-dnsname firma.local']),
-  c('windows', 'Active Directory', 'Nainstaluj roli Active Directory Domain Services i s nástroji pro správu.', 'Install-WindowsFeature AD-Domain-Services -IncludeManagementTools', [], undefined, ['install-windowsfeature', 'ad-domain-services', '-includemanagementtools']),
-  c('windows', 'Active Directory', 'Vytvoř novou doménovou strukturu (doménu) firma.local – server se stane řadičem domény.', 'Install-ADDSForest -DomainName firma.local', [], 'Příkaz se zeptá na heslo pro režim obnovení (DSRM) a restartuje server.', ['install-addsforest', '-domainname firma.local']),
-  c('windows', 'Active Directory', 'Vytvoř organizační jednotku Ucetni.', 'New-ADOrganizationalUnit -Name Ucetni', [], undefined, ['new-adorganizationalunit', '-name ucetni']),
-  c('windows', 'Active Directory', 'Vytvoř uživatele jnovak (jméno Jan Novák), zadej heslo a účet povol.', 'New-ADUser -Name "Jan Novak" -SamAccountName jnovak -AccountPassword (Read-Host -AsSecureString) -Enabled $true', [], undefined, ['new-aduser', '-samaccountname jnovak', '-accountpassword', '-enabled $true']),
-  c('windows', 'Active Directory', 'Vytvoř globální skupinu Ucetni.', 'New-ADGroup -Name Ucetni -GroupScope Global', [], undefined, ['new-adgroup', '-name ucetni', '-groupscope global']),
-  c('windows', 'Active Directory', 'Přidej uživatele jnovak do skupiny Ucetni.', 'Add-ADGroupMember -Identity Ucetni -Members jnovak', [], undefined, ['add-adgroupmember', 'ucetni', '-members jnovak']),
-  c('windows', 'Active Directory', 'Na klientovi připoj počítač do domény firma.local a restartuj ho.', 'Add-Computer -DomainName firma.local -Restart', [], undefined, ['add-computer', '-domainname firma.local', '-restart']),
-  c('windows', 'Active Directory', 'Na klientovi okamžitě aplikuj zásady skupiny.', 'gpupdate /force'),
-  c('windows', 'Active Directory', 'Zobraz, které zásady skupiny se na počítač uplatnily.', 'gpresult /r'),
-  c('windows', 'DNS a DHCP', 'Přidej do zóny firma.local záznam A „www“ s adresou 192.168.10.10.', 'Add-DnsServerResourceRecordA -Name www -ZoneName firma.local -IPv4Address 192.168.10.10', [], undefined, ['add-dnsserverresourcerecorda', '-name www', '-zonename firma.local', '-ipv4address 192.168.10.10']),
-  c('windows', 'DNS a DHCP', 'Nainstaluj roli DHCP server i s nástroji.', 'Install-WindowsFeature DHCP -IncludeManagementTools', [], undefined, ['install-windowsfeature', 'dhcp', '-includemanagementtools']),
-  c('windows', 'DNS a DHCP', 'Autorizuj DHCP server v Active Directory.', 'Add-DhcpServerInDC', [], 'Bez autorizace DHCP server v doméně adresy nepřiděluje.', ['add-dhcpserverindc']),
-  c('windows', 'DNS a DHCP', 'Vytvoř rozsah DHCP „LAN“ 192.168.10.100–192.168.10.200 s maskou /24.', 'Add-DhcpServerv4Scope -Name LAN -StartRange 192.168.10.100 -EndRange 192.168.10.200 -SubnetMask 255.255.255.0', [], undefined, ['add-dhcpserverv4scope', '-startrange 192.168.10.100', '-endrange 192.168.10.200', '-subnetmask 255.255.255.0']),
-  c('windows', 'DNS a DHCP', 'Nastav v DHCP volby: bránu 192.168.10.1 a DNS server 192.168.10.5.', 'Set-DhcpServerv4OptionValue -Router 192.168.10.1 -DnsServer 192.168.10.5', [], undefined, ['set-dhcpserverv4optionvalue', '-router 192.168.10.1', '-dnsserver 192.168.10.5']),
-  c('windows', 'Sdílení', 'Sdílej složku C:\\Data jako „Data“ s plným přístupem pro skupinu FIRMA\\Ucetni.', 'New-SmbShare -Name Data -Path C:\\Data -FullAccess FIRMA\\Ucetni', [], undefined, ['new-smbshare', '-name data', '-path c:\\data', '-fullaccess']),
-  c('windows', 'Sdílení', 'Zobraz sdílené složky na serveru.', 'Get-SmbShare', ['net share']),
-  c('windows', 'Sdílení', 'Připoj sdílenou složku \\\\SERVER\\logon jako jednotku X: (řádek přihlašovacího skriptu).', 'net use X: \\\\SERVER\\logon', [], 'Ve cvičení je tento řádek v logon.bat ve složce C:\\Windows\\SYSVOL\\sysvol\\server.local\\scripts.', ['net use', 'x:', '\\\\server\\logon']),
-  c('windows', 'Active Directory', 'Nastav uživateli barta domovskou složku \\\\SERVER\\data připojenou jako jednotka O:.', 'Set-ADUser barta -HomeDrive "O:" -HomeDirectory "\\\\SERVER\\data"', [], 'V GUI: Vlastnosti uživatele → Profil → Domovská složka → Připojit.', ['set-aduser', 'barta', '-homedrive', 'o:', '-homedirectory', '\\\\server\\data']),
-  c('windows', 'Active Directory', 'Nastav uživateli barta cestovní profil ve sdílené složce \\\\SERVER\\profily.', 'Set-ADUser barta -ProfilePath "\\\\SERVER\\profily\\barta"', [], 'V GUI: Vlastnosti uživatele → Profil → Cesta k profilu: \\\\SERVER\\profily\\%USERNAME%.', ['set-aduser', 'barta', '-profilepath', '\\\\server\\profily\\']),
-  c('windows', 'Zásady skupiny', 'Vytvoř GPO „Zamestnanci“ a propoj ho s OU zaměstnanci v doméně server.local.', 'New-GPO -Name "Zamestnanci" | New-GPLink -Target "OU=zaměstnanci,DC=server,DC=local"', [], 'V GUI: gpmc.msc → pravým na OU → Vytvořit objekt zásad skupiny v této doméně a propojit jej sem…', ['new-gpo', 'zamestnanci', 'new-gplink', '-target', 'ou=zaměstnanci,dc=server,dc=local']),
-  c('windows', 'Zásady skupiny', 'Zobraz zásady hesel domény (délka, složitost, uzamčení).', 'Get-ADDefaultDomainPasswordPolicy', [], 'V GUI: Default Domain Policy → Konfigurace počítače → … → Zásady účtů.', ['get-addefaultdomainpasswordpolicy']),
-  c('windows', 'Zásady skupiny', 'Nastav doméně server.local minimální délku hesla 8 znaků a zapni složitost hesla.', 'Set-ADDefaultDomainPasswordPolicy -Identity server.local -MinPasswordLength 8 -ComplexityEnabled $true', [], undefined, ['set-addefaultdomainpasswordpolicy', 'server.local', '-minpasswordlength 8', '-complexityenabled $true']),
+  // Windows Server se ve škole nastavuje přes grafické rozhraní – tady jsou jen příkazy z příkazového řádku (cmd), které se k tomu používají
+  c('windows', 'Příkazový řádek', 'Zobraz úplnou konfiguraci IP (adresa, maska, brána, DNS servery, MAC).', 'ipconfig /all'),
+  c('windows', 'Příkazový řádek', 'Na klientovi si vyžádej od DHCP serveru novou adresu.', 'ipconfig /renew'),
+  c('windows', 'Příkazový řádek', 'Z klienta ověř, že server 192.168.0.1 odpovídá.', 'ping 192.168.0.1'),
+  c('windows', 'Příkazový řádek', 'Otestuj, jestli DNS přeloží název domény server.local.', 'nslookup server.local'),
+  c('windows', 'Příkazový řádek', 'Na klientovi zjisti, pod jakým účtem a v jaké doméně jsi přihlášený.', 'whoami'),
+  c('windows', 'Zásady skupiny', 'Na klientovi okamžitě načti zásady skupiny.', 'gpupdate /force'),
+  c('windows', 'Zásady skupiny', 'Zobraz, které zásady skupiny se na počítač a uživatele uplatnily.', 'gpresult /r'),
   c('windows', 'Zásady skupiny', 'Ulož přehled uplatněných zásad skupiny do souboru zprava.html.', 'gpresult /h zprava.html', [], 'gpresult /r vypíše totéž stručně do okna.', ['gpresult', '/h', 'zprava.html']),
-  c('windows', 'Active Directory', 'Nastav uživateli barta přihlašovací skript logon.bat.', 'Set-ADUser barta -ScriptPath logon.bat', [], 'Skript leží ve složce SYSVOL\\sysvol\\<doména>\\scripts (sdílené jako NETLOGON).', ['set-aduser', 'barta', '-scriptpath', 'logon.bat']),
+  c('windows', 'Přihlašovací skript', 'Napiš řádek přihlašovacího skriptu, který připojí \\\\SERVER\\logon jako jednotku X:.', 'net use X: \\\\SERVER\\logon', [], 'Skript logon.bat se píše v Poznámkovém bloku a ukládá do C:\\Windows\\SYSVOL\\sysvol\\server.local\\scripts.', ['net use', 'x:', '\\\\server\\logon']),
+  c('windows', 'Přihlašovací skript', 'Vypiš připojené síťové jednotky.', 'net use'),
 ];
 
 /** Příkazy všech předmětů (sítě + cloud) */

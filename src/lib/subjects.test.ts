@@ -221,8 +221,8 @@ describe('Podle školního cvičení – Windows Server ve VirtualBoxu', () => {
       expect(sc.server.net).toBe('192.168.100.0/24');
       expect(sc.server.ip).toMatch(/^192\.168\.100\.\d+$/);
       const all = sc.osTasks.map((t) => `${t.detail}\n${t.solution}`).join('\n');
-      expect(all).toContain('Install-ADDSForest -DomainName ' + sc.domain);
-      expect(all).toContain('AD-Domain-Services, DNS');
+      expect(all).toContain('Název kořenové domény: ' + sc.domain);
+      expect(all).toContain('☑ Server DNS, ☑ Služba Active Directory Domain Services');
       expect(all).toContain('Vnitřní síť');
       expect(all).not.toMatch(/undefined|NaN|\$\{/);
       const ips = [...all.matchAll(/192\.168\.100\.(\d+)(?!\/)/g)].map((m) => Number(m[1]));
