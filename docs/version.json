@@ -1,7 +1,6 @@
 {
-  "version": "1.32.0",
+  "version": "1.32.1",
   "notes": [
-    "Cloud: zkouška nanečisto na čas (45–120 min) – zamčená řešení, odpočet, vyhodnocení po částech (virtualizace, kontejnery, úložiště)",
-    "Terminál: 4 nové úlohy na Debianu – NFS server, NFS klient přes /etc/fstab, GlusterFS cluster (replica 3) a GlusterFS klient; počítají se do cloudu"
+    "Nová profilovka „kapuce“"
   ]
 }
