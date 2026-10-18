@@ -527,7 +527,7 @@ export function generateScenario(os?: 'linux' | 'windows'): Scenario {
               id: 'win-role',
               title: 'Role DNS a Active Directory Domain Services',
               detail: 'Na server doinstaluj role DNS server a Active Directory Domain Services.',
-              solution: 'Správce serveru → Spravovat → Přidat role a funkce → vybrat server ds → Role serveru: ☑ Server DNS, ☑ Služba Active Directory Domain Services → Přidat funkce → Nainstalovat',
+              solution: 'Správce serveru → Správa → Přidat role a funkce → vybrat server ds → Role serveru: ☑ Server DNS, ☑ Služba Active Directory Domain Services → Přidat funkce → Nainstalovat',
             },
             {
               id: 'win-dc',
@@ -545,13 +545,13 @@ export function generateScenario(os?: 'linux' | 'windows'): Scenario {
               id: 'win-users',
               title: 'Doménová struktura: OU, uživatelé, skupiny',
               detail: 'Vytvoř organizační jednotky (např. Ucetni a Vyroba), v nich uživatelské účty a globální skupiny, uživatele přidej do skupin. Přihlas se na klientovi jako nový uživatel.',
-              solution: `dsa.msc (Uživatelé a počítače služby Active Directory) → pravým na doménu → Nový → Organizační jednotka\n→ v OU: Nový → Uživatel (přihlašovací jméno, heslo, „uživatel musí změnit heslo“ dle potřeby)\n→ Nový → Skupina (obor Globální, typ Zabezpečení) → Vlastnosti skupiny → Členové → Přidat\nNa klientovi: Jiný uživatel → přihlašovací jméno nového uživatele`,
+              solution: `dsa.msc (Uživatelé a počítače služby Active Directory) → pravým na doménu → Nový → Organizační jednotka\n→ v OU: Nový → Uživatel (přihlašovací uživatelské jméno, heslo; ve cvičení ☑ Heslo je platné stále)\n→ Nový → Skupina (obor Globální, typ Zabezpečení) → Vlastnosti skupiny → Členové → Přidat\nNa klientovi: Jiný uživatel → přihlašovací jméno nového uživatele`,
             },
             {
               id: 'win-disk',
               title: 'Svazek pro data',
               detail: 'Zmenši svazek C: a z uvolněného místa vytvoř nový svazek O: (NTFS). Budou na něm sdílené složky data, profily a logon.',
-              solution: 'Správa počítače → Úložiště → Správa disků → pravým na (C:) → Zmenšit svazek\n→ pravým na nepřidělené místo → Nový jednoduchý svazek → písmeno O:, NTFS',
+              solution: 'Správa počítače → Úložiště → Správa disků → pravým na (C:) → Zmenšit svazek\n→ pravým na nepřiřazené místo (Nepřiřazeno) → Nový jednoduchý svazek → písmeno O:, NTFS',
             },
             {
               id: 'win-home',

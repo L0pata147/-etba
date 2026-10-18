@@ -339,8 +339,8 @@ export const PROCEDURES: Procedure[] = [
     title: 'Příprava serveru (IP, název)',
     goal: 'Nastavit statickou adresu, DNS a název serveru.',
     steps: [
-      { text: 'Statická IP adresa, maska a brána', cmd: 'Síťová připojení (ncpa.cpl) → Ethernet → Vlastnosti → Protokol IP verze 4 (TCP/IPv4) → Vlastnosti → Použít následující adresu IP\nIP 192.168.10.5 · maska 255.255.255.0 · brána 192.168.10.1' },
-      { text: 'DNS server – budoucí řadič domény sám na sebe', cmd: 'Ve stejném okně: Použít tyto adresy serverů DNS → upřednostňovaný server DNS 192.168.10.5' },
+      { text: 'Statická IP adresa, maska a brána', cmd: 'Síťová připojení (ncpa.cpl) → Ethernet → Vlastnosti → Protokol IP verze 4 (TCP/IPv4) → Vlastnosti → Použít následující IP adresu:\nIP 192.168.10.5 · maska 255.255.255.0 · brána 192.168.10.1' },
+      { text: 'DNS server – budoucí řadič domény sám na sebe', cmd: 'Ve stejném okně: Použít následující adresy serverů DNS → Upřednostňovaný server DNS: 192.168.10.5' },
       { text: 'Přejmenovat server a restartovat', cmd: 'Správce serveru → Místní server → Název počítače → Změnit → DC1 → restartovat' },
     ],
   },
@@ -350,7 +350,7 @@ export const PROCEDURES: Procedure[] = [
     title: 'Doména Active Directory',
     goal: 'Povýšit server na řadič nové domény firma.local.',
     steps: [
-      { text: 'Nainstalovat roli Služba Active Directory Domain Services', cmd: 'Správce serveru → Spravovat → Přidat role a funkce → Role serveru: ☑ Služba Active Directory Domain Services → Přidat funkce → Nainstalovat' },
+      { text: 'Nainstalovat roli Služba Active Directory Domain Services', cmd: 'Správce serveru → Správa → Přidat role a funkce → Role serveru: ☑ Služba Active Directory Domain Services → Přidat funkce → Nainstalovat' },
       { text: 'Povýšit na řadič domény – nová doménová struktura (zadá se heslo DSRM)', cmd: 'Vlaječka s upozorněním → Povýšit tento server na řadič domény → Přidat novou doménovou strukturu → Název kořenové domény: firma.local → Nainstalovat' },
       { text: 'Po restartu se přihlásit jako FIRMA\\Administrator a ověřit', cmd: 'Nástroje → Uživatelé a počítače služby Active Directory → je vidět doména firma.local s kontejnery Users a Computers' },
     ],
@@ -390,7 +390,7 @@ export const PROCEDURES: Procedure[] = [
       { text: 'Nový obor s rozsahem adres', cmd: 'Nástroje → DHCP → server → pravým na IPv4 → Nový obor\nnázev LAN · počáteční 192.168.10.100 · koncová 192.168.10.200 · maska 255.255.255.0' },
       { text: 'Vyloučení a doba zapůjčení', cmd: 'průvodce: vyloučené adresy (např. pro servery a tiskárny) a doba zapůjčení (výchozí 8 dní)' },
       { text: 'Možnosti oboru – brána, DNS a doména, aktivace oboru', cmd: 'konfigurovat možnosti: ano → směrovač (výchozí brána) 192.168.10.1 → nadřazená doména firma.local, server DNS 192.168.10.5 → WINS přeskočit → aktivovat obor' },
-      { text: 'Ověřit na klientovi', cmd: 'IPv4 klienta: Získat adresu IP ze serveru DHCP automaticky\nipconfig /renew a ipconfig /all · na serveru: obor → Zapůjčení adres' },
+      { text: 'Ověřit na klientovi', cmd: 'IPv4 klienta: Získat IP adresu ze serveru DHCP automaticky\nipconfig /renew a ipconfig /all · na serveru: obor → Zapůjčení adres' },
     ],
   },
   {
@@ -417,7 +417,7 @@ export const PROCEDURES: Procedure[] = [
       { text: 'Nastavit zásady hesel', cmd: 'Konfigurace počítače → Zásady → Nastavení systému Windows → Nastavení zabezpečení → Zásady účtů → Zásady hesel\nMinimální délka hesla: např. 8 · Heslo musí splňovat požadavky na složitost: Povoleno · Maximální stáří hesla: např. 90 dní' },
       { text: 'Nastavit uzamčení účtu po chybných pokusech', cmd: 'Zásady účtů → Zásady uzamčení účtu\nPrahová hodnota pro uzamčení účtu: např. 3 neplatné pokusy · Doba uzamčení účtu: např. 30 minut' },
       { text: 'Na serveru zásady načíst', cmd: 'gpupdate /force' },
-      { text: 'Ověřit, že zásada platí', cmd: 'Uživatelé a počítače služby Active Directory → pravým na uživatele → Resetovat heslo → zkusit heslo kratší než 8 znaků – server ho odmítne' },
+      { text: 'Ověřit, že zásada platí', cmd: 'Uživatelé a počítače služby Active Directory → nastavit uživateli nové heslo kratší než 8 znaků – server ho odmítne' },
     ],
   },
   {

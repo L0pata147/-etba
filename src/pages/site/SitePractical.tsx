@@ -12,13 +12,14 @@ import { useStore } from '../../store';
 import { Button, Card, PageHeader, Segmented, SectionTitle, Tag, cx } from '../../components/ui';
 import { useStartSession } from '../SessionPage';
 import { Topology } from './Topology';
+import { ClickTab } from './ClickTrainer';
 import { PLATFORMS, calcConfig, commandsConfig, proceduresConfig, siteConfig } from './common';
 
-type Tab = 'zadani' | 'prikazy' | 'postupy' | 'chyby' | 'vypocty';
+type Tab = 'zadani' | 'prikazy' | 'postupy' | 'klikani' | 'chyby' | 'vypocty';
 
 export function SitePractical() {
   const [params, setParams] = useSearchParams();
-  const tab = (['zadani', 'prikazy', 'postupy', 'chyby', 'vypocty'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
+  const tab = (['zadani', 'prikazy', 'postupy', 'klikani', 'chyby', 'vypocty'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
   return (
     <div>
       <PageHeader
@@ -34,6 +35,7 @@ export function SitePractical() {
           { value: 'zadani', label: 'Zadání nanečisto' },
           { value: 'prikazy', label: 'Příkazy' },
           { value: 'postupy', label: 'Postupy' },
+          { value: 'klikani', label: 'Klikání (Windows)' },
           { value: 'chyby', label: 'Najdi chybu' },
           { value: 'vypocty', label: 'Výpočty' },
         ]}
@@ -41,6 +43,7 @@ export function SitePractical() {
       {tab === 'zadani' && <ScenarioTab />}
       {tab === 'prikazy' && <CommandsTab />}
       {tab === 'postupy' && <ProceduresTab />}
+      {tab === 'klikani' && <ClickTab />}
       {tab === 'chyby' && <TroubleTab />}
       {tab === 'vypocty' && <CalcTab />}
     </div>
