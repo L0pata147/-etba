@@ -32,6 +32,8 @@ export const OTHER_BOOKS: Record<string, EduLink[]> = {
   'na zapadni fronte klid': [yt('8a_FSi5UNRE', 'Rozbor díla: Na západní frontě klid (E. M. Remarque)', FF), yt('DZtdXIXu4F4', 'Rozbor díla: Na západní frontě klid – Erich Maria Remarque', OU)],
   'mechanicky pomeranc': [yt('uVwurFXW4nY', 'Anthony Burgess – Mechanický pomeranč, maturita z literatury', 'Knihy trochu jinak')],
   'sbohem armado': [yt('Yxxfc9yRdJI', 'Ernest Hemingway – Sbohem, armádo! (ukázka audioknihy)', 'Tympanum')],
+  'petr a lucie': [yt('sY9mVov0h_g', 'Rozbor díla: Petr a Lucie – Romain Rolland', OU)],
+  saturnin: [yt('wOexy-DJfqI', 'Rozbor díla: Saturnin – Zdeněk Jirotka', OU)],
   promena: [yt('KdroGM_bCPA', 'Rozbor díla: Proměna (F. Kafka)', FF), yt('rk0EG_BaOm8', 'Rozbor díla: Proměna – Franz Kafka', OU)],
 };
 

@@ -708,4 +708,133 @@ export const BOOKS_CZ20: BookSeed[] = [
       },
     ],
   },
+  {
+    id: 'saturnin',
+    title: 'Saturnin',
+    author: 'Zdeněk Jirotka',
+    authorLife: '1911–2003',
+    year: '1942',
+    category: 'cz20',
+    kind: 'epika',
+    genre: 'humoristický román',
+    period: 'Česká literatura 20. století – literatura za 2. světové války (protektorát)',
+    movement: 'Humoristická próza inspirovaná anglickým humorem (J. K. Jerome, P. G. Wodehouse)',
+    narratorShort: 'ich-forma, vypravěč beze jména (pražský úředník)',
+    settingShort: 'Praha (hausbót na Vltavě) a dědečkovo venkovské sídlo u malého městečka; léto, kolem roku 1942',
+    theme:
+      'Klidný mladý muž přijme sluhu Saturnina, který mu svými nápady obrátí život naruby; během dovolené u dědečka spolu zatočí s dotěrnou tetou Kateřinou a jejím synem Miloušem.',
+    motifs: ['sluha a pán', 'dobrodružství × nuda všedního dne', 'hausbót', 'dědictví a chamtivost', 'rodina a příbuzní', 'láska (slečna Barbora)', 'stržený most a odříznutí od světa', 'humor, nadsázka a ironie', 'přísloví a pořekadla', 'parodie románových klišé'],
+    mainIdea:
+      'Život nemá být nudný – trochu dobrodružství a humoru z něj udělá něco zajímavého. Román se s laskavou ironií vysmívá lidské hlouposti, chamtivosti a přetvářce (teta Kateřina, Milouš) a oslavuje vtip, slušnost a pohotovost.',
+    mainCharacters: [
+      ch('Saturnin', 'Vypravěčův sluha – vzdělaný, pracovitý, s uhlazenými způsoby jako anglický sluha (vzor Jeeves od Wodehouse). Je nápaditý a pohotový, vymýšlí dobrodružství a historky a nenápadně řídí dění; jeho cílem je vždy chránit a pomáhat svému pánovi.'),
+      ch('Vypravěč (pán)', 'Asi třicetiletý svobodný pražský úředník beze jména (ve filmu Jiří Oulický), zprvu suchopárný a nesmělý, spokojený s klidným životem. Saturnin ho vmanipuluje do různých absurdních situací; zamiluje se do slečny Barbory.'),
+      ch('Teta Kateřina', 'Vdova, která se nezastaví před ničím, aby získala dědečkovo dědictví. Podlézavá, účelově mění chování, chová se jako mladice a neustále otravuje okolí příslovími. Po manželovi zruinovala jeho továrnu.'),
+      ch('Dědeček', 'Hodný, bohatý starý pán, který se baví bojem příbuzných o dědictví; nadšený příznivec elektřiny. Se Saturninem se hned spřátelí.'),
+    ],
+    sideCharacters: [
+      ch('Milouš', 'Syn tety Kateřiny, osmnáctiletý neotesaný budižkničemu, který si hraje na světáka; je neuctivý ke slečně Barboře.'),
+      ch('Slečna Barbora', 'Milá, energická, moderní dívka, výborná tenistka (zná vypravěče z tenisového klubu). Vypravěč se s ní sblíží.'),
+      ch('Doktor Vlach', 'Padesátiletý lékař a rodinný přítel, sarkastický řečník, který vymýšlí teorie o chování lidí a vede dlouhé úvahy.'),
+      ch('Strýc František', 'Zesnulý manžel tety Kateřiny; majitel továrničky na čisticí prostředky, kde při jeho pokusech o „úžasné mýdlo“ často docházelo k explozím.'),
+    ],
+    plot:
+      'Vypravěč, pražský úředník s klidným a nudným životem, přijme sluhu Saturnina. Ten mezi známými šíří historky o pánových cestách na safari, vybaví byt trofejemi a jednoho dne mu oznámí, že už nebydlí v bytě, ale na hausbótu. Na hausbót se nezvaná nastěhuje teta Kateřina se synem Miloušem; Saturnin je však vyžene – varuje je před hlodavci, kteří v noci běhají lidem po obličeji, a dá jim na ochranu maškarní masky. Většina děje se odehrává na dědečkově venkovském sídle během vypravěčovy třítýdenní dovolené. Je tam i doktor Vlach a přijede slečna Barbora, ale také teta Kateřina s Miloušem. Saturnin naučí dědečka džiu-džitsu a vypravěč si při „souboji“ s dědečkem vyvrtne kotník; z nemocnice ho odveze slečna Barbora. Rozvodněná řeka strhne most, jedinou cestu do městečka, a v domě přestane jít elektřina. Společnost vaří na ohni a po večerech si vypráví příběhy; vypravěč se sbližuje s Barborou a se Saturninem vede proti drzému Miloušovi skrytou válku. Když dojdou zásoby, vydají se pěšky kolem pramene řeky do městečka; přenocují ve srubu doktora Vlacha, pak se dědeček zraní a noc tráví pod širým nebem, kde vypravěč políbí Barboru. U strženého mostu nakonec najdou most nový. Teta Kateřina se vnutí ošetřovat dědečka, ten ale předstírá šílenství a sepíše závěť, v níž majetek odkazuje na dobročinné účely – teta pohoršeně odjede. I to byl Saturninův nápad. Všichni se vrátí domů, vypravěč pozve Barboru na schůzku a z dopisu se dozví, že Saturnin zůstává u dědečka, že hausbót patří Saturninovi a že si s dědečkem otevřeli kancelář pro napravování nepravostí v románech. Teta Kateřina se bohatě vdala.',
+    plotEvents: [
+      'Vypravěč přijme sluhu Saturnina, který šíří historky o pánových cestách na safari.',
+      'Saturnin přestěhuje vypravěče na hausbót.',
+      'Saturnin vyžene z hausbótu tetu Kateřinu s Miloušem (hlodavci a maškarní masky).',
+      'Dovolená na dědečkově venkovském sídle; přijede slečna Barbora i teta s Miloušem.',
+      'Dědeček se od Saturnina naučí džiu-džitsu, vypravěč si vyvrtne kotník a z nemocnice ho veze Barbora.',
+      'Povodeň strhne most a přestane jít elektřina – společnost je odříznutá od světa.',
+      'Vypravěč a Saturnin vedou skrytou válku proti Miloušovi.',
+      'Výprava pěšky do městečka, noc pod širým nebem, vypravěč políbí Barboru.',
+      'Dědeček předstírá šílenství a sepíše fingovanou závěť; teta Kateřina odjede.',
+      'Návrat domů; Saturnin zůstává u dědečka, hausbót patří jemu.',
+    ],
+    setting: 'Praha – vypravěčův byt a hausbót na Vltavě; dědečkovo venkovské sídlo za řekou nedaleko malého městečka; srub doktora Vlacha, cesta kolem pramene řeky.',
+    time: 'Nejspíš doba vzniku románu (kolem roku 1942, protektorát – zmínky o zatemnění oken), i když prostředí působí jako za první republiky; hlavní děj trvá tři týdny letní dovolené.',
+    composition:
+      '26 kapitol označených římskými číslicemi, každá začíná krátkým shrnutím svého děje. Převážně chronologický děj s vloženými příběhy a historkami, které si postavy vyprávějí, a s úvahami vypravěče a doktora Vlacha. Rámec: Praha (hausbót) – dovolená u dědečka – návrat a dopis od Saturnina.',
+    narrator: 'Ich-forma – vypravěčem je pán (beze jména), který vypráví s humorem, ironií a nadhledem i o sobě. Občas se obrací přímo ke čtenáři.',
+    narrativeModes: 'Vyprávění, popis, charakteristika, úvahy (vypravěč, doktor Vlach), vložené historky.',
+    speechTypes: 'Pásmo vypravěče, přímá řeč (vtipné dialogy), dlouhé monology doktora Vlacha a vypravěče, dopis.',
+    verse: '',
+    language:
+      'Spisovný jazyk s občasnými archaismy, kultivovaný a vtipný styl. Humor a ironie, nadsázka, situační i jazyková komika. Mnoho přísloví a pořekadel (hlavně teta Kateřina a doktor Vlach), řečnické otázky, dlouhé úvahy.',
+    tropes: 'Ironie, nadsázka (hyperbola), přirovnání, kontrast (klidný pán × nápaditý sluha), parodie románových klišé, přísloví a rčení.',
+    authorContext:
+      'Zdeněk Jirotka – český humorista a prozaik. Od roku 1940 díky Janu Drdovi spolupracovník Lidových novin; tam 24. 8. 1940 vyšla povídka Můj sluha Saturnin, ze které vznikl román. Velkou část Saturnina psal v koupelně pražského bytu, protože kvůli náletům platilo zatemnění oken a koupelna okno neměla. Další díla: Muž se psem, Hvězdy nad starým Vavrouchem, Profesor biologie na žebříku, Pravidla se změnila.',
+    historicalContext:
+      'Román vznikl za protektorátu Čechy a Morava během 2. světové války; humor nabízel čtenářům únik z tíživé doby. Inspirace anglickou humoristickou literaturou – J. K. Jerome (Tři muži ve člunu), P. G. Wodehouse (sluha Jeeves). Česká humoristická próza: Karel Poláček, Vladislav Vančura (Rozmarné léto). Saturnin zvítězil v anketě Kniha mého srdce (2009); zfilmován jako seriál a film (1994, režie Jiří Věrčák).',
+    otherWorks: ['Muž se psem', 'Hvězdy nad starým Vavrouchem', 'Profesor biologie na žebříku', 'Pravidla se změnila'],
+    interpretation:
+      'Saturnin je laskavá satira na lidskou hloupost a chamtivost: teta Kateřina a Milouš jsou zesměšněni, slušní a vtipní lidé vítězí. Sluha je ve skutečnosti chytřejší než jeho pán a nenápadně řídí jeho život – vnáší do nudné všednosti dobrodružství. V době války román přinášel úsměv a ukazoval svět, kde je problémem jen stržený most a otravná příbuzná.',
+    examTips:
+      'Znát postavy (Saturnin, vypravěč beze jména, teta Kateřina, Milouš, dědeček, doktor Vlach, slečna Barbora), hausbót, stržený most, fingovanou závěť a dopis na konci. Zmínit inspiraci anglickým humorem (Jeeves, J. K. Jerome) a vznik za protektorátu. Ich-forma, 26 kapitol se shrnutím na začátku.',
+    quick: [
+      'Z. Jirotka, 1942 (z povídky Můj sluha Saturnin, Lidové noviny 1940); humoristický román.',
+      'Ich-forma, vypravěč beze jména; 26 kapitol se shrnutím na začátku.',
+      'Sluha Saturnin přestěhuje pána na hausbót a vyžene z něj tetu Kateřinu s Miloušem.',
+      'Dovolená u dědečka: stržený most, bez elektřiny, láska se slečnou Barborou.',
+      'Dědeček předstírá šílenství a fingovanou závětí se zbaví tety Kateřiny.',
+      'Inspirace anglickým humorem (Jeeves, J. K. Jerome); přísloví, ironie, nadsázka.',
+    ],
+    clues: [
+      'Román, v němž sluha oznámí svému pánovi, že už nebydlí v bytě, ale na hausbótu.',
+      'Humoristický román, ve kterém povodeň strhne most k dědečkovu sídlu a společnost zůstane odříznutá od světa.',
+      'Román, v němž dědeček předstírá šílenství a fingovanou závětí se zbaví dotěrné příbuzné, která neustále mluví v příslovích.',
+    ],
+    scenes: [
+      {
+        scene: 'Sluha varuje nezvanou příbuznou a jejího syna, že na lodi v noci běhají lidem přes obličej hlodavci, a podá jim na ochranu maškarní masky.',
+        context: 'Začátek románu – Saturnin vyžene tetu Kateřinu s Miloušem z hausbótu, kam se nastěhovali kvůli „zdravému vzduchu“.',
+      },
+      {
+        scene: 'Starý pán předvede na vnukovi chvat džiu-džitsu, který se právě naučil, a vnuk skončí s vyvrtnutým kotníkem v nemocnici.',
+        context: 'Dovolená u dědečka – Saturnin naučil dědečka džiu-džitsu; z nemocnice pak vypravěče veze slečna Barbora a za nimi strhne voda most.',
+      },
+      {
+        scene: 'Pán dostane dopis, ve kterém se dočte, že sluha zůstává u dědečka, že loď, na které bydlí, patří ve skutečnosti sluhovi a že spolu otevřeli kancelář pro napravování nepravostí v románech.',
+        context: 'Závěr románu – návrat do Prahy; vypravěč zjišťuje, kolik toho Saturnin celou dobu řídil.',
+      },
+    ],
+    deepQuestions: [
+      {
+        q: 'V čem spočívá humor Saturnina?',
+        area: 'language',
+        answer:
+          'Humor stojí na situační komice (hausbót, maškarní masky, džiu-džitsu, stržený most), na charakterech (podlézavá teta Kateřina s příslovími, světák Milouš, sarkastický doktor Vlach), na ironii a nadsázce vypravěče, který si dělá legraci i ze sebe, a na parodii románových klišé. Jirotka navazuje na anglický humor (Jeeves, J. K. Jerome).',
+        points: [
+          { label: 'situační komika', keywords: ['situač', 'hausbót', 'most', 'džiu', 'masky'] },
+          { label: 'komické postavy (teta, Milouš, Vlach)', keywords: ['tet', 'milouš', 'vlach', 'postav'] },
+          { label: 'ironie, nadsázka, přísloví', keywords: ['ironi', 'nadsáz', 'přísloví', 'hyperbol'] },
+          { label: 'anglický humor (Jeeves, Jerome)', keywords: ['angl', 'jeeves', 'jerome', 'wodehouse'] },
+        ],
+      },
+      {
+        q: 'Jakou roli má Saturnin ve vztahu ke svému pánovi?',
+        area: 'characters',
+        answer:
+          'Saturnin je formálně sluha, ve skutečnosti ale chytřejší a nápaditější než jeho pán a nenápadně řídí jeho život: přestěhuje ho na hausbót, vymýšlí historky, vede válku proti Miloušovi a vymyslí i fingovanou závěť proti tetě Kateřině. Vše dělá proto, aby pána chránil a vnesl do jeho nudného života dobrodružství. Na konci se ukáže, že hausbót patří jemu.',
+        points: [
+          { label: 'chytřejší než pán, řídí děj', keywords: ['chytř', 'říd', 'manipul', 'nápad'] },
+          { label: 'dobrodružství × nuda', keywords: ['dobrodruž', 'nud'] },
+          { label: 'chrání pána, pomáhá', keywords: ['chrán', 'pomáh'] },
+          { label: 'závěť / hausbót patří jemu', keywords: ['závěť', 'hausbót', 'patří'] },
+        ],
+      },
+      {
+        q: 'Proč je důležité, že Saturnin vznikl za protektorátu?',
+        area: 'context',
+        answer:
+          'Román vyšel 1942 uprostřed 2. světové války, kdy platilo zatemnění a lidé žili ve strachu. Laskavý humor a svět, kde je největším problémem stržený most a otravná teta, nabízel čtenářům únik a útěchu. Válka se v knize skoro neobjevuje (jen zmínky o zatemnění). I proto se Saturnin stal jednou z nejoblíbenějších českých knih (Kniha mého srdce 2009).',
+        points: [
+          { label: '1942, 2. světová válka, protektorát', keywords: ['1942', 'válk', 'protektorát'] },
+          { label: 'humor jako únik / útěcha', keywords: ['únik', 'útěch', 'odreag'] },
+          { label: 'válka v knize skoro chybí (zatemnění)', keywords: ['zatemn', 'chybí', 'neobjev'] },
+        ],
+      },
+    ],
+  },
 ];

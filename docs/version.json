@@ -1,8 +1,6 @@
 {
-  "version": "1.34.0",
+  "version": "1.35.0",
   "notes": [
-    "Klikací trénink Windows Serveru: 27 úloh, kde krok po kroku klikáš ve zjednodušeném okně se skutečnými českými popisky (role, doména, uživatelé, sdílení, profily, zásady skupiny, DNS, DHCP, klient)",
-    "7 úloh na skutečných snímcích z hodiny 1. 10. – klikáš přímo do obrazovky serveru a klienta",
-    "Opravené popisky podle snímků: menu Správa (ne Spravovat), Použít následující IP adresu / adresy serverů DNS"
+    "Do databáze knih přibyly Petr a Lucie (R. Rolland) a Saturnin (Z. Jirotka) – kompletní rozbor, test i videa."
   ]
 }

@@ -36,7 +36,7 @@ const FALLBACK_AUTHORS = [
 ];
 const FALLBACK_TITLES = [
   'Babička',
-  'Petr a Lucie',
+  'Bílá nemoc',
   'Osudy dobrého vojáka Švejka',
   'Romeo a Julie',
   'Bídníci',

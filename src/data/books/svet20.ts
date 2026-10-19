@@ -946,4 +946,128 @@ export const BOOKS_SVET20: BookSeed[] = [
       },
     ],
   },
+  {
+    id: 'petr-a-lucie',
+    title: 'Petr a Lucie',
+    author: 'Romain Rolland',
+    authorLife: '1866–1944',
+    year: '1920',
+    category: 'svet20',
+    kind: 'epika',
+    genre: 'milostná protiválečná novela (lyrická, psychologická)',
+    period: 'Světová literatura 20. století – literatura o 1. světové válce',
+    movement: 'Protiválečná (pacifistická) próza; humanismus',
+    narratorShort: 'er-forma, vševědoucí vypravěč',
+    settingShort: 'Paříž za 1. světové války; 30. ledna – 29. března 1918 (Velký pátek)',
+    theme:
+      'Krátká a čistá láska dvou mladých lidí v Paříži ostřelované za 1. světové války, kterou válka nakonec zničí – obraz nesmyslnosti a krutosti války.',
+    motifs: ['láska', 'válka a smrt', 'bombardování Paříže', 'strach a úzkost', 'čas, který se krátí (odvod na vojnu)', 'mládí a nevinnost', 'chudoba × bohatství', 'umění (Luciino malování)', 'víra a kostel', 'sen o budoucnosti'],
+    mainIdea:
+      'Válka je nesmyslná a ničí i to nejcennější, co lidé mají – lásku a mládí. Petr a Lucie si uprostřed hrůzy vytvoří vlastní svět naděje, ale válka je dostihne i daleko od fronty, v zázemí.',
+    mainCharacters: [
+      ch('Petr Aubier', 'Osmnáctiletý student z měšťanské pařížské rodiny (otec soudce, matka dobrá křesťanka). Citlivý, něžný, uzavřený, idealista. Za půl roku má narukovat a válku nedokáže pochopit ani přijmout. Do Lucie se zamiluje na první pohled.'),
+      ch('Lucie', 'Mladá dívka z chudé rodiny. Živí se malováním – kopiemi obrazů a portréty (často vojáků) podle fotografií, svých maleb si sama moc neváží. Je realistka, umí se o sebe postarat a vnímat krásu světa i za války. V kostele chrání Petra svým tělem.'),
+    ],
+    sideCharacters: [
+      ch('Filip Aubier', 'Petrův starší bratr, který se na začátku války dobrovolně přihlásil do armády. Válka mu vzala iluze a ideály, je odtažitý; když ale zjistí, že Petr miluje Lucii, má z toho radost a přeje mu to.'),
+      ch('Luciina matka', 'Vdova, pracuje v továrně na střelivo. S Lucií se kvůli práci téměř nevídají. Má přítele, se kterým čeká dítě.'),
+      ch('Petrovi rodiče', 'Otec – čestný soudce, který svědomitě plní povinnosti; matka – dobrá křesťanka.'),
+    ],
+    plot:
+      'Paříž, leden 1918, válka trvá už čtvrtým rokem. Osmnáctiletý Petr Aubier má za půl roku narukovat; jeho starší bratr Filip už je na frontě. Při náletu se Petr ukryje v metru, v tlačenici se tam setká s neznámou dívkou a ze strachu se chytí za ruce. Dívka vystoupí a Petr na ni nemůže zapomenout. Potká ji znovu na nábřeží Seiny, ale nedokáže promluvit; až při dalším setkání (v Lucemburské zahradě) ji osloví. Dozví se, že se jmenuje Lucie, je chudá, žije s matkou, která pracuje v továrně na střelivo, a živí se malováním obrazů a portrétů podle fotografií. Scházejí se každý den, chodí na dlouhé procházky, Lucie si Petra pozve domů, aby ho nakreslila, a jejich vztah přeroste v hlubokou lásku. Do Paříže se na pár dní vrátí Filip, změněný válkou; když Petra uvidí s Lucií, má radost z jeho štěstí. Milenci sní o společné budoucnosti, i když vědí, že je nejistá. Slíbí si, že se o Velikonocích zasnoubí. Na Velký pátek 29. března 1918 jdou do kostela svatého Gervasia (Saint-Gervais) poslechnout si hudbu a potichu si slíbí věrnost. Při ostřelování Paříže je kostel zasažen, Lucie Petra chrání vlastním tělem a oba pohřbí padající pilíř.',
+    plotEvents: [
+      'Při náletu na Paříž (leden 1918) se Petr v metru poprvé setká s Lucií a ze strachu se chytí za ruce.',
+      'Petr Lucii znovu potká, ale nedokáže promluvit; až při dalším setkání ji osloví.',
+      'Petr se dozví, že Lucie je chudá malířka a její matka pracuje v továrně na střelivo.',
+      'Lucie si Petra pozve domů a maluje jeho portrét; jejich láska roste.',
+      'Do Paříže se vrátí bratr Filip, změněný válkou, a má radost z Petrovy lásky.',
+      'Milenci sní o budoucnosti a slíbí si, že se o Velikonocích zasnoubí.',
+      'Na Velký pátek jdou do kostela sv. Gervasia, kde si slíbí věrnost.',
+      'Kostel je při ostřelování zasažen a oba pohřbí padající pilíř.',
+    ],
+    setting: 'Paříž v zázemí války: metro (úkryt při náletu), nábřeží Seiny, Lucemburská zahrada, ulice a parky, Luciin skromný byt, kostel svatého Gervasia (Saint-Gervais).',
+    time: 'Poslední rok 1. světové války – od 30. ledna do Velkého pátku 29. března 1918 (asi dva měsíce).',
+    composition:
+      'Krátká novela bez číslovaných kapitol (oddíly oddělené předělem). Chronologický, souvislý děj. Prolíná se vnější děj (nálety, válka) s vnitřním světem postav (pocity, úvahy). Tragický, náhlý konec.',
+    narrator: 'Er-forma; vševědoucí vypravěč, který zná myšlenky a pocity postav (hlavně Petrovy). Čtenáře oslovuje jen nepřímo – přes myšlenky a vnitřní monology postav.',
+    narrativeModes: 'Vyprávění, popis (Paříže, pocitů), charakteristika, úvahy o smyslu války a života.',
+    speechTypes: 'Pásmo vypravěče, přímá řeč (dialogy Petra a Lucie), vnitřní monology, polopřímá řeč.',
+    verse: '',
+    language:
+      'Spisovný jazyk (v českém překladu Jaroslava Zaorálka), bohatá slovní zásoba, lyrické a poetické pasáže, popis pocitů, filozofické otázky o (ne)smyslu války („Proč smrt? Proč život?“), občas francouzské výrazy.',
+    tropes: 'Metafory, přirovnání, personifikace, epiteta, kontrast (láska × válka, život × smrt, chudí × bohatí), symbolika (kostel, Velký pátek – oběť a smrt).',
+    authorContext:
+      'Romain Rolland – francouzský prozaik, dramatik a esejista, pacifista a odpůrce fašismu. Za 1. světové války žil ve Švýcarsku a vystupoval proti válce (eseje Nad vřavou). Nobelova cena za literaturu 1915 (hlavně za román Jan Kryštof). Psal životopisy velkých osobností (Beethoven, Michelangelo, Tolstoj). Další díla: Jan Kryštof, Dobrý člověk ještě žije (Colas Breugnon), Okouzlená duše, Clerambault.',
+    historicalContext:
+      '1. světová válka (1914–1918); na jaře 1918 Němci ostřelovali Paříž dálkovým dělem a 29. března 1918 (Velký pátek) zasáhla střela kostel Saint-Gervais – na tuto skutečnou událost novela navazuje. Novela vyšla 1920 a patří k protiválečné literatuře: E. M. Remarque – Na západní frontě klid, E. Hemingway – Sbohem, armádo!, J. Hašek – Osudy dobrého vojáka Švejka; na rozdíl od nich se ale neodehrává na frontě, nýbrž v zázemí.',
+    otherWorks: ['Jan Kryštof', 'Dobrý člověk ještě žije (Colas Breugnon)', 'Okouzlená duše', 'Clerambault', 'Život Beethovenův'],
+    interpretation:
+      'Láska Petra a Lucie je čistá, nevinná a „mimo svět“ – milenci se snaží na válku zapomenout, ale válka zasáhne i civilisty daleko od fronty. Smrt na Velký pátek v kostele má symbolický rozměr (oběť nevinných). Kontrastem lásky a války Rolland ukazuje nesmyslnost války; to, že milenci zemřou spolu, lze chápat i jako smíření – jejich láska už nemůže být zničena odloučením.',
+    examTips:
+      'Znát dobu a místo (Paříž, 30. 1. – 29. 3. 1918), setkání v metru při náletu, Luciino malování, bratra Filipa, smrt v kostele sv. Gervasia na Velký pátek. Zdůraznit protiválečné vyznění a to, že děj je v zázemí, ne na frontě. Srovnání s Romeem a Julií (nešťastní milenci) a s Remarquem nebo Hemingwayem.',
+    quick: [
+      'R. Rolland (Nobelova cena 1915), 1920; milostná protiválečná novela.',
+      'Paříž za 1. sv. války, 30. ledna – Velký pátek 29. března 1918.',
+      'Petr (18, měšťan, má narukovat) potká Lucii (chudá malířka) v metru při náletu.',
+      'Bratr Filip – válkou změněný voják, z Petrovy lásky má radost.',
+      'Na Velký pátek je kostel sv. Gervasia zasažen a oba milence pohřbí pilíř.',
+      'Er-forma, vševědoucí vypravěč, chronologie; kontrast láska × válka.',
+    ],
+    clues: [
+      'Novela, v níž se dva mladí lidé poprvé setkají v metru při náletu na Paříž a ze strachu se chytí za ruce.',
+      'Příběh lásky studenta, který má brzy narukovat, a chudé malířky, končící smrtí v kostele na Velký pátek.',
+      'Protiválečná novela, jejíž hrdiny pohřbí padající pilíř kostela svatého Gervasia.',
+    ],
+    scenes: [
+      {
+        scene: 'Při výbuchu bomby v přeplněném metru se mladík a neznámá dívka ze strachu chytí za ruce; dívka pak vystoupí a on jede dál.',
+        context: 'Začátek novely (leden 1918) – první setkání Petra a Lucie při náletu na Paříž.',
+      },
+      {
+        scene: 'Mladík přijde k dívce domů, aby ho nakreslila; oba jsou nervózní, uvolní se až nad fotografiemi z dětství a dívka vypráví o matce, která pracuje v továrně na střelivo.',
+        context: 'Střed novely – Petr u Lucie doma; poznává její chudobu a jejich vztah se prohlubuje.',
+      },
+      {
+        scene: 'Milenci poslouchají v kostele hudbu a šeptem si slíbí věrnost; pak se chrám otřese, dívka chrání mladíka svým tělem a zřítí se pilíř.',
+        context: 'Závěr – Velký pátek 29. března 1918, kostel sv. Gervasia zasažený při ostřelování Paříže; smrt Petra a Lucie.',
+      },
+    ],
+    deepQuestions: [
+      {
+        q: 'Jak se v Petrovi a Lucii projevuje protiválečné vyznění, když se děj neodehrává na frontě?',
+        area: 'theme',
+        answer:
+          'Válka je stále přítomná v zázemí: nálety na Paříž, úkryty v metru, Petrův blížící se odvod, bratr Filip změněný frontou, Luciina matka v továrně na střelivo. Milenci se před válkou schovávají do své lásky, ale válka je nakonec zabije i v kostele. Rolland tak ukazuje, že válka ničí i nevinné civilisty a mládí.',
+        points: [
+          { label: 'válka v zázemí (nálety, metro)', keywords: ['nálet', 'zázemí', 'metro', 'bombard', 'ostřel'] },
+          { label: 'odvod, Filip změněný válkou', keywords: ['odvod', 'naruk', 'filip', 'vojn'] },
+          { label: 'smrt nevinných civilistů', keywords: ['nevin', 'civil', 'smrt', 'zemř'] },
+          { label: 'kontrast láska × válka', keywords: ['kontrast', 'lásk'] },
+        ],
+      },
+      {
+        q: 'Jaký význam má závěr novely – smrt v kostele na Velký pátek?',
+        area: 'composition',
+        answer:
+          'Konec je náhlý a tragický: milenci zemřou spolu ve chvíli, kdy si slíbí věrnost. Velký pátek je den Kristovy oběti a smrti – Petr a Lucie jsou nevinné oběti války. Zároveň zemřou spolu, takže je válka už nemůže rozdělit (Petrův odchod na frontu). Jde o skutečnou událost – zásah kostela Saint-Gervais 29. 3. 1918.',
+        points: [
+          { label: 'náhlý tragický konec', keywords: ['náhl', 'tragi', 'konec'] },
+          { label: 'Velký pátek – oběť', keywords: ['velký pátek', 'oběť', 'krist'] },
+          { label: 'zemřou spolu, nerozdělí je', keywords: ['spolu', 'rozděl', 'společn'] },
+          { label: 'skutečná událost 1918', keywords: ['skuteč', '1918', 'gerv'] },
+        ],
+      },
+      {
+        q: 'Porovnej Petra, Lucii a Filipa.',
+        area: 'characters',
+        answer:
+          'Petr je citlivý, uzavřený idealista z bohaté rodiny, který válku nechápe. Lucie je chudá, ale realistka, umí se o sebe postarat a vidět krásu světa – v závěru je silnější a chrání Petra. Filip ukazuje, co válka udělá s člověkem: z nadšeného dobrovolníka je zklamaný, odtažitý voják bez iluzí, v němž se ale probudí láska k bratrovi.',
+        points: [
+          { label: 'Petr – idealista, citlivý', keywords: ['ideal', 'citliv', 'uzavř'] },
+          { label: 'Lucie – chudá realistka, chrání Petra', keywords: ['realist', 'chud', 'chrán'] },
+          { label: 'Filip – změněný válkou', keywords: ['filip', 'změn', 'iluz'] },
+        ],
+      },
+    ],
+  },
 ];
