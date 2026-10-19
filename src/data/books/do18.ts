@@ -337,4 +337,260 @@ export const BOOKS_DO18: BookSeed[] = [
       },
     ],
   },
+  {
+    id: 'robinson-crusoe',
+    title: 'Robinson Crusoe',
+    author: 'Daniel Defoe',
+    authorLife: '1660–1731',
+    year: '1719',
+    category: 'do18',
+    kind: 'epika',
+    genre: 'dobrodružný román (robinzonáda); fiktivní autobiografie',
+    period: 'Anglická literatura 18. století – osvícenství',
+    movement: 'Osvícenství; počátky anglického realistického románu',
+    narratorShort: 'ich-forma, vypravěčem je sám Robinson (fiktivní vlastní životopis)',
+    settingShort: 'York a Anglie, moře, Afrika, Brazílie, pustý ostrov u ústí Orinoka; 17. století',
+    theme:
+      'Námořník ztroskotá a 28 let žije sám (později s Pátkem) na pustém ostrově – rozumem, prací a vytrvalostí si vybuduje život a najde cestu k Bohu.',
+    motifs: ['ztroskotání', 'osamělost', 'práce a vynalézavost', 'rozum', 'víra a Bůh', 'civilizace × divočina', 'svoboda a dobrodružství', 'otroctví', 'kanibalové', 'přátelství (Pátek)', 'neposlušnost vůči otci'],
+    mainIdea:
+      'Člověk dokáže díky rozumu, práci a vytrvalosti přežít i v nejtěžších podmínkách a vytvořit si civilizovaný život. Robinson se na ostrově mění z pyšného, neklidného mladíka v pokornějšího, rozumného a věřícího člověka.',
+    mainCharacters: [
+      ch('Robinson Crusoe', 'Námořník z Yorku, syn kupce. Proti vůli otce odejde na moře. Po ztroskotání žije 28 let na pustém ostrově: staví si obydlí, pěstuje obilí, chová kozy, vede si kalendář a deník. Je pracovitý, vynalézavý, houževnatý a rozumný; postupně nachází víru v Boha.'),
+      ch('Pátek', 'Domorodec, kterého Robinson zachrání před kanibaly; pojmenuje ho podle dne, kdy ho zachránil. Je učenlivý, věrný a oddaný, naučí se anglicky a stane se Robinsonovým druhem a pomocníkem; odjede s ním do Anglie.'),
+    ],
+    sideCharacters: [
+      ch('Robinsonův otec', 'Kupec v Yorku; chce, aby syn zůstal doma a žil střední, klidný život, a před mořem ho varuje.'),
+      ch('Xury', 'Chlapec, se kterým Robinson uprchne z otroctví; v původním Defoeově textu zůstane ve službě u portugalského kapitána.'),
+      ch('Portugalský kapitán', 'Vezme Robinsona do Brazílie, kde si Robinson založí plantáž; po letech mu pomůže získat zpět majetek.'),
+      ch('Španěl a Pátkův otec', 'Zajatci kanibalů, které Robinson s Pátkem osvobodí.'),
+      ch('Anglický kapitán', 'Kapitán lodi, na které se vzbouřila posádka; Robinson mu pomůže loď získat zpět a s ní se vrátí do Anglie.'),
+    ],
+    plot:
+      'Robinson, syn kupce z Yorku, chce proti vůli otce na moře. Na první plavbě (z Hullu do Londýna) zažije bouři a ztroskotání, přesto pokračuje. Při cestě do Guineje jeho loď přepadnou piráti a Robinson se stane otrokem. S chlapcem Xurym uprchne na člunu, zachrání je portugalská loď a Robinson se dostane do Brazílie, kde si založí plantáž (tabák). Při výpravě do Afriky pro otroky loď ztroskotá a Robinson se jako jediný zachrání na pustém ostrově. Z vraku si odnese nástroje, zbraně, potraviny a další věci. Postaví si obydlí, ohradu, pěstuje obilí, ochočí si kozy a papouška, vyrábí hrnce a čluny, vede si kalendář (zářezy) a deník. Prožije nemoc a začne číst Bibli a hledat Boha. Po letech najde v písku lidskou stopu – na ostrov připlouvají kanibalové. Zachrání jejich zajatce, kterého nazve Pátek, a naučí ho anglicky. Později osvobodí i Španěla a Pátkova otce. Nakonec připluje anglická loď se vzbouřenou posádkou; Robinson pomůže kapitánovi loď znovu ovládnout, vzbouřence nechají na ostrově a Robinson se po 28 letech vrací s Pátkem do Anglie. Otce už doma živého nenajde; jeho brazilská plantáž mu mezitím vynesla jmění.',
+    plotEvents: [
+      'Robinson proti vůli otce odejde na moře a zažije první ztroskotání.',
+      'Piráti ho zajmou, je otrokem; s Xurym uprchne.',
+      'V Brazílii si založí plantáž.',
+      'Při výpravě do Afriky ztroskotá a jako jediný přežije na pustém ostrově.',
+      'Z vraku si odnese nástroje a zásoby, postaví obydlí, pěstuje obilí, chová kozy.',
+      'Vede si kalendář a deník, v nemoci najde víru v Boha.',
+      'Najde lidskou stopu v písku – na ostrov připlouvají kanibalové.',
+      'Zachrání Pátka a naučí ho anglicky.',
+      'Pomůže kapitánovi získat zpět loď od vzbouřenců.',
+      'Po 28 letech se vrací s Pátkem do Anglie.',
+    ],
+    setting: 'York a Hull v Anglii, Londýn, moře, africké pobřeží (Guinea, otroctví u pirátů), Brazílie (plantáž), pustý tropický ostrov v Atlantiku u ústí řeky Orinoko.',
+    time: '17. století; Robinson stráví na ostrově 28 let (v českém převyprávění J. V. Plevy jen 10 let).',
+    composition:
+      'Chronologické vyprávění v ich-formě jako vzpomínky starého Robinsona; součástí je jeho deník z prvních let na ostrově. Rámec: odchod z domova – dobrodružství a ztroskotání – život na ostrově – návrat domů. Román měl pokračování (Další dobrodružství Robinsona Crusoe, 1719).',
+    narrator: 'Ich-forma; vypravěčem je sám Robinson, který jako starý muž vzpomíná na svůj život. Kniha vyšla jako „vlastní životopis“ (mystifikace – autor se tvářil, že jde o pravdivý příběh).',
+    narrativeModes: 'Vyprávění, velmi podrobné popisy (práce, nástroje, výroba věcí), úvahy (o Bohu, osudu, životě), deníkové zápisy, výčty a seznamy.',
+    speechTypes: 'Pásmo vypravěče (ich-forma), deníkové zápisky, přímá řeč (hlavně rozhovory s Pátkem), vnitřní monology a modlitby.',
+    verse: '',
+    language: 'Věcný, srozumitelný, popisný jazyk s mnoha podrobnostmi (realistická iluze pravdivosti); úvahy náboženského a mravního rázu; v češtině vychází ve více překladech a převyprávěních.',
+    tropes: 'Málo ozdobných prostředků; výčty, přesné popisy, kontrast (civilizace × divočina), symbolika ostrova (zkouška a proměna člověka).',
+    authorContext:
+      'Daniel Defoe – anglický spisovatel, novinář a obchodník, autor politických pamfletů. Psal knihy, které se tvářily jako skutečné paměti. Další díla: Moll Flandersová, Deník morového roku, Paměti kavalíra.',
+    historicalContext:
+      'Osvícenství – víra v rozum, práci a pokrok; doba zámořských plaveb, kolonizace a obchodu s otroky. Inspirací byl skutečný příběh skotského námořníka Alexandra Selkirka, který žil přes čtyři roky sám na ostrově v Tichém oceánu. Román založil žánr robinzonády. Další osvícenská díla: J. Swift – Gulliverovy cesty, Voltaire – Candide.',
+    otherWorks: ['Moll Flandersová', 'Deník morového roku', 'Paměti kavalíra', 'Další dobrodružství Robinsona Crusoe'],
+    interpretation:
+      'Robinson je ideál osvícenského člověka: rozumem a prací přetváří divokou přírodu v civilizovaný svět. Ostrov je zkouškou, která z neposlušného, pyšného mladíka udělá pokorného a věřícího muže. Vztah k Pátkovi ukazuje i dobové pohledy Evropanů (Robinson je „pán“, Pátek „sluha“, kterého civilizuje a obrací na víru).',
+    examTips:
+      'Znát 28 let na ostrově, Pátka (proč se tak jmenuje), stopu v písku, kalendář a deník, ich-formu a mystifikaci („napsáno jím samým“), inspiraci A. Selkirkem, osvícenské rysy (rozum, práce) a pojem robinzonáda. Zmínit rozdíl mezi originálem a převyprávěním J. V. Plevy.',
+    quick: [
+      'D. Defoe, 1719; dobrodružný román, zakladatel robinzonády; osvícenství.',
+      'Ich-forma – Robinson vypráví svůj život jako pravdivý příběh (mystifikace).',
+      'Ztroskotá a 28 let žije na pustém ostrově u ústí Orinoka.',
+      'Rozum a práce: obydlí, obilí, kozy, kalendář, deník; najde víru v Boha.',
+      'Stopa v písku, kanibalové, zachrání Pátka.',
+      'Pomůže kapitánovi proti vzbouřencům a vrací se do Anglie.',
+    ],
+    clues: [
+      'Román, jehož hrdina po letech samoty najde na pobřeží ostrova otisk lidské nohy v písku.',
+      'Kniha o námořníkovi, který svého sluhu pojmenoval podle dne v týdnu, kdy ho zachránil před lidojedy.',
+      'Román vydávaný za pravdivý vlastní životopis námořníka, který 28 let žil sám na pustém ostrově.',
+    ],
+    scenes: [
+      {
+        scene: 'Trosečník převáží na voru z vraku lodi nástroje, zbraně, prach, potraviny a oblečení, než loď rozbije moře.',
+        context: 'Začátek pobytu na ostrově – Robinson si z ztroskotané lodi zachrání všechno, co se dá použít, a začne budovat nový život.',
+      },
+      {
+        scene: 'Muž jde po pobřeží a najednou zůstane stát jako omráčený: v písku je zřetelný otisk bosé lidské nohy.',
+        context: 'Po mnoha letech samoty Robinson zjistí, že na ostrov připlouvají lidé – kanibalové; žije pak ve strachu a opevňuje se.',
+      },
+      {
+        scene: 'Zachráněný divoch položí hlavu na zem a postaví si nohu svého zachránce na hlavu na znamení, že mu bude navždy sloužit.',
+        context: 'Robinson osvobodí zajatce kanibalů a pojmenuje ho Pátek; začíná jejich soužití a Robinson ho učí anglicky.',
+      },
+    ],
+    deepQuestions: [
+      {
+        q: 'Které rysy osvícenství najdeš v Robinsonu Crusoeovi?',
+        area: 'context',
+        answer:
+          'Robinson spoléhá na rozum a vlastní práci: plánuje, počítá, vyrábí nástroje, pěstuje obilí, vede si kalendář a deník. Divokou přírodu přetváří v civilizovaný prostor a „civilizuje“ i Pátka. Chyby přičítá sobě a hledá řešení. Kniha je zároveň mravně poučná a vydává se za pravdivý příběh – osvícenství si cenilo pravdy a užitečnosti.',
+        points: [
+          { label: 'rozum a práce', keywords: ['rozum', 'prác', 'racion'] },
+          { label: 'přetváření přírody / civilizace', keywords: ['civiliz', 'přírod', 'přetv'] },
+          { label: 'poučnost, víra', keywords: ['poučn', 'mrav', 'víra', 'bůh', 'boh'] },
+          { label: 'iluze pravdivosti', keywords: ['pravd', 'mystifik', 'skuteč'] },
+        ],
+      },
+      {
+        q: 'Jak se Robinson během pobytu na ostrově mění?',
+        area: 'characters',
+        answer:
+          'Na začátku je neklidný, neposlušný a pyšný mladík, který neposlechne otce. Na ostrově se musí naučit trpělivosti, plánování a práci. V nemoci začne číst Bibli, kaje se a nachází Boha a pokoru. Vyrovná se se samotou, z trosečníka se stane „pán ostrova“ a nakonec rozumný a zkušený muž.',
+        points: [
+          { label: 'neposlušný, pyšný mladík', keywords: ['neposlu', 'pyš', 'otec', 'otc'] },
+          { label: 'trpělivost, práce, plánování', keywords: ['trpěl', 'prác', 'plán'] },
+          { label: 'víra, pokora', keywords: ['víra', 'bůh', 'boh', 'bibl', 'pokor'] },
+        ],
+      },
+      {
+        q: 'Co je robinzonáda a proč je Robinson Crusoe důležitý?',
+        area: 'genre',
+        answer:
+          'Robinzonáda je dobrodružný příběh o člověku (nebo skupině), který se ocitne odříznutý od civilizace, obvykle na pustém ostrově, a musí přežít vlastními silami. Defoeův román žánr založil a stal se jedním z prvních anglických realistických románů. Navázala na něj řada děl (např. J. Verne – Tajuplný ostrov).',
+        points: [
+          { label: 'přežití odříznutý od civilizace', keywords: ['přež', 'odříz', 'ostrov', 'civiliz'] },
+          { label: 'zakladatel žánru', keywords: ['založ', 'zaklad', 'první'] },
+          { label: 'realistický román', keywords: ['realist', 'román'] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'romeo-a-julie',
+    title: 'Romeo a Julie',
+    author: 'William Shakespeare',
+    authorLife: '1564–1616',
+    year: 'kolem 1595 (tiskem 1597)',
+    category: 'do18',
+    kind: 'drama',
+    genre: 'tragédie (milostná) o pěti dějstvích s prologem',
+    period: 'Renesance (Anglie, alžbětinské drama)',
+    movement: 'Renesance – alžbětinské divadlo',
+    narratorShort: 'drama – bez vypravěče (prolog pronáší sbor)',
+    settingShort: 'Verona a Mantova (Itálie); děj trvá jen několik dní',
+    theme:
+      'Tragická láska dvou mladých lidí ze znepřátelených veronských rodů Monteků a Kapuletů, kterou zničí nenávist rodin a nešťastné náhody.',
+    motifs: ['láska na první pohled', 'nenávist a rodový spor', 'osud a náhoda', 'smrt', 'tajný sňatek', 'souboj a pomsta', 'vyhnanství', 'uspávací nápoj a jed', 'noc a den (balkon, skřivan)', 'usmíření'],
+    mainIdea:
+      'Láska je silnější než nenávist, ale nenávist rodičů a slepá zášť zničí jejich vlastní děti. Teprve smrt milenců rodiny usmíří.',
+    mainCharacters: [
+      ch('Romeo', 'Syn Monteků; zpočátku romanticky zamilovaný do Rosaliny, pak na plese na první pohled do Julie. Vášnivý, impulzivní; v hněvu zabije Tybalta a je vyhnán. Na zprávu o Juliině smrti se otráví.'),
+      ch('Julie', 'Dcera Kapuletů, třináctiletá. Zpočátku poslušná a naivní, láskou rychle dospívá, je rozhodná a odvážná – tajně se vdá a vypije uspávací nápoj. Když najde Romea mrtvého, probodne se jeho dýkou.'),
+    ],
+    sideCharacters: [
+      ch('Otec (bratr) Vavřinec', 'Františkánský mnich, Romeův zpovědník; milence tajně oddá v naději, že sňatek usmíří rody. Dá Julii uspávací nápoj.'),
+      ch('Chůva', 'Juliina chůva a důvěrnice; nosí zprávy mezi milenci, později Julii radí, aby si vzala Parise.'),
+      ch('Merkucio', 'Romeův přítel, vtipný a výřečný (řeč o královně Mab); zabije ho Tybalt.'),
+      ch('Tybalt', 'Juliin bratranec, prchlivý a nenávistný; zabije Merkucia a sám padne Romeovou rukou.'),
+      ch('Benvolio', 'Romeův bratranec a přítel, smířlivý.'),
+      ch('Paris', 'Mladý šlechtic, příbuzný vévody; má si vzít Julii. U hrobky ho zabije Romeo.'),
+      ch('Kapulet a Montek', 'Hlavy znepřátelených rodů; Kapulet nutí Julii ke sňatku s Parisem.'),
+      ch('Vévoda Eskalus', 'Vládce Verony; zakazuje rvačky a Romea vyhostí.'),
+    ],
+    plot:
+      'Ve Veroně se znovu poperou služebníci Monteků a Kapuletů a vévoda Eskalus pod trestem smrti zakáže další spory. Romeo Montek se s přáteli Merkuciem a Benvoliem v masce dostane na ples u Kapuletů. Tybalt ho pozná, ale starý Kapulet nechce skandál. Romeo uvidí Julii a oba se do sebe zamilují, i když se dozví, že patří k nepřátelskému rodu. V noci pod balkonem si vyznají lásku a druhý den je otec Vavřinec tajně oddá. Tybalt pak vyzve Romea na souboj; Romeo odmítá, místo něj bojuje Merkucio a je zabit. Romeo v hněvu zabije Tybalta a vévoda ho vyhostí do Mantovy. Po svatební noci se milenci rozloučí. Kapulet mezitím rozhodne, že se Julie hned provdá za Parise. Julie dostane od Vavřince nápoj, po kterém bude vypadat jako mrtvá; Vavřinec má Romeovi poslat zprávu, aby si pro ni přišel do hrobky. Posel (bratr Jan) se však kvůli moru do Mantovy nedostane a Romeo se dozví jen to, že je Julie mrtvá. Koupí jed, vrátí se do Verony, u hrobky zabije Parise, naposledy políbí Julii a otráví se. Julie se probudí, najde Romea mrtvého a probodne se jeho dýkou. Nad mrtvými dětmi se rody Monteků a Kapuletů usmíří.',
+    plotEvents: [
+      'Rvačka Monteků a Kapuletů, vévoda zakáže spory.',
+      'Romeo se v masce dostane na ples Kapuletů a zamiluje se do Julie.',
+      'Scéna pod balkonem – vyznání lásky.',
+      'Otec Vavřinec milence tajně oddá.',
+      'Tybalt zabije Merkucia, Romeo zabije Tybalta a je vyhnán do Mantovy.',
+      'Kapulet chce Julii provdat za Parise.',
+      'Julie vypije Vavřincův uspávací nápoj a vypadá jako mrtvá.',
+      'Zpráva Romeovi nedojde (mor); Romeo se otráví u Juliina těla.',
+      'Julie se probudí a probodne se dýkou.',
+      'Rody se nad mrtvými dětmi usmíří.',
+    ],
+    setting: 'Verona (náměstí, dům a zahrada Kapuletů s balkonem, cela otce Vavřince, hrobka Kapuletů) a Mantova (Romeovo vyhnanství).',
+    time: 'Itálie kolem přelomu středověku a renesance; děj je soustředěný do několika dní.',
+    composition:
+      'Prolog (sonet, který pronáší sbor a předem prozradí tragický konec) a pět dějství. Chronologický děj, rychlé tempo. Klasická stavba dramatu: expozice (spor rodů, ples) – kolize (sňatek, smrt Merkucia a Tybalta) – krize (vyhnanství, nucený sňatek s Parisem) – peripetie (uspávací nápoj, zpráva nedojde) – katastrofa (smrt milenců) a usmíření rodů.',
+    narrator: 'Drama nemá vypravěče; děj se odvíjí v dialozích a monolozích postav. Prolog pronáší sbor (chorus).',
+    narrativeModes: 'Dialogy, monology, scénické poznámky; prolog.',
+    speechTypes: 'Dialogy, monology (např. Juliin monolog na balkoně), řeč stranou, scénické poznámky.',
+    verse: 'Převážně blankvers (nerýmovaný pětistopý jamb), místy rýmované verše a sonety (prolog, první rozhovor Romea a Julie); vedlejší komické postavy (sluhové, chůva) mluví často prózou.',
+    language: 'Poetický, obrazný jazyk plný metafor a slovních hříček; vznešené milostné pasáže se střídají s komickými a hrubšími výstupy sluhů a chůvy. Do češtiny přeložili např. J. V. Sládek, E. A. Saudek, J. Topol, M. Hilský.',
+    tropes: 'Metafory (Julie je slunce), přirovnání, kontrast (láska × nenávist, den × noc, život × smrt), slovní hříčky, oxymóron, předtucha (sny, varování), dramatická ironie (divák ví, že Julie žije).',
+    authorContext:
+      'William Shakespeare – anglický dramatik a básník, herec a spolumajitel divadla Globe v Londýně. Psal tragédie (Hamlet, Othello, Král Lear, Macbeth), komedie (Sen noci svatojánské, Zkrocení zlé ženy, Večer tříkrálový), historické hry a sonety.',
+    historicalContext:
+      'Renesance – zájem o člověka, jeho city a svobodnou vůli; v Anglii vrchol alžbětinského divadla za Alžběty I. Látku o milencích z Verony zpracoval Matteo Bandello a anglicky Arthur Brooke (1562), ze kterého Shakespeare čerpal; podobný motiv má antický příběh Pýramos a Thisbé. Ohlasy: muzikál West Side Story, film F. Zeffirelliho (1968), B. Luhrmanna (1996), Prokofjevův balet.',
+    otherWorks: ['Hamlet', 'Othello', 'Král Lear', 'Macbeth', 'Sen noci svatojánské', 'Zkrocení zlé ženy'],
+    interpretation:
+      'Hra ukazuje střet mladé, čisté lásky se světem nenávisti dospělých. Milenci jednají rychle a vášnivě, ale tragédii způsobí hlavně spor rodů, nucený sňatek a řada nešťastných náhod (zpráva, která nedojde). Jejich smrt je obětí, která rody usmíří. Renesanční je důraz na city a právo člověka rozhodnout o vlastním životě.',
+    examTips:
+      'Znát Verona, Montekové × Kapuleti, ples, scénu pod balkonem, tajný sňatek (Vavřinec), smrt Merkucia a Tybalta, vyhnanství do Mantovy, uspávací nápoj, nedoručenou zprávu (mor) a smrt obou milenců. Druhově drama – tragédie, prolog + 5 dějství, blankvers. Srovnání s Petrem a Lucií, West Side Story.',
+    quick: [
+      'W. Shakespeare, kolem 1595; tragédie, prolog + 5 dějství, blankvers; renesance.',
+      'Verona: znepřátelené rody Monteků a Kapuletů.',
+      'Ples, láska na první pohled, scéna pod balkonem, tajný sňatek (otec Vavřinec).',
+      'Tybalt zabije Merkucia, Romeo Tybalta → vyhnanství do Mantovy.',
+      'Uspávací nápoj, zpráva nedojde, Romeo se otráví, Julie se probodne.',
+      'Smrt dětí usmíří rody.',
+    ],
+    clues: [
+      'Tragédie, v níž dívka vypije nápoj, po kterém vypadá jako mrtvá, ale zpráva o tom nedojde k jejímu manželovi.',
+      'Hra o lásce dvou mladých lidí z rodů, které spolu vedou dávný spor, se slavnou scénou pod balkonem.',
+      'Tragédie, ve které mnich tajně oddá milence v naději, že jejich sňatek usmíří znepřátelené rody.',
+    ],
+    scenes: [
+      {
+        scene: 'Dívka v noci na balkoně nahlas uvažuje, proč je mladík, kterého miluje, právě z nepřátelského rodu – a on ji tajně poslouchá v zahradě pod ní.',
+        context: '2. dějství – scéna pod balkonem; Julie a Romeo si vyznají lásku a domluví se na tajném sňatku.',
+      },
+      {
+        scene: 'Mladík místo přítele přijme výzvu k souboji, je smrtelně zraněn a umírá se slovy, ať mor stihne oba rody.',
+        context: '3. dějství – Tybalt zabije Merkucia; Romeo se pomstí, zabije Tybalta a je vyhnán do Mantovy.',
+      },
+      {
+        scene: 'Mladík v hrobce naposledy políbí svou ženu, kterou považuje za mrtvou, a vypije jed; ona se vzápětí probudí.',
+        context: 'Závěr (5. dějství) – smrt Romea a Julie v hrobce Kapuletů; rody se pak usmíří.',
+      },
+    ],
+    deepQuestions: [
+      {
+        q: 'Kdo nebo co je vinno smrtí Romea a Julie?',
+        area: 'theme',
+        answer:
+          'Hlavní vinu nese dávná nenávist mezi Monteky a Kapulety – kvůli ní musí milenci jednat tajně. Dále Kapulet, který Julii nutí do sňatku s Parisem, Tybaltova zášť (smrt Merkucia a Tybalta, Romeovo vyhnanství) a řada náhod: posel kvůli moru nedoručí zprávu. Roli hraje i unáhlenost mladých milenců. Prolog celý příběh rámuje jako osud („hvězdami nešťastní milenci“).',
+        points: [
+          { label: 'nenávist rodů', keywords: ['nenávist', 'spor', 'rod'] },
+          { label: 'nucený sňatek s Parisem', keywords: ['paris', 'sňat', 'nut', 'kapulet'] },
+          { label: 'náhoda – nedoručená zpráva (mor)', keywords: ['náhod', 'zpráv', 'posel', 'mor', 'dopis'] },
+          { label: 'unáhlenost / osud', keywords: ['unáhl', 'rychl', 'osud', 'impulz'] },
+        ],
+      },
+      {
+        q: 'Jaká je stavba Romea a Julie jako dramatu?',
+        area: 'composition',
+        answer:
+          'Prolog (sonet pronesený sborem) předem prozradí tragický konec. Pak následuje pět dějství podle klasické stavby: expozice (spor rodů, ples, seznámení), kolize (tajný sňatek, smrt Merkucia a Tybalta), krize (vyhnanství, nucený sňatek), peripetie (uspávací nápoj, zpráva nedojde) a katastrofa (smrt milenců) s usmířením rodů. Hra je psaná převážně blankversem.',
+        points: [
+          { label: 'prolog', keywords: ['prolog', 'sbor', 'sonet'] },
+          { label: 'pět dějství', keywords: ['pět', '5', 'dějstv'] },
+          { label: 'expozice–kolize–krize–peripetie–katastrofa', keywords: ['expozic', 'koliz', 'kriz', 'peripet', 'katastrof'] },
+          { label: 'blankvers', keywords: ['blankvers', 'jamb', 'verš'] },
+        ],
+      },
+      {
+        q: 'Jak se Julie v průběhu hry mění?',
+        area: 'characters',
+        answer:
+          'Na začátku je třináctiletá poslušná dcera, která se o lásce teprve dozvídá. Láska k Romeovi ji rychle promění v rozhodnou a odvážnou ženu: tajně se vdá, vzepře se otci, odmítne radu chůvy a odváží se vypít uspávací nápoj. Nakonec si raději vezme život, než aby žila bez Romea.',
+        points: [
+          { label: 'poslušná, mladá (13 let)', keywords: ['posluš', '13', 'třináct', 'naivn'] },
+          { label: 'rozhodná, odvážná', keywords: ['rozhod', 'odváž', 'odvah'] },
+          { label: 'vzepře se otci a chůvě', keywords: ['otc', 'otec', 'chův', 'vzepř'] },
+        ],
+      },
+    ],
+  },
 ];

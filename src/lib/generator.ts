@@ -38,7 +38,7 @@ const FALLBACK_TITLES = [
   'Babička',
   'Bílá nemoc',
   'Osudy dobrého vojáka Švejka',
-  'Romeo a Julie',
+  'Krakatit',
   'Bídníci',
   'Zločin a trest',
   'Obsluhoval jsem anglického krále',

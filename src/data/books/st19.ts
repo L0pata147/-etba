@@ -361,4 +361,256 @@ export const BOOKS_ST19: BookSeed[] = [
       },
     ],
   },
+  {
+    id: 'revizor',
+    title: 'Revizor',
+    author: 'Nikolaj Vasiljevič Gogol',
+    authorLife: '1809–1852',
+    year: '1836',
+    category: 'st19',
+    kind: 'drama',
+    genre: 'satirická komedie o pěti dějstvích',
+    period: 'Světová literatura 19. století – ruský realismus (1. polovina 19. století)',
+    movement: 'Kritický realismus; satira',
+    narratorShort: 'drama – bez vypravěče',
+    settingShort: 'malé ruské okresní městečko, počátek 30. let 19. století; děj trvá asi 24 hodin',
+    theme:
+      'Úředníci zkorumpovaného ruského městečka považují bezvýznamného mladíka Chlestakova za tajného revizora z Petrohradu, podplácejí ho a podlézají mu – a pak přijede revizor skutečný.',
+    motifs: ['korupce a úplatky', 'strach z kontroly', 'podlézavost', 'záměna osob', 'lež a vychloubání', 'byrokracie', 'hloupost a nevzdělanost', 'pomluvy a drby', 'otevírání dopisů', 'zrcadlo'],
+    mainIdea:
+      'Gogol zesměšňuje úplatkářství, hloupost a podlézavost úředníků carského Ruska. Strach a špatné svědomí z nich udělají snadnou oběť podvodníka. Divák se směje, ale vidí v nich i sebe („Čemu se smějete? Sami sobě se smějete!“).',
+    mainCharacters: [
+      ch('Ivan Alexandrovič Chlestakov', 'Mladý bezvýznamný petrohradský úředník, lehkomyslný a prázdný; prohrál v kartách všechny peníze a nemá na zaplacení hostince. Když ho považují za revizora, rychle toho využije: bere „půjčky“, vychloubá se smyšlenými známostmi, dvoří se hejtmanově ženě i dceři a včas zmizí.'),
+      ch('Hejtman (Anton Antonovič)', 'Představený městečka, zkušený úplatkář a zloděj obecních peněz. Ze strachu z revize Chlestakova ubytuje u sebe, podplácí ho a nabídne mu ruku své dcery; sní o kariéře v Petrohradě. Nakonec je sám podveden.'),
+    ],
+    sideCharacters: [
+      ch('Osip', 'Chlestakovův starý sluha; chytřejší než jeho pán, přiměje ho včas odjet, než se podvod prozradí.'),
+      ch('Anna Andrejevna a Marja Antonovna', 'Hejtmanova žena a dcera; marnivé a koketní, obě se nechají Chlestakovem okouzlit.'),
+      ch('Bobčinskij a Dobčinskij', 'Dva statkáři a klevetníci, kteří běhají po městě se zprávami; jako první prohlásí Chlestakova za revizora.'),
+      ch('Poštmistr', 'Ze zvědavosti otevírá cizí dopisy – tak se nakonec všichni dozvědí o Chlestakovově podvodu.'),
+      ch('Soudce, školní inspektor, správce chudobince', 'Městští úředníci – úplatkáři a nedbalci, kteří Chlestakovovi ochotně „půjčují“ peníze.'),
+      ch('Strážník Děržimorda', 'Hrubý policista, symbol policejní zvůle.'),
+    ],
+    plot:
+      'Hejtman svolá městské úředníky a oznámí jim, že podle dopisu z Petrohradu přijede inkognito revizor. Všichni mají špatné svědomí – berou úplatky, kradou a ve městě je nepořádek. Bobčinskij a Dobčinskij přiběhnou se zprávou, že v hostinci už dva týdny bydlí mladý muž z Petrohradu, který nic neplatí – určitě je to revizor. Je to však Chlestakov, drobný úředník, který prohrál peníze v kartách a hostinský mu už nechce dávat jíst. Hejtman ho navštíví, omlouvá se a odvede si ho k sobě domů. Chlestakov zprvu nechápe, proč se k němu všichni tak chovají, ale pak toho využije: úředníci a kupci mu jeden po druhém přinášejí „půjčky“ a dary, on se vychloubá, jak se stýká s ministry a Puškinem. Dvoří se hejtmanově ženě i dceři a nakonec požádá o ruku dcery. Sluha Osip ho přiměje, aby co nejdřív odjel; Chlestakov tvrdí, že jede za strýcem pro požehnání ke svatbě. Hejtman se už vidí v Petrohradě jako generál. Pak poštmistr přinese otevřený Chlestakovův dopis příteli, ve kterém se všem vysmívá. Hejtman zuří a obviňuje i sám sebe. V tu chvíli četník oznámí, že přijel skutečný revizor z Petrohradu a chce je všechny vidět. Hra končí němou scénou – všichni ztuhnou.',
+    plotEvents: [
+      'Hejtman oznámí úředníkům, že přijede tajný revizor.',
+      'Bobčinskij a Dobčinskij prohlásí za revizora Chlestakova, který bydlí v hostinci.',
+      'Hejtman ho ze strachu ubytuje u sebe doma.',
+      'Úředníci a kupci Chlestakovovi dávají „půjčky“ a dary.',
+      'Chlestakov se vychloubá, dvoří se hejtmanově ženě i dceři a požádá o ruku dcery.',
+      'Na Osipovu radu Chlestakov včas odjede.',
+      'Poštmistr přečte Chlestakovův dopis, kde se všem vysmívá.',
+      'Přijede skutečný revizor – němá scéna.',
+    ],
+    setting: 'Malé ruské okresní městečko daleko od Petrohradu: hostinec, hejtmanův dům.',
+    time: 'Počátek 30. let 19. století (Rusko za cara Mikuláše I.); děj trvá zhruba 24 hodin.',
+    composition:
+      'Pět dějství, chronologický děj, soustředěný na jedno místo a krátký čas. Vtip stojí na záměně osob. Expozice (zpráva o revizorovi) – kolize (Chlestakov považován za revizora) – krize (podplácení, zásnuby) – peripetie (Chlestakov odjede, dopis je přečten) – katastrofa (příjezd skutečného revizora). Na konci slavná „němá scéna“.',
+    narrator: 'Drama nemá vypravěče; děj se odvíjí v dialozích a monolozích postav, autor připojil podrobné poznámky k postavám a scénické poznámky.',
+    narrativeModes: 'Dialogy, monology, scénické poznámky; dopis.',
+    speechTypes: 'Dialogy, monology (hejtman, Chlestakov), řeč stranou, přečtený dopis.',
+    verse: '',
+    language: 'Próza; hovorový jazyk postav, který je charakterizuje (vychloubačné řeči Chlestakova, podlézavé projevy úředníků), mluvící jména, komické přeřeky. Motto hry: „Nevrč, brachu, na zrcadlo, když máš křivou hubu.“',
+    tropes: 'Satira, ironie, groteska, nadsázka (hyperbola – Chlestakovovo vychloubání), situační komika, mluvící jména, kontrast mezi zdáním a skutečností.',
+    authorContext:
+      'Nikolaj Vasiljevič Gogol – ruský prozaik a dramatik ukrajinského původu, zakladatel ruského kritického realismu. Námět Revizora mu prý dal A. S. Puškin. Další díla: Mrtvé duše, Petrohradské povídky (Plášť, Nos), Taras Bulba, Večery na samotě u Dikaňky, Ženitba.',
+    historicalContext:
+      'Rusko za cara Mikuláše I. – absolutismus, rozbujelá byrokracie, tajná policie a cenzura, korupce úředníků; z Petrohradu se do provincie posílali revizoři. Premiéra 1836 v Petrohradě měla úspěch u mladé generace, ale vyvolala odpor vyšší společnosti. Současníci: A. S. Puškin (Evžen Oněgin), M. J. Lermontov; v Čechách hru přeložil už v 19. století např. J. Mikuláš Boleslavský a známý je film Revizor (1933) s Vlastou Burianem.',
+    otherWorks: ['Mrtvé duše', 'Plášť', 'Nos', 'Taras Bulba', 'Večery na samotě u Dikaňky', 'Ženitba'],
+    interpretation:
+      'Hra je satirou na celé carské Rusko: městečko je zmenšený obraz státu, kde vládne strach, úplatky a přetvářka. Chlestakov není záměrný podvodník – je prázdný člověk, kterého si úředníci sami „vytvoří“ ze svého strachu. Němá scéna ukazuje, že trest přichází. Gogol sám později hru vykládal i nábožensky: skutečný revizor jako Boží soud nad lidskou duší.',
+    examTips:
+      'Znát záměnu (Chlestakov považován za revizora), hejtmana, Bobčinského a Dobčinského, Osipa, poštmistra, který otevírá dopisy, a závěr s příjezdem skutečného revizora (němá scéna). Druh drama – satirická komedie, 5 dějství, próza. Kritický realismus, korupce za Mikuláše I. Motto o zrcadle.',
+    quick: [
+      'N. V. Gogol, 1836; satirická komedie o 5 dějstvích; ruský realismus.',
+      'Úředníci ruského městečka čekají tajného revizora.',
+      'Za revizora považují zadluženého mladíka Chlestakova.',
+      'Podplácejí ho, hejtman mu nabídne dceru; Chlestakov včas odjede.',
+      'Poštmistr otevře jeho dopis – podvod prozrazen.',
+      'Přijede skutečný revizor – němá scéna.',
+    ],
+    clues: [
+      'Komedie, v níž úředníci ze strachu z kontroly podplácejí bezvýznamného mladíka, kterého si spletli s tajným vyslancem z hlavního města.',
+      'Hra, ve které poštmistr ze zvědavosti otevírá cizí dopisy a díky tomu se prozradí podvod.',
+      'Komedie končící němou scénou, kdy strážník oznámí příjezd skutečného úředníka z Petrohradu.',
+    ],
+    scenes: [
+      {
+        scene: 'Představený města svolá úředníky a oznámí jim „nepříjemnou zprávu“: přijede k nim inkognito úředník z Petrohradu, aby vše prověřil.',
+        context: 'Začátek hry (1. dějství) – hejtman varuje úředníky před revizorem; všichni mají špatné svědomí.',
+      },
+      {
+        scene: 'Mladík u stolu vypráví, jak se stýká s ministry, jak píše knihy a jak se o jeho přízeň uchází celý Petrohrad; posluchači se chvějí úctou.',
+        context: 'Chlestakovovo vychloubání v hejtmanově domě – úředníci věří, že mluví s mocným revizorem.',
+      },
+      {
+        scene: 'Úředník nahlas čte dopis, v němž odjíždějící host popisuje všechny místní jako hlupáky a dává jim posměšné přezdívky.',
+        context: 'Závěr (5. dějství) – poštmistr otevřel Chlestakovův dopis; podvod je prozrazen a vzápětí přijede skutečný revizor.',
+      },
+    ],
+    deepQuestions: [
+      {
+        q: 'Proč úředníci považují Chlestakova za revizora?',
+        area: 'characters',
+        answer:
+          'Mají špatné svědomí – berou úplatky, kradou a zanedbávají povinnosti – a proto se bojí. Klevetníci Bobčinskij a Dobčinskij zjistí, že v hostinci bydlí mladík z Petrohradu, který nic neplatí, a hned z něj udělají revizora. Strach a hloupost jim nedovolí vidět pravdu; Chlestakova si „vytvoří“ sami. Chlestakov zpočátku nic nepředstírá, teprve pak toho využije.',
+        points: [
+          { label: 'špatné svědomí, strach', keywords: ['svědom', 'strach', 'boj'] },
+          { label: 'klevetníci Bobčinskij a Dobčinskij', keywords: ['bobčin', 'dobčin', 'klevet', 'drb'] },
+          { label: 'hloupost, sebeklam', keywords: ['hloup', 'sebeklam', 'vytvoř'] },
+          { label: 'Chlestakov toho využije', keywords: ['využ', 'chlestakov'] },
+        ],
+      },
+      {
+        q: 'V čem spočívá satira Revizora?',
+        area: 'theme',
+        answer:
+          'Gogol zesměšňuje úplatkářství, nevzdělanost, podlézavost a byrokracii úředníků carského Ruska. Městečko je obrazem celé země. Satira používá nadsázku, grotesku, situační komiku a mluvící jména. Hejtmanovo „Čemu se smějete? Sami sobě se smějete!“ a motto o zrcadle obracejí kritiku i k divákům.',
+        points: [
+          { label: 'korupce, úplatky', keywords: ['koru', 'úplat', 'podplác'] },
+          { label: 'byrokracie carského Ruska', keywords: ['byrokra', 'úřed', 'carsk', 'rusk'] },
+          { label: 'nadsázka, groteska, komika', keywords: ['nadsáz', 'grotesk', 'komik', 'hyperbol'] },
+          { label: 'zrcadlo – smějeme se sami sobě', keywords: ['zrcad', 'sami sobě', 'divák'] },
+        ],
+      },
+      {
+        q: 'Jaký význam má závěrečná němá scéna?',
+        area: 'composition',
+        answer:
+          'Když strážník oznámí příjezd skutečného revizora, všechny postavy ztuhnou v úžasu a zděšení. Podvod je odhalen a úředníky čeká skutečná kontrola – trest přichází. Němá scéna je pointou hry a nechává diváka domyslet, co bude dál; Gogol ji později vykládal i jako obraz Božího soudu.',
+        points: [
+          { label: 'přijel skutečný revizor', keywords: ['skuteč', 'revizor'] },
+          { label: 'ztuhnutí, úžas a zděšení', keywords: ['ztuh', 'úžas', 'zděš', 'němá'] },
+          { label: 'trest / soud', keywords: ['trest', 'soud'] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'kulicka',
+    title: 'Kulička',
+    author: 'Guy de Maupassant',
+    authorLife: '1850–1893',
+    year: '1880',
+    category: 'st19',
+    kind: 'epika',
+    genre: 'povídka (novela)',
+    period: 'Světová literatura 19. století – realismus a naturalismus (Francie)',
+    movement: 'Realismus a naturalismus',
+    narratorShort: 'er-forma, objektivní vševědoucí vypravěč',
+    settingShort: 'Normandie (Rouen – hostinec v Tôtes – cesta k Le Havru) za prusko-francouzské války, zima 1870',
+    theme:
+      'Prostitutka Kulička se obětuje pro spolucestující z „lepší společnosti“, kteří ji k tomu sami donutí a pak jí opovrhují.',
+    motifs: ['pokrytectví', 'společenské vrstvy a předsudky', 'válka a okupace', 'vlastenectví', 'oběť', 'sobectví', 'jídlo a hlad', 'morálka', 'vydírání', 'nevděk'],
+    mainIdea:
+      'Člověk z nejnižší vrstvy může být morálně mnohem lepší než „ctihodní“ bohatí měšťané a šlechtici. Ti jsou sobečtí, pokrytečtí a vděk neznají – svou čest a víru ohýbají podle vlastního prospěchu.',
+    mainCharacters: [
+      ch('Kulička (Alžběta Roussetová)', 'Prostitutka z Rouenu, podle své kypré postavy přezdívaná Kulička. Dobrosrdečná, štědrá a vlastenecká (bonapartistka); odmítá se vydat pruskému důstojníkovi, dokud ji spolucestující nepřemluví. Na konci zůstane opovrhovaná, hladová a pláče.'),
+    ],
+    sideCharacters: [
+      ch('Manželé Loiseauovi', 'Velkoobchodník s vínem, vychytralý šibal a vtipálek, a jeho rázná, počtářská žena.'),
+      ch('Manželé Carré-Lamadonovi', 'Bohatý a vážený továrník (přádelny bavlny) a jeho mladá, hezká žena.'),
+      ch('Hrabě a hraběnka de Bréville', 'Šlechtici ze starého rodu, nejvýše postavení cestující; hrabě vede „diplomatické“ přemlouvání Kuličky.'),
+      ch('Dvě jeptišky', 'Starší a mladší řeholnice; starší svými řečmi o světcích pomáhá Kuličku přesvědčit, že oběť pro dobrou věc není hřích.'),
+      ch('Cornudet', 'Demokrat (republikán) a pivař s rudým plnovousem; sám se Kuličce marně dvoří, k nátlaku se nepřidá a na konci si pohvizduje Marseillaisu.'),
+      ch('Pruský důstojník', 'Velitel v hostinci v Tôtes; nepustí dostavník dál, dokud mu Kulička nebude po vůli.'),
+      ch('Follenvie', 'Majitel hostince v Tôtes.'),
+    ],
+    plot:
+      'Za prusko-francouzské války obsadí Prusové Rouen. Deset lidí si s povolením opatří dostavník a jednoho mrazivého rána vyjede do Le Havru: tři manželské páry z vyšší společnosti (Loiseauovi, Carré-Lamadonovi, hrabě a hraběnka de Bréville), dvě jeptišky, demokrat Cornudet a prostitutka Kulička. Dámy jí okázale opovrhují. Cesta se kvůli sněhu protahuje, nikde nelze nic koupit a všichni hladovějí – jedině Kulička má košík plný jídla a se všemi se ochotně rozdělí. Pak se k ní na chvíli chovají vlídně. Večer dorazí do hostince v Tôtes, kde je pruský důstojník. Ten nedovolí odjet, dokud se mu Kulička nepodvolí; ona to z vlastenectví a hrdosti odmítá. Zpočátku ji všichni podporují, ale po několika dnech čekání ji začnou přemlouvat: líčí jí příklady obětavých žen z historie, jeptiška mluví o světcích, kterým Bůh odpustí, když jednají pro dobrou věc. Kulička nakonec ustoupí. Druhý den smí dostavník odjet. Spolucestující se od Kuličky odtahují a nemluví s ní. Kulička v rychlosti zapomněla jídlo, a když ostatní vytáhnou své zásoby, nikdo se s ní nerozdělí. Cornudet si pohvizduje Marseillaisu a Kulička v koutě tiše pláče.',
+    plotEvents: [
+      'Prusové obsadí Rouen; deset lidí vyjede dostavníkem do Le Havru.',
+      'Dámy Kuličkou opovrhují.',
+      'Cestující hladovějí; Kulička se s nimi rozdělí o svůj košík jídla.',
+      'V hostinci v Tôtes pruský důstojník nepustí dostavník dál, dokud se mu Kulička nepodvolí.',
+      'Kulička z vlastenectví odmítá.',
+      'Spolucestující ji několik dní přemlouvají; nakonec ustoupí.',
+      'Dostavník odjede; nikdo s Kuličkou nemluví ani se s ní nerozdělí o jídlo.',
+      'Kulička pláče, Cornudet si pohvizduje Marseillaisu.',
+    ],
+    setting: 'Normandie: okupovaný Rouen, zasněžená cesta, dostavník, hostinec v Tôtes, cesta k Le Havru.',
+    time: 'Prusko-francouzská válka, zima 1870; děj trvá několik dní.',
+    composition:
+      'Chronologická povídka. Úvod popisuje porážku Francie a okupaci Rouenu. Rámcově souměrná stavba: dvě cesty dostavníkem – na první se Kulička dělí o jídlo, na druhé s ní nikdo; mezi nimi čekání v hostinci. Uzavřený, hořce ironický konec.',
+    narrator: 'Er-forma; objektivní vševědoucí vypravěč, který nekomentuje přímo, ale ironicky vykresluje postavy jejich vlastním jednáním.',
+    narrativeModes: 'Vyprávění, popis (válka, prostředí, postavy), charakteristika, dialogy.',
+    speechTypes: 'Pásmo vypravěče, přímá řeč (dialogy cestujících), nepřímá řeč.',
+    verse: '',
+    language: 'Spisovný, věcný a přesný jazyk (v českém překladu), realistické detaily, ironie; přímá charakteristika postav; místy hovorové výrazy v řeči postav.',
+    tropes: 'Ironie, kontrast (Kulička × „ctihodná“ společnost, první × druhá cesta), přirovnání, symbolika jídla (štědrost × sobectví), satira.',
+    authorContext:
+      'Guy de Maupassant – francouzský prozaik, mistr povídky, žák a přítel Gustava Flauberta. Účastnil se prusko-francouzské války, později byl úředníkem v Paříži. Kulička vyšla 1880 ve společném sborníku Médanské večery (kolem É. Zoly) a proslavila ho. Další díla: Miláček, Silná jako smrt, Petr a Jan, povídky Horla, Slečna Fifi.',
+    historicalContext:
+      'Prusko-francouzská válka 1870–1871 – porážka Francie, pád císařství Napoleona III. a pruská okupace severní Francie. Literatura 2. poloviny 19. století – realismus a naturalismus: É. Zola (Zabiják), G. Flaubert (Paní Bovaryová), H. de Balzac; v Rusku F. M. Dostojevskij, L. N. Tolstoj.',
+    otherWorks: ['Miláček', 'Silná jako smrt', 'Petr a Jan', 'Horla', 'Slečna Fifi'],
+    interpretation:
+      'Povídka ostře kritizuje pokrytectví „lepší společnosti“: šlechtici, továrník, obchodník i jeptišky se dovolávají cti a víry, ale kvůli vlastnímu pohodlí obětují druhého a pak jím pohrdají. Kulička, kterou společnost odsuzuje, je jediná štědrá a vlastenecká. Jídlo symbolizuje rozdíl mezi její nezištností a sobectvím ostatních.',
+    examTips:
+      'Znát dobu (prusko-francouzská válka 1870), Rouen – dostavník – Tôtes, cestující (tři páry, jeptišky, Cornudet), košík s jídlem, pruského důstojníka a nátlak na Kuličku, závěr (nikdo se nerozdělí, pláč, Marseillaisa). Realismus/naturalismus, Médanské večery.',
+    quick: [
+      'G. de Maupassant, 1880 (sborník Médanské večery); povídka; realismus/naturalismus.',
+      'Prusko-francouzská válka, okupovaný Rouen, cesta dostavníkem do Le Havru.',
+      'Prostitutka Kulička se rozdělí o jídlo s hladovými „ctihodnými“ cestujícími.',
+      'Pruský důstojník nepustí dostavník dál, dokud mu Kulička nebude po vůli.',
+      'Spolucestující ji přemluví; potom jí opovrhují a nedají jí jíst.',
+      'Kritika pokrytectví vyšších vrstev; Kulička pláče.',
+    ],
+    clues: [
+      'Povídka o prostitutce, která se v dostavníku rozdělí o jídlo s hladovými spolucestujícími, kteří jí pak opovrhují.',
+      'Příběh z prusko-francouzské války, v němž pruský důstojník nedovolí odjet dostavníku, dokud mu jedna z cestujících nebude po vůli.',
+      'Povídka končící tím, že hrdinka hladová pláče v koutě dostavníku, zatímco jeden z cestujících pohvizduje Marseillaisu.',
+    ],
+    scenes: [
+      {
+        scene: 'Žena vytáhne zpod lavice velký košík s pečenými kuřaty, paštikou, ovocem a vínem, zatímco ostatní hladoví cestující na ni závistivě hledí.',
+        context: 'První cesta dostavníkem – Kulička se s „ctihodnými“ spolucestujícími, kteří jí předtím pohrdali, štědře rozdělí o jídlo.',
+      },
+      {
+        scene: 'Hostinský každý večer přijde se vzkazem od důstojníka, zda už si to slečna nerozmyslela; ostatní cestující u večeře probírají, jak ji přesvědčit.',
+        context: 'Čekání v hostinci v Tôtes – nátlak spolucestujících, kteří chtějí za každou cenu odjet.',
+      },
+      {
+        scene: 'Všichni jedí ze svých zásob a nikdo nenabídne hladové ženě, která si v rychlosti nestihla nic vzít; ona v koutě pláče.',
+        context: 'Závěr – druhá cesta dostavníkem po Kuliččině oběti; spolucestující jí opovrhují a Cornudet pohvizduje Marseillaisu.',
+      },
+    ],
+    deepQuestions: [
+      {
+        q: 'Jak Maupassant v Kuličce zobrazuje „lepší společnost“?',
+        area: 'theme',
+        answer:
+          'Bohatí měšťané, šlechtici a jeptišky se ohánějí ctí, vírou a vlastenectvím, ale jednají sobecky a pokrytecky. Nejprve Kuličkou pohrdají, pak se nechají pohostit jejím jídlem, nakonec ji kvůli vlastnímu pohodlí donutí k oběti a poté jí znovu opovrhují. Kulička je jediná štědrá a vlastenecká postava – vyšší vrstvy jsou morálně pod ní.',
+        points: [
+          { label: 'pokrytectví, sobectví', keywords: ['pokryt', 'sobec'] },
+          { label: 'pohrdání, nevděk', keywords: ['pohrd', 'opovrh', 'nevděk'] },
+          { label: 'nátlak na Kuličku', keywords: ['nátlak', 'přemlouv', 'donut'] },
+          { label: 'Kulička morálně lepší', keywords: ['morál', 'lepší', 'štědr', 'vlasten'] },
+        ],
+      },
+      {
+        q: 'Jakou roli v povídce hraje jídlo?',
+        area: 'composition',
+        answer:
+          'Jídlo rámuje celý příběh. Na první cestě má jídlo jen Kulička a štědře se rozdělí s hladovými spolucestujícími. Na druhé cestě mají jídlo všichni kromě ní a nikdo se nerozdělí. Tento kontrast ukazuje nevděk a sobectví „ctihodné“ společnosti a nezištnost Kuličky.',
+        points: [
+          { label: 'první cesta – Kulička se dělí', keywords: ['první', 'dělí', 'košík', 'rozděl'] },
+          { label: 'druhá cesta – nikdo se nerozdělí', keywords: ['druh', 'nikdo'] },
+          { label: 'kontrast, nevděk', keywords: ['kontrast', 'nevděk', 'sobec'] },
+        ],
+      },
+      {
+        q: 'Proč je Kulička řazena k realismu a naturalismu?',
+        area: 'context',
+        answer:
+          'Zachycuje skutečnou historickou situaci (prusko-francouzská válka, okupace Normandie), postavy z různých vrstev a jejich skutečné jednání bez idealizace. Vypravěč je objektivní, nekomentuje, ironie vyplývá z popsaného chování. Hrdinkou je člověk ze společenské „spodiny“, což je typické pro naturalismus. Povídka vyšla ve sborníku Médanské večery spojeném s É. Zolou.',
+        points: [
+          { label: 'skutečná historická situace', keywords: ['válk', 'histor', 'skuteč', '1870'] },
+          { label: 'objektivní vypravěč, bez idealizace', keywords: ['objektiv', 'idealiz', 'vypravěč'] },
+          { label: 'hrdinka ze spodiny', keywords: ['prostitut', 'spodin', 'nižš'] },
+          { label: 'Médanské večery / Zola', keywords: ['médan', 'zola'] },
+        ],
+      },
+    ],
+  },
 ];

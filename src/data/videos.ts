@@ -34,6 +34,12 @@ export const OTHER_BOOKS: Record<string, EduLink[]> = {
   'sbohem armado': [yt('Yxxfc9yRdJI', 'Ernest Hemingway – Sbohem, armádo! (ukázka audioknihy)', 'Tympanum')],
   'petr a lucie': [yt('sY9mVov0h_g', 'Rozbor díla: Petr a Lucie – Romain Rolland', OU)],
   saturnin: [yt('wOexy-DJfqI', 'Rozbor díla: Saturnin – Zdeněk Jirotka', OU)],
+  'robinson crusoe': [yt('kXbqop1lZvQ', 'Robinson Crusoe, Daniel Defoe – rozbor díla k maturitě', 'Just Simi')],
+  'romeo a julie': [yt('64VXD-omwnE', 'Rozbor díla: Romeo a Julie – William Shakespeare', OU)],
+  revizor: [yt('3VPE42691nQ', 'Rozbor díla: Revizor – Nikolaj Vasiljevič Gogol', OU)],
+  kulicka: [yt('YkOrGmhYTbw', 'Maturitní četba (rozbor): Kulička (Guy de Maupassant)', 'Ja-Ma recenze')],
+  'slezske pisne': [yt('dauEuG4nz8E', 'EP113 Petr Bezruč – Slezské písně', 'Na potítku')],
+  'bajecna leta pod psa': [yt('j8bCIIoztpA', 'Michal Viewegh – Báječná léta pod psa, maturita z literatury', 'Knihy trochu jinak'), yt('MaajoI6ISu8', 'EP188 Michal Viewegh – Báječná léta pod psa', 'Na potítku')],
   promena: [yt('KdroGM_bCPA', 'Rozbor díla: Proměna (F. Kafka)', FF), yt('rk0EG_BaOm8', 'Rozbor díla: Proměna – Franz Kafka', OU)],
 };
 

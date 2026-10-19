@@ -837,4 +837,256 @@ export const BOOKS_CZ20: BookSeed[] = [
       },
     ],
   },
+  {
+    id: 'slezske-pisne',
+    title: 'Slezské písně',
+    author: 'Petr Bezruč',
+    authorLife: '1867–1958',
+    year: '1909 (předtím jako Slezské číslo 1903; časopisecky od 1899)',
+    category: 'cz20',
+    kind: 'lyricko-epika',
+    genre: 'básnická sbírka – sociální balady, lyrické a reflexivní básně',
+    period: 'Česká literatura přelomu 19. a 20. století',
+    movement: 'Česká moderna / generace 90. let – sociální a národní poezie (realismus se symbolismem)',
+    narratorShort: 'lyrický subjekt – „bard“ slezského lidu (Já), v baladách er-forma',
+    settingShort: 'Slezsko a Ostravsko (Beskydy, Ostrava, Těšínsko, Frýdek); přelom 19. a 20. století',
+    theme:
+      'Sociální a národnostní útlak slezského lidu – bída horníků a chudiny, vykořisťování šlechtou a průmyslníky, poněmčování a popolšťování; zároveň osobní samota básníka.',
+    motifs: ['bída a hlad', 'hornictví a uhlí', 'vykořisťování (markýz Gero)', 'poněmčování a popolšťování', 'zánik národa', 'smrt a sebevražda', 'Beskydy a Ostravice', 'vzdor a pomsta', 'samota a vyděděnost', 'bard – mluvčí lidu'],
+    mainIdea:
+      'Básník jako „bard“ slezského lidu žaluje na nespravedlnost: Slezané strádají sociálně (bída, dřina v dolech) i národnostně (ztráta jazyka a škol). Sbírka chce vyburcovat svědomí a hlásí se k odporu a vzdoru.',
+    mainCharacters: [
+      ch('Lyrický subjekt (bard, „Já“)', 'Mluvčí slezského lidu, osamělý, vzdorovitý a hořký; cítí se povolán mluvit za utlačované a ví, že brzy zemře (Kdo na moje místo?).'),
+      ch('Maryčka Magdónova', 'Sirotek – otec zahynul v dole, matka zemřela; stará se o mladší sourozence. Když nese dříví z panského lesa, je chycena a vedena k soudu; z hanby skočí ze skály do Ostravice.'),
+      ch('Kantor Halfar', 'Venkovský učitel, který trval na tom, že bude učit česky; kvůli tomu nedostal stálé místo, žil v bídě a nakonec se oběsil.'),
+    ],
+    sideCharacters: [
+      ch('Markýz Gero', 'Symbol bohatého šlechtice a vykořisťovatele, který bohatne z práce lidu (bývá spojován s arcivévodou Bedřichem).'),
+      ch('Horníci (havíři) a hutníci', 'Kolektivní postava – dřou v dolech pod Ostravou a strádají.'),
+      ch('„Sedmdesát tisíc“ Slezanů', 'Malý národ, který mizí pod tlakem němčiny a polštiny (báseň 70 000).'),
+    ],
+    plot:
+      'Sbírka nemá jednotný děj; skládá se z desítek básní (v dnešní podobě přes 80), které vznikaly a byly doplňovány po celý autorův život. Jádro tvoří sociální balady a básně s příběhem: Maryčka Magdónova (osiřelá dívka nese z panského lesa dříví, je chycena a ze zoufalství skočí ze skály do Ostravice), Kantor Halfar (učitel trvající na češtině nedostane místo a oběsí se), Ostrava (hlas horníka, který celý život kope uhlí a druzí z něj bohatnou), 70 000 (malý národ Slezanů mizí poněmčováním a popolšťováním), Markýz Gero, Den Palackého. Další básně jsou osobní a reflexivní – Kdo na moje místo? (básník se ptá, kdo bude bojovat po jeho smrti), Já, Červený květ – a přírodní i místopisné (Beskydy, obce Slezska).',
+    plotEvents: [
+      'Básně začínají vycházet od roku 1899 v časopise Čas (redaktor Jan Herben), pod pseudonymem.',
+      '1903 vychází výbor Slezské číslo, 1909 knižně Slezské písně; sbírka se pak rozrůstá.',
+      'Maryčka Magdónova: osiřelá dívka je chycena s dřívím z panského lesa a skočí ze skály do Ostravice.',
+      'Kantor Halfar: učitel učící česky nedostane místo a oběsí se.',
+      'Ostrava: horník celý život kope uhlí, na jeho práci bohatnou jiní.',
+      '70 000: malý slezský národ mizí pod tlakem němčiny a polštiny.',
+      'Kdo na moje místo?: básník se ptá, kdo bude mluvit za lid po jeho smrti.',
+    ],
+    setting: 'Slezsko a Ostravsko – Beskydy, řeka Ostravice, Ostrava a doly, Těšínsko, Frýdek a Místek, slezské vesnice.',
+    time: 'Přelom 19. a 20. století (Rakousko-Uhersko); doba průmyslového rozmachu Ostravska.',
+    composition:
+      'Básnická sbírka bez jednotného děje; počet a pořadí básní se v různých vydáních měnily (autor ji doplňoval do konce života, za čtenářský základ bylo vzato vydání z roku 1928). Jádro tvoří básně z let kolem 1899. Střídají se sociální balady, osobní lyrika, reflexivní a přírodní básně.',
+    narrator: 'Lyrický subjekt – často v 1. osobě („Já“) jako bard a mluvčí lidu, který se s utlačovanými ztotožňuje; v baladách er-forma vypravěče, který příběh dramaticky podává a komentuje.',
+    narrativeModes: 'Lyrické vyznání, vyprávění příběhů (balady), apostrofy (oslovení), řečnické otázky, výzvy a žaloby.',
+    speechTypes: 'Monolog lyrického subjektu, přímá řeč postav v baladách, oslovení (apostrofa), dialogické prvky.',
+    verse: 'Převážně vázaný verš s rýmem, ale rytmicky nepravidelný, úsečný a dynamický; časté refrény a opakování (např. oslovení Maryčky). Básně jsou velmi zvukomalebné – zhudebnil je L. Janáček (Maryčka Magdónova, Kantor Halfar, 70 000) i J. Nohavica.',
+    language: 'Spisovná čeština s prvky slezského (lašského) nářečí, polštiny a němčiny; místní jména; drsná, expresivní slova; krátké, úderné verše.',
+    tropes: 'Apostrofa (oslovení), řečnické otázky, hyperbola, kontrast (bohatí × chudí), metafory, symboly (uhlí, krev, markýz Gero), opakování a refrén, gradace.',
+    authorContext:
+      'Petr Bezruč – pseudonym Vladimíra Vaška, poštovního úředníka z Opavy, který pracoval i v Místku (1891–1893) a pak v Brně. Totožnost dlouho tajil. Slezské písně jsou jeho jediná sbírka. Za 1. světové války byl vězněn kvůli podezření z autorství protirakouských básní. Jeho autorství některých básní bylo zpochybňováno (O. B. Petr), kritická edice z roku 2014 ho však potvrzuje jako jediného autora.',
+    historicalContext:
+      'Konec 19. století v Rakousku-Uhersku – rychlá industrializace Ostravska (uhlí, hutě), bída dělníků, národnostní tlak (poněmčování, popolšťování, rušení českých škol). Generace 90. let a Česká moderna: J. S. Machar, A. Sova, O. Březina; buřiči F. Gellner, F. Šrámek, V. Dyk. Navazuje na baladu K. J. Erbena, ale viníkem není nadpřirozeno, ale společnost.',
+    otherWorks: ['Stužkonoska modrá (próza)'],
+    interpretation:
+      'Bezruč proměnil baladu ze záhrobních trestů (Erben) v sociální žalobu – viníkem je bída, šlechta, úřady a národnostní útlak. Lyrický subjekt je zároveň kolektivní hlas lidu i osamělý vyděděnec. Sbírka je výzvou k probuzení svědomí a k odporu; dodnes je spojena s identitou Slezska a Ostravska.',
+    examTips:
+      'Znát pseudonym (Vladimír Vašek), časopis Čas (J. Herben), Slezské číslo 1903 / Slezské písně 1909, hlavní básně (Maryčka Magdónova, Kantor Halfar, Ostrava, 70 000, Kdo na moje místo?), sociální a národní téma, bard jako lyrický subjekt, srovnání sociální balady s Erbenovou Kyticí.',
+    quick: [
+      'P. Bezruč (Vladimír Vašek); jediná sbírka; 1909 (Slezské číslo 1903).',
+      'Sociální a národnostní útlak Slezska; lyrický subjekt jako bard lidu.',
+      'Maryčka Magdónova – sirotek skočí ze skály do Ostravice.',
+      'Kantor Halfar – učitel učící česky se oběsí.',
+      'Ostrava, 70 000, Markýz Gero, Kdo na moje místo?',
+      'Apostrofy, řečnické otázky, nářečí, refrény; zhudebnil Janáček.',
+    ],
+    clues: [
+      'Sbírka, v níž osiřelá dívka nese dříví z panského lesa a z hanby skočí ze skály do řeky Ostravice.',
+      'Básnická sbírka poštovního úředníka skrývajícího se za pseudonymem, která žaluje na bídu horníků a poněmčování Slezska.',
+      'Sbírka s básní o venkovském učiteli, který trval na češtině, nedostal místo a nakonec se oběsil.',
+    ],
+    scenes: [
+      {
+        scene: 'Dívka, které zemřeli oba rodiče, nese z panského lesa náruč dříví pro hladové sourozence; četník ji chytí a vede k soudu.',
+        context: 'Báseň Maryčka Magdónova – nejznámější sociální balada sbírky; Maryčka cestou z hanby skočí do Ostravice.',
+      },
+      {
+        scene: 'Horník mluví o tom, že celý život kope v dolech uhlí, zatímco jiní na jeho práci bohatnou.',
+        context: 'Báseň Ostrava – hlas vykořisťovaného havíře a obžaloba průmyslníků a šlechty.',
+      },
+      {
+        scene: 'Básník se ptá, kdo zaujme jeho místo a bude mluvit za lid, až on odejde.',
+        context: 'Báseň Kdo na moje místo? – osobní lyrika, vědomí samoty a nemoci, otázka pokračování boje.',
+      },
+    ],
+    deepQuestions: [
+      {
+        q: 'Čím se Bezručova sociální balada liší od balady K. J. Erbena?',
+        area: 'genre',
+        answer:
+          'U Erbena (Kytice) trestá člověka za provinění nadpřirozená síla nebo osud. U Bezruče je viníkem společnost – bída, šlechta, úřady, průmyslníci a národnostní útlak. Postavy (Maryčka, Halfar) nejsou vinné, jsou oběťmi. Balada se tak mění v sociální žalobu a výzvu k nápravě.',
+        points: [
+          { label: 'Erben – nadpřirozeno, trest za vinu', keywords: ['erben', 'nadpřiroz', 'kytic'] },
+          { label: 'Bezruč – viníkem společnost', keywords: ['společn', 'bída', 'šlecht', 'útlak'] },
+          { label: 'postavy jako oběti', keywords: ['oběť', 'nevin'] },
+          { label: 'sociální žaloba', keywords: ['žalob', 'sociál', 'kritik'] },
+        ],
+      },
+      {
+        q: 'Kdo je lyrickým subjektem Slezských písní?',
+        area: 'characters',
+        answer:
+          'Často mluví v 1. osobě „Já“ – bard, mluvčí slezského lidu, který se ztotožňuje s utlačovanými a žaluje za ně. Je osamělý, hořký, vzdorovitý a vyděděný, ví o své nemoci a blízké smrti (Kdo na moje místo?). Je zároveň kolektivním hlasem lidu i osobní postavou básníka.',
+        points: [
+          { label: 'bard / mluvčí lidu', keywords: ['bard', 'mluvčí', 'lid'] },
+          { label: 'osamělý, vzdorovitý', keywords: ['osaměl', 'vzdor', 'samot'] },
+          { label: 'Já – 1. osoba', keywords: ['já', '1. osob', 'první osob'] },
+        ],
+      },
+      {
+        q: 'Jaký útlak Slezské písně zachycují?',
+        area: 'theme',
+        answer:
+          'Sociální – bída horníků, hutníků a chudiny, vykořisťování šlechtou (markýz Gero) a průmyslníky (Ostrava, Maryčka Magdónova). Národnostní – poněmčování a popolšťování, rušení českých škol a mizení malého národa (70 000, Kantor Halfar).',
+        points: [
+          { label: 'sociální – bída, horníci', keywords: ['bída', 'horník', 'havíř', 'chudin', 'sociál'] },
+          { label: 'vykořisťování (Gero)', keywords: ['vykořis', 'gero', 'šlecht'] },
+          { label: 'národnostní – poněmčování, popolšťování', keywords: ['poněmč', 'popolš', 'národ', 'škol'] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'bajecna-leta-pod-psa',
+    title: 'Báječná léta pod psa',
+    author: 'Michal Viewegh',
+    authorLife: '1962',
+    year: '1992',
+    category: 'cz20',
+    kind: 'epika',
+    genre: 'humoristický a satirický rodinný román s autobiografickými prvky (rodinná kronika)',
+    period: 'Česká literatura po roce 1989',
+    movement: 'Polistopadová próza; postmoderní prvky (hra s psaním románu)',
+    narratorShort: 'převážně er-forma (vypravěč blízký Kvidovi), prolínají se rozhovory s redaktorem',
+    settingShort: 'Praha a městečko Sázava; od roku 1962 přes normalizaci do počátku 90. let',
+    theme:
+      'Dětství a dospívání chytrého chlapce Kvida v obyčejné rodině za normalizace a otcovy kompromisy s komunistickým režimem, které ho psychicky zlomí.',
+    motifs: ['rodina', 'normalizace a komunismus', 'kompromisy a strach', 'kariéra a straničtí funkcionáři', 'psaní a literatura', 'láska (Jaruška)', 'dospívání', 'deprese a rakev', 'babička-turistka', 'cenzura', 'pád komunismu'],
+    mainIdea:
+      'Román je „převážně veselým ohlédnutím za převážně neveselou dobou“: s humorem a nadsázkou ukazuje, jak normalizace deformovala obyčejné lidi, kteří se snažili přežít bez členství ve straně, a jak absurdní byl tehdejší svět.',
+    mainCharacters: [
+      ch('Kvido', 'Autobiografická postava (autorovo alter ego). Nadprůměrně inteligentní, neohrabaný chlapec, který už jako dítě šokuje dospělé svými řečmi a čte dřív, než jde do školy. Miluje Jarušku a literaturu; zanechá studia ekonomie, pracuje jako vrátný a píše román o své rodině.'),
+      ch('Kvidův otec', 'Vzdělaný ekonom, pracovitý a neprůbojný, nechce vstoupit do KSČ. Kvůli bytu a kariéře dělá ústupky; po návštěvě u disidenta Pavla Kohouta přijde o místo ve sklárnách, skončí v závodní stráži, upadne do deprese a v kůlně si vyrábí rakev. Uzdraví se až po roce 1989.'),
+      ch('Kvidova matka', 'Právnička se vztahem k divadlu, energická a milující; drží rodinu pohromadě.'),
+    ],
+    sideCharacters: [
+      ch('Jaruška', 'Kvidova spolužačka, kamarádka a později žena; mají spolu dceru.'),
+      ch('Paco', 'Kvidův mladší bratr, průměrný žák, „kovboj“, který spí pod širákem.'),
+      ch('Babička Líba', 'Matčina matka, posedlá zdravím a cestováním, šetří na jídle, aby mohla jezdit po světě; posílá pohlednice s veršem.'),
+      ch('Ing. Zvára', 'Otcův kamarád ze studií, který vstoupil do strany a stal se jeho nadřízeným.'),
+      ch('Šperk', 'Mocný stranický funkcionář, který rodinu ovládá; po revoluci se z něj stane úspěšný podnikatel.'),
+      ch('Pavel Kohout', 'Skutečný spisovatel a chartista, matčin známý; návštěva u něj otci zničí kariéru.'),
+      ch('Redaktor', 'Nakladatelský redaktor, se kterým Kvido konzultuje svůj rukopis a který mu radí, co je za normalizace „vydatelné“.'),
+    ],
+    plot:
+      'Kvido se narodí roku 1962. Po srpnu 1968 se rodina z Prahy stěhuje do Sázavy, kde otec dostane místo ve sklárnách; dlouho bydlí v nevytopitelném domě s prosklenou terasou. Otec odmítá vstoupit do strany, ale aby rodina získala byt a on postup, dělá drobné ústupky (věší vlaječky, hraje fotbal se soudruhy, koupí psa), a Kvido recituje komunistické básně, aniž jim rozumí. Narodí se bratr Paco, k rodině se přidá babička Líba. Otec dostane místo, které mu umožňuje služební cesty do ciziny, a na čas ožije (flirt s Chorvatkou Mirjanou). Když se ale ukáže, že rodina navštívila disidenta Pavla Kohouta, otec o místo přijde a skončí v závodní stráži jako vrátný. Upadá do deprese, trpí strachem a paranoiou, zavírá se v kůlně a vyrábí si vlastní rakev. Kvido zatím dospívá, zamiluje se do Jarušky, nedostuduje ekonomii, stane se vrátným a píše. Otci nepomáhá ani psycholog; matka navrhne, aby Kvido s Jaruškou měli dítě – narodí se dcera, ale ani ta otce nevyléčí. Sílu mu dodá až perestrojka a pád komunismu. Kvido píše román o své rodině, který mu redaktor za normalizace odmítá (málo dělnických postav, příliš kritiky); vyjde až po roce 1989. V epilogu se stručně vypráví, co se s postavami stalo po listopadu 1989 (např. Šperk zbohatne jako podnikatel).',
+    plotEvents: [
+      'Kvido se narodí roku 1962; po roce 1968 se rodina stěhuje do Sázavy.',
+      'Otec odmítá vstoupit do strany, ale dělá drobné ústupky kvůli bytu a postupu.',
+      'Narodí se Paco, přistěhuje se babička Líba.',
+      'Otec díky práci ve sklárnách jezdí na služební cesty do ciziny.',
+      'Po návštěvě u Pavla Kohouta otec přijde o místo a skončí jako vrátný.',
+      'Otec upadne do deprese a v kůlně si vyrábí rakev.',
+      'Kvido nedostuduje, je vrátný, píše a s Jaruškou má dceru.',
+      'Redaktor Kvidovi vrací rukopis; román vyjde až po roce 1989.',
+      'Po pádu komunismu se otec uzdraví; epilog o osudech postav.',
+    ],
+    setting: 'Praha a hlavně městečko Sázava (sklárny, dům rodiny, kůlna); zmínky o cizině (služební cesty).',
+    time: 'Od narození Kvida 1962 přes srpen 1968 a normalizaci 70. a 80. let až po listopad 1989 a začátek 90. let (epilog do roku 1991).',
+    composition:
+      'Sedmnáct číslovaných kapitol a krátký epilog. Převážně chronologické vyprávění rodinné kroniky, přerušované vstupy „ze současnosti“ – rozhovory Kvida s redaktorem o jeho rukopisu (román o vzniku románu). Vložené epizody (babička Líba, Kvidovo dospívání), úryvky básní, deníkové záznamy, části psané jako divadelní scénář. Epilog shrnuje osudy postav formou publicistického výčtu.',
+    narrator: 'Převážně er-forma – o Kvidovi se mluví ve třetí osobě, ale vypravěč mu je velmi blízký (autobiografické prvky); prolínají se dialogy s redaktorem, deníkové zápisy a komentáře, místy ich-forma.',
+    narrativeModes: 'Vyprávění, krátké epizody a anekdoty, dialogy, komentáře, scénářové pasáže, deníkové záznamy.',
+    speechTypes: 'Pásmo vypravěče, hojná přímá řeč (vtipné dialogy), polopřímá řeč, citace (básně, dobové fráze).',
+    verse: '',
+    language: 'Živý, svižný jazyk – spisovný i hovorový, slang, vulgarismy, cizí slova (angličtina, němčina), dobové komunistické fráze; ironie, satira, humor, nadsázka, absurdní situace; časté literární odkazy a citáty.',
+    tropes: 'Ironie, satira, nadsázka (hyperbola), groteska, situační komika, kontrast (veselý tón × smutná doba), parodie dobových frází.',
+    authorContext:
+      'Michal Viewegh – český prozaik a fejetonista, nejprodávanější autor 90. let. Vystudoval na FF UK češtinu a pedagogiku, učil na základní škole, pak byl redaktorem v nakladatelství. Za Báječná léta pod psa dostal Cenu Jiřího Ortena (1993). Další díla: Názory na vraždu, Výchova dívek v Čechách, Účastníci zájezdu, Román pro ženy, Povídky o manželství a o sexu, Nápady laskavého čtenáře (parodie).',
+    historicalContext:
+      'Pražské jaro a srpen 1968, normalizace (70.–80. léta) – prověrky, kariéra podmíněná členstvím v KSČ, cenzura, Charta 77; perestrojka v SSSR, sametová revoluce 1989. Po roce 1989 vychází dříve zakázaná literatura a vznikají soukromá nakladatelství. Další autoři doby: P. Šabach (Hovno hoří), J. Topol (Sestra), I. Klíma, L. Vaculík. Román zfilmoval Petr Nikolaev (1997).',
+    otherWorks: ['Názory na vraždu', 'Výchova dívek v Čechách', 'Účastníci zájezdu', 'Román pro ženy', 'Nápady laskavého čtenáře'],
+    interpretation:
+      'Báječná léta „pod psa“ – léta mládí v mizerné době. Román ukazuje normalizaci zevnitř obyčejné rodiny: strach, kompromisy a ponižování zlomí slušného, schopného otce, zatímco přizpůsobiví kariéristé (Zvára, Šperk) prosperují – i po revoluci. Humor a ironie jsou obranou proti absurditě doby. Rozhovory s redaktorem ukazují, jak cenzura deformovala literaturu.',
+    examTips:
+      'Znát Kvida (autorovo alter ego), otce a jeho kompromisy, návštěvu u Pavla Kohouta, rakev v kůlně, babičku Líbu, Jarušku, rozhovory s redaktorem a epilog. Vysvětlit název. Normalizace jako kontext, Cena J. Ortena, film 1997. Srovnání s Šabachem nebo s otcem v Smrti krásných srnců.',
+    quick: [
+      'M. Viewegh, 1992; humoristický rodinný román s autobiografickými prvky; Cena J. Ortena.',
+      'Praha a Sázava, 1962 – normalizace – 1989.',
+      'Chytrý Kvido (alter ego autora) a jeho rodina; otec odmítá vstoupit do strany.',
+      'Po návštěvě u disidenta P. Kohouta otec přijde o místo, upadne do deprese, vyrábí si rakev.',
+      'Kvido píše román o rodině, redaktor ho odmítá; vyjde až po roce 1989.',
+      '17 kapitol + epilog; ironie, satira, „veselé ohlédnutí za neveselou dobou“.',
+    ],
+    clues: [
+      'Román, ve kterém si otec, zlomený normalizačním ponižováním, vyrábí v kůlně vlastní rakev.',
+      'Kniha o chytrém chlapci Kvidovi, jehož rodina přijde o výhody po návštěvě u disidenta Pavla Kohouta.',
+      'Román, jehož hrdina konzultuje s nakladatelským redaktorem rukopis o své rodině, který za normalizace nemůže vyjít.',
+    ],
+    scenes: [
+      {
+        scene: 'Malý chlapec recituje komunistické básničky, jejichž obsahu vůbec nerozumí, a pomáhá tím pověsti své rodiny.',
+        context: 'Dětství v Sázavě – rodina se drobnými ústupky snaží získat přízeň režimu, aby otec dostal byt a postup.',
+      },
+      {
+        scene: 'Muž se zavírá v kůlně, hobluje prkna a z nich si pečlivě vyrábí rakev; rodina neví, jak mu pomoci.',
+        context: 'Otcova deprese po ztrátě místa – následek návštěvy u Pavla Kohouta a let ponižování.',
+      },
+      {
+        scene: 'Redaktor mladému autorovi vysvětluje, že v jeho rukopisu chybí kladná postava dělníka a je v něm příliš mnoho kritiky.',
+        context: 'Vložené rozhovory Kvida s redaktorem – román o rodině nemůže za normalizace vyjít.',
+      },
+    ],
+    deepQuestions: [
+      {
+        q: 'Jak se v Báječných létech pod psa projevuje normalizace?',
+        area: 'context',
+        answer:
+          'Kariéra a byt závisí na postoji ke straně – otec, který odmítá vstoupit do KSČ, musí dělat ústupky, a po návštěvě u chartisty Kohouta je degradován na vrátného. Postupují přizpůsobiví (Zvára, Šperk). Rodina žije ve strachu a pod dohledem, otec se psychicky zhroutí. Cenzuru ukazují rozhovory s redaktorem, který odmítá Kvidův rukopis.',
+        points: [
+          { label: 'kariéra závislá na straně', keywords: ['stran', 'ksč', 'kariér', 'členst'] },
+          { label: 'kompromisy, strach', keywords: ['kompromis', 'ústup', 'strach'] },
+          { label: 'Kohout, degradace otce', keywords: ['kohout', 'vrátn', 'místo'] },
+          { label: 'cenzura (redaktor)', keywords: ['cenzur', 'redaktor', 'rukopis'] },
+        ],
+      },
+      {
+        q: 'Jaká je kompozice románu a co znamenají rozhovory s redaktorem?',
+        area: 'composition',
+        answer:
+          'Román má 17 kapitol a epilog. Hlavní linie je rodinná kronika, kterou přerušují rozhovory Kvida s nakladatelským redaktorem o jeho rukopisu. Vzniká tak „román o psaní románu“ – postmoderní hra. Rozhovory ukazují, co za normalizace nesmělo vyjít, a zároveň komentují samotný text. Epilog stručně shrnuje osudy postav po roce 1989.',
+        points: [
+          { label: '17 kapitol a epilog', keywords: ['17', 'sedmnáct', 'epilog'] },
+          { label: 'dvě roviny – kronika × redaktor', keywords: ['rovin', 'redaktor', 'kronik'] },
+          { label: 'román o psaní románu', keywords: ['psaní', 'román o', 'postmodern'] },
+          { label: 'cenzura', keywords: ['cenzur', 'vyjít', 'normaliz'] },
+        ],
+      },
+      {
+        q: 'Jak je v románu vykreslen Kvidův otec?',
+        area: 'characters',
+        answer:
+          'Je to vzdělaný, schopný a slušný ekonom, který nechce vstoupit do strany. Je však neprůbojný a ze strachu o rodinu dělá ústupky. Po ztrátě místa se z něj stane vrátný, upadá do deprese a paranoie a vyrábí si rakev. Je tragikomickou obětí doby; uzdraví se až po pádu komunismu.',
+        points: [
+          { label: 'vzdělaný, slušný, nechce do strany', keywords: ['vzděl', 'sluš', 'stran', 'ekonom'] },
+          { label: 'kompromisy, neprůbojnost', keywords: ['ústup', 'kompromis', 'neprůboj', 'strach'] },
+          { label: 'deprese, rakev', keywords: ['depres', 'rakev', 'paranoi'] },
+          { label: 'uzdraví se po 1989', keywords: ['uzdrav', '1989', 'revoluc', 'perestroj'] },
+        ],
+      },
+    ],
+  },
 ];
