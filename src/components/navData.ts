@@ -3,6 +3,7 @@ import {
   BookOpen,
   Bot,
   Calculator,
+  Printer,
   CalendarDays,
   CircleUserRound,
   ClipboardList,
@@ -176,6 +177,7 @@ export const NAV_BOTTOM: NavItem[] = [
   { to: '/souteze', label: 'Soutěže', icon: Swords },
   { to: '/profil', label: 'Můj profil', icon: CircleUserRound },
   { to: '/plan', label: 'Studijní plán', icon: CalendarDays },
+  { to: '/tahak', label: 'Taháky k tisku', icon: Printer },
   { to: '/ai', label: 'AI učitel', icon: Bot },
   { to: '/nastaveni', label: 'Nastavení', icon: Settings },
 ];

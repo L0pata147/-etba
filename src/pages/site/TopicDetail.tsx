@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, Eye, EyeOff, Mic, Shuffle } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Eye, EyeOff, Mic, Printer, Shuffle } from 'lucide-react';
 import { useStore } from '../../store';
 import { ALL_TOPIC_MAP, SUBJECTS, SUBJECT_TOPICS } from '../../data/subjects';
 import { areaMastery, topicProgress } from '../../lib/progress';
@@ -88,6 +88,9 @@ function TopicInner({ id }: { id?: string }) {
               Simulace s tímto tématem
             </Button>
           )}
+          <Button size="sm" variant="ghost" icon={<Printer size={16} />} to={`/tahak?t=${t.id}`}>
+            Tahák
+          </Button>
         </div>
       </Card>
 

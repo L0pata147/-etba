@@ -149,9 +149,9 @@ export function Layout({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen print:min-h-0">
       {/* Sidebar (desktop) */}
-      <aside className={cx('fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200/80 bg-white/75 px-3 py-5 backdrop-blur dark:border-white/[0.06] dark:bg-ink/80', !inSession && 'lg:flex')}>
+      <aside className={cx('print:hidden fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200/80 bg-white/75 px-3 py-5 backdrop-blur dark:border-white/[0.06] dark:bg-ink/80', !inSession && 'lg:flex')}>
         <Brand />
         <div className="mt-6 flex-1 overflow-y-auto">{navList}</div>
         <NavLink to="/profil" className="mt-4 block rounded-xl bg-paper p-3 text-sm ring-1 ring-slate-200/70 transition hover:ring-brand-500/50 dark:bg-white/[0.04] dark:ring-white/[0.06]">
@@ -179,7 +179,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Top bar (mobile) */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/85 px-4 py-3 backdrop-blur dark:border-white/[0.06] dark:bg-ink/85 lg:hidden">
+      <header className="print:hidden sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/85 px-4 py-3 backdrop-blur dark:border-white/[0.06] dark:bg-ink/85 lg:hidden">
         <Brand compact />
         <div className="flex items-center gap-1">
           <span className="mr-1 text-sm font-semibold text-slate-600 dark:text-slate-300">🔥 {st}</span>
@@ -213,18 +213,20 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <main className={cx('mx-auto max-w-6xl px-4 pt-5 sm:px-6 lg:px-10 lg:pt-8', inSession ? 'pb-10 lg:pt-12' : 'pb-28 lg:ml-64 lg:pb-12')}>
-        <StorageWarning />
-        <UnlockWatcher paused={inSession} />
-        {!inSession && <UpdateBanner />}
-        <div key={loc.pathname} className="animate-fade-up">
+      <main className={cx('mx-auto max-w-6xl px-4 pt-5 sm:px-6 lg:px-10 lg:pt-8 print:m-0 print:max-w-none print:p-0', inSession ? 'pb-10 lg:pt-12' : 'pb-28 lg:ml-64 lg:pb-12')}>
+        <div className="print:hidden">
+          <StorageWarning />
+          <UnlockWatcher paused={inSession} />
+          {!inSession && <UpdateBanner />}
+        </div>
+        <div key={loc.pathname} className="animate-fade-up print:animate-none">
           {children}
         </div>
       </main>
 
       {/* Bottom nav (mobile) */}
       {!inSession && (
-        <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/80 bg-white/95 backdrop-blur dark:border-white/[0.06] dark:bg-ink/95 lg:hidden">
+        <nav className="print:hidden pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/80 bg-white/95 backdrop-blur dark:border-white/[0.06] dark:bg-ink/95 lg:hidden">
           <div className="grid grid-cols-5">
             {MOBILE.map((n) => (
               <NavLink
@@ -251,7 +253,7 @@ export function Layout({ children }: { children: ReactNode }) {
       )}
 
       {/* Toasts */}
-      <div className="pointer-events-none fixed inset-x-0 top-3 z-[60] flex flex-col items-center gap-2 px-4">
+      <div className="print:hidden pointer-events-none fixed inset-x-0 top-3 z-[60] flex flex-col items-center gap-2 px-4">
         {toasts.map((t) => (
           <button
             key={t.id}

@@ -12,6 +12,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.print.PrintAttributes;
+import android.print.PrintManager;
 import android.provider.MediaStore;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
@@ -153,7 +155,21 @@ public class MainActivity extends Activity {
     private class Bridge {
         @JavascriptInterface
         public int version() {
-            return 1;
+            return 2;
+        }
+
+        /** Systémový tisk aktuální stránky (lze vybrat i „Uložit jako PDF“) */
+        @JavascriptInterface
+        public void print(final String title) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    PrintManager pm = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+                    if (pm == null || web == null) return;
+                    PrintAttributes attrs = new PrintAttributes.Builder().setMediaSize(PrintAttributes.MediaSize.ISO_A4).build();
+                    pm.print(title, web.createPrintDocumentAdapter(title), attrs);
+                }
+            });
         }
 
         @JavascriptInterface

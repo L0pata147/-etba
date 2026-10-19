@@ -1,0 +1,41 @@
+import { describe, expect, it } from 'vitest';
+import { BOOK_DATABASE, seedToBook } from '../data/books';
+import { ALL_TOPICS } from '../data/subjects';
+import { bookSheet, firstSentences, topicSheet } from './cheatsheet';
+
+describe('Taháky k tisku', () => {
+  it('věty se nedělí na iniciálách a zkratkách', () => {
+    expect(firstSentences('Převyprávěl to J. V. Pleva. Druhá věta.', 1)).toBe('Převyprávěl to J. V. Pleva.');
+    expect(firstSentences('Je to tzv. robinzonáda. Další.', 1)).toBe('Je to tzv. robinzonáda.');
+    expect(firstSentences('Jedna! Dvě? Tři.', 2)).toBe('Jedna! Dvě?');
+    expect(firstSentences('Bez tečky na konci', 2)).toBe('Bez tečky na konci');
+    expect(firstSentences('', 2)).toBe('');
+  });
+
+  it('každá kniha z databáze má tahák s hlavními částmi', () => {
+    for (const seed of BOOK_DATABASE) {
+      const s = bookSheet(seedToBook(seed));
+      const titles = s.sections.map((x) => x.title);
+      for (const t of ['Téma', 'Hlavní myšlenka', 'Kompozice', 'Hlavní postavy', 'Děj v bodech']) expect(titles, `${seed.id}: ${t}`).toContain(t);
+      expect(s.subtitle, seed.id).toContain(seed.author);
+    }
+  });
+
+  it('poznámky jen na přání a prázdné části se vynechají', () => {
+    const b = seedToBook(BOOK_DATABASE[0], { notes: 'moje' });
+    expect(bookSheet(b).sections.some((x) => x.title === 'Moje poznámky')).toBe(false);
+    expect(bookSheet(b, true).sections.find((x) => x.title === 'Moje poznámky')?.text).toBe('moje');
+    expect(bookSheet({ ...b, verse: '' }).sections.some((x) => x.title === 'Verš')).toBe(false);
+  });
+
+  it('každé téma IT předmětů má tahák s osnovou a pojmy', () => {
+    for (const t of ALL_TOPICS) {
+      const s = topicSheet(t);
+      expect(s.sections.length, t.id).toBeGreaterThanOrEqual(2);
+      expect(
+        s.sections.some((x) => x.pairs?.length),
+        t.id,
+      ).toBe(t.terms.length > 0);
+    }
+  });
+});

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { CheckCircle2, ChevronDown, Circle, ClipboardCheck, Compass, Dumbbell, GraduationCap, Info, Landmark, Lightbulb, MessageSquareQuote, PenLine, Pencil, ScrollText, Star, UserRound, Users, type LucideIcon } from 'lucide-react';
+import { CheckCircle2, ChevronDown, Circle, ClipboardCheck, Compass, Dumbbell, GraduationCap, Info, Landmark, Lightbulb, MessageSquareQuote, PenLine, Pencil, Printer, ScrollText, Star, UserRound, Users, type LucideIcon } from 'lucide-react';
 import type { AreaId, Book } from '../types';
 import { useStore } from '../store';
 import { AREA_MAP, CATEGORIES, EXAM_AREAS, KINDS } from '../data/osnova';
@@ -92,6 +92,9 @@ export function BookDetail() {
           </Button>
           <Button variant="secondary" icon={<GraduationCap size={18} />} to={`/simulace/${book.id}`}>
             Simulace ústní zkoušky
+          </Button>
+          <Button variant="ghost" icon={<Printer size={17} />} to={`/tahak?k=${book.id}`}>
+            Tahák
           </Button>
           <Button variant="ghost" icon={<Pencil size={17} />} to={`/knihy/${book.id}/upravit`}>
             Upravit

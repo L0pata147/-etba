@@ -36,6 +36,7 @@ import { Group } from './pages/Group';
 import { ProfilePage } from './pages/Profile';
 import { Contests } from './pages/Contests';
 import { ContestPlay } from './pages/ContestPlay';
+import { CheatSheetPage } from './pages/CheatSheet';
 
 const Stats = lazy(() => import('./pages/Stats').then((m) => ({ default: m.Stats })));
 
@@ -77,6 +78,7 @@ export function App() {
         <Route path="/sloh" element={<WritingPage />} />
         <Route path="/dril" element={<Drill />} />
         <Route path="/hledat" element={<SearchPage />} />
+        <Route path="/tahak" element={<CheatSheetPage />} />
         <Route path="/terminal" element={<TerminalPage />} />
         <Route path="/otazka-dne" element={<QuestionOfDay />} />
         <Route path="/zkousky" element={<Exams />} />

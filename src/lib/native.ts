@@ -17,6 +17,8 @@ interface AndroidBridge {
   saveFile(name: string, content: string): string;
   /** od verze 1.26: uloží obrázek (base64 PNG) do Stažených souborů */
   saveImage?(name: string, base64: string): string;
+  /** od verze 1.37: otevře systémový tisk (i uložení do PDF) aktuální stránky */
+  print?(title: string): void;
 }
 
 export function androidBridge(): AndroidBridge | null {
@@ -81,4 +83,23 @@ export function saveImageNative(name: string, base64: string): string | null {
   const b = androidBridge();
   if (!b || typeof b.saveImage !== 'function') return null;
   return b.saveImage(name, base64) || null;
+}
+
+/** Tisk / uložení do PDF: v Android aplikaci přes systémový tisk, jinak tisk prohlížeče. Vrátí false, když tisk nejde otevřít. */
+export function printPage(title: string): boolean {
+  const b = androidBridge();
+  if (b && typeof b.print === 'function') {
+    b.print(title);
+    return true;
+  }
+  if (b) return false; // starší Android aplikace tisk neumí
+  // název dokumentu = výchozí název PDF souboru
+  const prev = document.title;
+  document.title = title;
+  try {
+    window.print();
+  } finally {
+    setTimeout(() => (document.title = prev), 1000);
+  }
+  return true;
 }
