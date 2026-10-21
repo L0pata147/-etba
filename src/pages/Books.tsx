@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CheckCircle2, Circle, Database, Pencil, Plus, Search, Star, Trash2 } from 'lucide-react';
+import { ArrowLeftRight, CheckCircle2, Circle, Database, Pencil, Plus, Search, Star, Trash2 } from 'lucide-react';
 import type { Book, CategoryId, LiteraryKind } from '../types';
 import { useStore } from '../store';
 import { CATEGORIES, CATEGORY_ORDER, KINDS } from '../data/osnova';
@@ -12,7 +12,7 @@ import { Button, Card, EmptyState, Modal, PageHeader, ProgressBar, Segmented, Ta
 type Status = 'all' | 'learned' | 'todo' | 'favorite' | 'review';
 
 export function Books() {
-  const { data, updateBook, deleteBook, addBook, toast } = useStore();
+  const { data, updateBook, deleteBook, addBook, replaceBook, toast } = useStore();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [cat, setCat] = useState<CategoryId | 'all'>('all');
@@ -21,6 +21,7 @@ export function Books() {
   const [sort, setSort] = useState<'list' | 'progress' | 'title'>('list');
   const [toDelete, setToDelete] = useState<Book | null>(null);
   const [dbOpen, setDbOpen] = useState(false);
+  const [toSwap, setToSwap] = useState<Book | null>(null);
 
   const filtered = useMemo(() => {
     const nq = normalize(query);
@@ -123,6 +124,7 @@ export function Books() {
                     onFavorite={() => updateBook(b.id, { favorite: !b.favorite })}
                     onLearned={() => updateBook(b.id, { learned: !b.learned })}
                     onDelete={() => setToDelete(b)}
+                    onSwap={() => setToSwap(b)}
                   />
                 ))}
               </div>
@@ -156,6 +158,22 @@ export function Books() {
       </Modal>
 
       <DatabaseModal
+        open={!!toSwap}
+        onClose={() => setToSwap(null)}
+        swap={toSwap}
+        existing={new Set(data.books.map((b) => b.templateId ?? b.id))}
+        onAdd={(id) => {
+          const old = toSwap;
+          if (!old) return;
+          const seed = BOOK_DATABASE.find((s) => s.id === id)!;
+          const taken = data.books.some((b) => b.id === seed.id && b.id !== old.id);
+          replaceBook(old.id, seedToBook(seed, taken ? { id: `${seed.id}-${Date.now().toString(36)}` } : {}));
+          toast(`${old.title} → ${seed.title}`, 'success');
+          setToSwap(null);
+        }}
+      />
+
+      <DatabaseModal
         open={dbOpen}
         onClose={() => setDbOpen(false)}
         existing={new Set(data.books.map((b) => b.templateId ?? b.id))}
@@ -181,6 +199,7 @@ function BookCard({
   onFavorite,
   onLearned,
   onDelete,
+  onSwap,
 }: {
   book: Book;
   progress: number;
@@ -190,6 +209,7 @@ function BookCard({
   onFavorite: () => void;
   onLearned: () => void;
   onDelete: () => void;
+  onSwap: () => void;
 }) {
   return (
     <Card className="group flex flex-col p-4 transition hover:shadow-md">
@@ -226,6 +246,9 @@ function BookCard({
         <Link to={`/knihy/${b.id}/upravit`} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Upravit">
           <Pencil size={17} />
         </Link>
+        <IconBtn label="Vyměnit za jinou knihu" onClick={onSwap}>
+          <ArrowLeftRight size={17} />
+        </IconBtn>
         <IconBtn label="Smazat" onClick={onDelete}>
           <Trash2 size={17} />
         </IconBtn>
@@ -242,13 +265,28 @@ function IconBtn({ children, label, onClick }: { children: ReactNode; label: str
   );
 }
 
-export function DatabaseModal({ open, onClose, existing, onAdd }: { open: boolean; onClose: () => void; existing: Set<string>; onAdd: (id: string, edit: boolean) => void }) {
+export function DatabaseModal({
+  open,
+  onClose,
+  existing,
+  onAdd,
+  swap,
+}: {
+  open: boolean;
+  onClose: () => void;
+  existing: Set<string>;
+  onAdd: (id: string, edit: boolean) => void;
+  /** Výměna: kniha, která se nahradí vybranou */
+  swap?: Book | null;
+}) {
   const [q, setQ] = useState('');
   const list = BOOK_DATABASE.filter((b) => !q || normalize(`${b.title} ${b.author}`).includes(normalize(q)));
   return (
-    <Modal open={open} onClose={onClose} title="Přidat knihu z databáze" wide>
+    <Modal open={open} onClose={onClose} title={swap ? `Vyměnit: ${swap.title}` : 'Přidat knihu z databáze'} wide>
       <p className="mb-3 text-sm text-slate-500">
-        Předvyplněné informace o dílech. Po přidání je můžeš libovolně upravit. Údaje vždy ověř se svým učitelem nebo čítankou.
+        {swap
+          ? 'Vyber knihu, která nahradí tuhle na stejném místě seznamu (i ve studijním plánu). Poznámky k původní knize se smažou, výsledky z procvičování zůstanou ve statistikách.'
+          : 'Předvyplněné informace o dílech. Po přidání je můžeš libovolně upravit. Údaje vždy ověř se svým učitelem nebo čítankou.'}
       </p>
       <input className="input mb-3" placeholder="Hledat…" value={q} onChange={(e) => setQ(e.target.value)} />
       <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
@@ -264,6 +302,10 @@ export function DatabaseModal({ open, onClose, existing, onAdd }: { open: boolea
               </div>
               {has ? (
                 <Tag tone="emerald">V seznamu</Tag>
+              ) : swap ? (
+                <Button size="sm" icon={<ArrowLeftRight size={15} />} onClick={() => onAdd(b.id, false)}>
+                  Vyměnit
+                </Button>
               ) : (
                 <div className="flex gap-1">
                   <Button size="sm" variant="ghost" onClick={() => onAdd(b.id, true)}>

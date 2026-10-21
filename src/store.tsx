@@ -20,6 +20,8 @@ interface Store {
   addBook: (b: Book) => void;
   updateBook: (id: string, patch: Partial<Book>) => void;
   deleteBook: (id: string) => void;
+  /** Vymění knihu v seznamu za jinou na stejném místě (i ve studijním plánu) */
+  replaceBook: (oldId: string, b: Book) => void;
   setBooks: (books: Book[]) => void;
   recordAnswer: (q: Question, r: AnswerResult) => void;
   recordSession: (rec: SessionRecord, bonusXp?: number) => void;
@@ -195,6 +197,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ...d,
           books: d.books.filter((b) => b.id !== id),
           plan: d.plan ? { ...d.plan, weeks: d.plan.weeks.map((w) => ({ ...w, bookIds: w.bookIds.filter((x) => x !== id) })) } : null,
+        })),
+      replaceBook: (oldId, nb) =>
+        update((d) => ({
+          ...d,
+          books: d.books.map((b) => (b.id === oldId ? nb : b)),
+          plan: d.plan ? { ...d.plan, weeks: d.plan.weeks.map((w) => ({ ...w, bookIds: w.bookIds.map((x) => (x === oldId ? nb.id : x)) })) } : null,
         })),
       setBooks: (books) => update((d) => ({ ...d, books })),
       recordAnswer: (q, r) =>
