@@ -155,6 +155,43 @@ export const CLOUD_PROCEDURES: Procedure[] = [
     ],
   },
   {
+    id: 'st-gluster-hodina',
+    platform: 'storage',
+    title: 'GlusterFS podle hodiny 23. 10. – příprava kontejnerů (servery node01–node03)',
+    goal: 'Ze tří kontejnerů node01, node02 a node03 udělat cluster GlusterFS s volume „server“ v režimu repliky (každý soubor na všech třech).',
+    steps: [
+      { text: 'Na každém kontejneru upravit jméno systému (na node02 a node03 obdobně)', cmd: 'hostnamectl set-hostname node01\nexec bash\nsu -' },
+      {
+        text: 'Upravit soubor /etc/hosts – na každém uzlu vlastní jméno na 127.0.1.1 a ostatní dva uzly s adresami (x, y, z = adresy vašich kontejnerů)',
+        cmd: 'nano /etc/hosts\n\npro node01:\n127.0.1.1   node01\n10.0.3.y    node02\n10.0.3.z    node03\n\npro node02:\n127.0.1.1   node02\n10.0.3.x    node01\n10.0.3.z    node03\n\npro node03:\n127.0.1.1   node03\n10.0.3.x    node01\n10.0.3.y    node02',
+      },
+      { text: 'Na každém uzlu vytvořit adresář pro repliku (brick)', cmd: 'mkdir /gluster' },
+      { text: 'Na každém uzlu nainstalovat a zprovoznit GlusterFS server', cmd: 'apt install glusterfs-server -y\nsystemctl enable glusterd\nsystemctl start glusterd' },
+      { text: 'Z jednoho uzlu (např. node01) propojit nody mezi sebou – u každého probe má přijít „success“', cmd: 'gluster peer probe node02\ngluster peer probe node03' },
+      { text: 'Ověřit spojení', cmd: 'gluster peer status' },
+      { text: 'Vytvořit volume „server“ v režimu repliky ze všech tří uzlů', cmd: 'gluster volume create server replica 3 node01:/gluster node02:/gluster node03:/gluster force\n(force kvůli tomu, že /gluster leží na systémovém disku)' },
+      { text: 'Spustit volume server', cmd: 'gluster volume start server' },
+    ],
+  },
+  {
+    id: 'st-gluster-hodina-klient',
+    platform: 'storage',
+    title: 'GlusterFS podle hodiny 23. 10. – příprava klienta',
+    goal: 'Na kontejneru klient trvale připojit volume „server“ do /mnt/replika.',
+    steps: [
+      { text: 'Upravit jméno systému', cmd: 'hostnamectl set-hostname klient\nexec bash\nsu -' },
+      { text: 'Upravit /etc/hosts', cmd: 'nano /etc/hosts\n\n127.0.1.1   klient\n10.0.3.x    node01\n10.0.3.y    node02\n10.0.3.z    node03' },
+      { text: 'Vytvořit adresář pro připojení repliky', cmd: 'mkdir /mnt/replika' },
+      { text: 'Nainstalovat klienta GlusterFS', cmd: 'apt install glusterfs-client -y' },
+      { text: 'Klient v režimu kontejneru musí před připojením vytvořit zařízení /dev/fuse', cmd: 'mknod /dev/fuse c 10 229' },
+      {
+        text: 'Editace /etc/fstab – za dvojtečkou je název volume (server), ne adresář /gluster na uzlu',
+        cmd: 'nano /etc/fstab\n\nnode01:/server  /mnt/replika  glusterfs  _netdev,defaults  0  0',
+      },
+      { text: 'Načíst změněný fstab a připojit', cmd: 'systemctl daemon-reload\nmount -a\nfindmnt /mnt/replika' },
+    ],
+  },
+  {
     id: 'st-gluster',
     platform: 'storage',
     title: 'GlusterFS – replikovaný volume ze tří uzlů',

@@ -36,6 +36,8 @@ export interface LinuxOptions {
   glusterNodes?: Record<string, string>;
   /** Spuštěné volume GlusterFS na vzdálených uzlech: adresa → názvy volume */
   glusterVolumes?: Record<string, string[]>;
+  /** Běží v kontejneru (LXC) bez /dev/fuse – klient GlusterFS ho musí vytvořit přes mknod */
+  container?: boolean;
 }
 
 interface Mount {
@@ -145,6 +147,9 @@ export class LinuxSim implements Simulator {
   glusterRemote: Record<string, string[]>;
   peers = new Set<string>();
   volumes = new Map<string, Volume>();
+  container: boolean;
+  /** Zařízení /dev/fuse existuje (mimo kontejner vždy, v kontejneru po mknod /dev/fuse c 10 229) */
+  devFuse: boolean;
 
   constructor(o: LinuxOptions) {
     this.hostname = o.hostname ?? 'server';
@@ -154,6 +159,8 @@ export class LinuxSim implements Simulator {
     this.nfsRemote = o.nfsExports ?? {};
     this.glusterNodes = o.glusterNodes ?? {};
     this.glusterRemote = o.glusterVolumes ?? {};
+    this.container = !!o.container;
+    this.devFuse = !this.container;
     this.users.set('root', new Set(['root']));
     for (const d of ['/', '/root', '/etc', '/etc/network', '/home', '/var', '/var/www', '/tmp', '/data', '/mnt', '/srv', '/proc', '/proc/sys', '/proc/sys/net', '/proc/sys/net/ipv4'])
       this.files.set(d, { dir: true, content: '', mode: 0o755, owner: 'root', group: 'root' });
@@ -326,6 +333,7 @@ export class LinuxSim implements Simulator {
             '  chmod, chown, chgrp, sysctl, curl, whoami, clear',
             '  NFS: exportfs -a / -v, mount, umount, findmnt, df -h, systemctl daemon-reload',
             '  GlusterFS: gluster peer probe|status, gluster volume create|start|info|status',
+            '  mknod /dev/fuse c 10 229 (kontejner), exec bash, su -',
           ],
         };
       case 'clear':
@@ -602,6 +610,23 @@ export class LinuxSim implements Simulator {
         return { out: [] };
       case 'ssh':
         return { out: ['(v simulaci se na jiný počítač nepřipojíš – na serveru zkontroluj systemctl status ssh)'] };
+      case 'exec':
+        // exec bash – nový shell načte nový název počítače do promptu
+        return { out: [] };
+      case 'su':
+        return { out: [] };
+      case 'mknod': {
+        const [name, kind, major, minor] = pos;
+        if (!name || !kind) return { out: ['mknod: chybí operand', 'Více informací získáte příkazem „mknod --help“.'] };
+        if (!['c', 'b', 'u', 'p'].includes(kind)) return { out: [`mknod: neplatný typ zařízení „${kind}“`] };
+        if (kind !== 'p' && (major === undefined || minor === undefined)) return { out: ['mknod: u speciálních souborů je nutné zadat hlavní i vedlejší číslo zařízení'] };
+        const p = this.abs(name);
+        if (this.files.has(p)) return { out: [`mknod: ${name}: Soubor již existuje`] };
+        if (!this.files.get(this.parent(p))?.dir) this.mkdirp(this.parent(p));
+        this.write(p, '');
+        if (p === '/dev/fuse' && kind === 'c' && major === '10' && minor === '229') this.devFuse = true;
+        return { out: [] };
+      }
       case 'exit':
       case 'logout':
         return { out: ['(v simulaci zůstáváš přihlášený)'] };
@@ -805,6 +830,7 @@ export class LinuxSim implements Simulator {
       if (!ex.some((e) => e.path === path && sameNet(e.net, this.myIp()))) return [`mount.nfs: access denied by server while mounting ${src}`];
     } else if (type === 'glusterfs') {
       if (!this.packages.has('glusterfs-client') && !this.packages.has('glusterfs-server')) return [`mount: ${target}: unknown filesystem type 'glusterfs'.`];
+      if (!this.devFuse) return ['Mount failed. Check the log file for more details.', '(v logu klienta: failed to open /dev/fuse (No such file or directory) – v kontejneru je potřeba mknod /dev/fuse c 10 229)'];
       const ip = host ? this.resolve(host) : null;
       const vol = path.replace(/^\//, '');
       if (!ip || !this.reachable(ip) || !(this.glusterRemote[ip] ?? []).includes(vol)) return ['Mount failed. Check the log file for more details.'];
@@ -1318,6 +1344,88 @@ export const LINUX_TASKS: TermTask<LinuxSim>[] = [
         { label: 'glusterfs-client je nainstalovaný', ok: s.packages.has('glusterfs-client') },
         { label: 'vg0 je připojený v /mnt/gluster', ok: mounted },
         { label: 'v připojeném volume je test.txt', ok: mounted && s.files.has('/mnt/gluster/test.txt') },
+      ];
+    },
+  },
+  {
+    id: 'lx-gluster-hodina',
+    bookId: 'cloud-prikazy-storage',
+    title: 'GlusterFS podle hodiny 23. 10. – uzel node01',
+    goal: 'Jsi v kontejneru, který má být node01 (10.0.3.11). Na node02 (10.0.3.12) a node03 (10.0.3.13) už GlusterFS běží a mají adresář /gluster. Přejmenuj systém, uprav /etc/hosts, připrav adresář /gluster, nainstaluj a spusť GlusterFS server, propoj uzly a vytvoř a spusť volume „server“ v režimu repliky ze všech tří uzlů. (Adresy jsou příklad, na tabuli byly 10.0.3.x/y/z.)',
+    steps: ['název systému node01 (hostnamectl, exec bash, su -)', '/etc/hosts: 127.0.1.1 node01, node02 a node03 s adresami', 'adresář /gluster', 'glusterfs-server, glusterd povolený a spuštěný', 'node02 a node03 v clusteru (peer probe), ověřit peer status', 'volume server: replica 3 z node01:/gluster, node02:/gluster, node03:/gluster (force)', 'volume server je spuštěný'],
+    hints: [
+      'hostnamectl set-hostname node01, pak exec bash a su -',
+      'nano /etc/hosts – řádek 127.0.1.1 node01 a pod něj 10.0.3.12 node02, 10.0.3.13 node03',
+      'mkdir /gluster',
+      'apt install glusterfs-server -y, systemctl enable glusterd, systemctl start glusterd',
+      'gluster peer probe node02, gluster peer probe node03, kontrola gluster peer status (u probe má být success)',
+      'gluster volume create server replica 3 node01:/gluster node02:/gluster node03:/gluster force',
+      'gluster volume start server',
+    ],
+    solution:
+      'hostnamectl set-hostname node01\nexec bash\nsu -\nnano /etc/hosts\n\n127.0.1.1   node01\n10.0.3.12   node02\n10.0.3.13   node03\n\nmkdir /gluster\napt install glusterfs-server -y\nsystemctl enable glusterd\nsystemctl start glusterd\ngluster peer probe node02\ngluster peer probe node03\ngluster peer status\ngluster volume create server replica 3 node01:/gluster node02:/gluster node03:/gluster force\ngluster volume start server',
+    create: () =>
+      new LinuxSim({
+        hostname: 'debian',
+        ifaces: [{ name: 'eth0', addr: '10.0.3.11/24' }],
+        gateway: '10.0.3.1',
+        hosts: ['10.0.3.1', '10.0.3.12', '10.0.3.13'],
+        glusterNodes: { node02: '10.0.3.12', node03: '10.0.3.13' },
+        container: true,
+      }),
+    check: (s) => {
+      const v = s.volumes.get('server');
+      const hosts = s.read('/etc/hosts');
+      return [
+        { label: 'název systému je node01', ok: s.hostname === 'node01' },
+        { label: '/etc/hosts: 127.0.1.1 node01, node02 a node03', ok: has(hosts, /^127\.0\.1\.1\s+.*\bnode01\b/m) && has(hosts, /^10\.0\.3\.12\s+.*\bnode02\b/m) && has(hosts, /^10\.0\.3\.13\s+.*\bnode03\b/m) },
+        { label: 'adresář /gluster existuje', ok: !!s.files.get('/gluster')?.dir },
+        { label: 'glusterd běží a je povolený', ok: !!s.services.get('glusterd')?.active && !!s.services.get('glusterd')?.enabled },
+        { label: 'node02 a node03 jsou v clusteru', ok: s.peers.has('node02') && s.peers.has('node03') },
+        { label: 'volume server je replica 3 ze tří uzlů', ok: !!v && v.replica === 3 && v.bricks.length === 3 && ['node01:/gluster', 'node02:/gluster', 'node03:/gluster'].every((b) => v.bricks.includes(b)) },
+        { label: 'volume server je spuštěný', ok: !!v?.started },
+      ];
+    },
+  },
+  {
+    id: 'lx-gluster-replika',
+    bookId: 'cloud-prikazy-storage',
+    title: 'GlusterFS podle hodiny 23. 10. – klient (kontejner)',
+    goal: 'Volume „server“ na node01–node03 (10.0.3.11–13) běží. V kontejneru, který má být klient, přejmenuj systém, doplň /etc/hosts, vytvoř /mnt/replika, nainstaluj klienta GlusterFS a připoj volume trvale přes /etc/fstab. Pozor: klient v kontejneru potřebuje před připojením /dev/fuse.',
+    steps: ['název systému klient', '/etc/hosts: 127.0.1.1 klient, node01, node02, node03', 'adresář /mnt/replika', 'glusterfs-client', '/dev/fuse (mknod)', 'řádek v /etc/fstab pro volume server do /mnt/replika s _netdev', 'systemctl daemon-reload a připojení (mount -a)'],
+    hints: [
+      'hostnamectl set-hostname klient, exec bash, su -',
+      'nano /etc/hosts – 127.0.1.1 klient a 10.0.3.11 node01, 10.0.3.12 node02, 10.0.3.13 node03',
+      'mkdir /mnt/replika',
+      'apt install glusterfs-client -y',
+      'mknod /dev/fuse c 10 229',
+      'v /etc/fstab: node01:/server /mnt/replika glusterfs _netdev,defaults 0 0 – za dvojtečkou je název volume (server), ne adresář /gluster',
+      'systemctl daemon-reload, pak mount -a',
+    ],
+    solution:
+      'hostnamectl set-hostname klient\nexec bash\nsu -\nnano /etc/hosts\n\n127.0.1.1   klient\n10.0.3.11   node01\n10.0.3.12   node02\n10.0.3.13   node03\n\nmkdir /mnt/replika\napt install glusterfs-client -y\nmknod /dev/fuse c 10 229\nnano /etc/fstab\n\nnode01:/server /mnt/replika glusterfs _netdev,defaults 0 0\n\nsystemctl daemon-reload\nmount -a\nfindmnt /mnt/replika',
+    create: () =>
+      new LinuxSim({
+        hostname: 'debian',
+        ifaces: [{ name: 'eth0', addr: '10.0.3.50/24' }],
+        gateway: '10.0.3.1',
+        hosts: ['10.0.3.1', '10.0.3.11', '10.0.3.12', '10.0.3.13'],
+        glusterVolumes: { '10.0.3.11': ['server'], '10.0.3.12': ['server'], '10.0.3.13': ['server'] },
+        container: true,
+      }),
+    check: (s) => {
+      const hosts = s.read('/etc/hosts');
+      return [
+        { label: 'název systému je klient', ok: s.hostname === 'klient' },
+        {
+          label: '/etc/hosts: klient, node01, node02 a node03',
+          ok: has(hosts, /^127\.0\.1\.1\s+.*\bklient\b/m) && has(hosts, /^10\.0\.3\.11\s+.*\bnode01\b/m) && has(hosts, /^10\.0\.3\.12\s+.*\bnode02\b/m) && has(hosts, /^10\.0\.3\.13\s+.*\bnode03\b/m),
+        },
+        { label: 'glusterfs-client je nainstalovaný', ok: s.packages.has('glusterfs-client') },
+        { label: '/dev/fuse vytvořené (mknod /dev/fuse c 10 229)', ok: s.devFuse },
+        { label: 'v /etc/fstab je node0X:/server /mnt/replika glusterfs … _netdev', ok: has(s.read('/etc/fstab'), /^\s*node0[123]:\/server\s+\/mnt\/replika\/?\s+glusterfs\s+\S*_netdev\S*/m) },
+        { label: 'systemd zná aktuální fstab (systemctl daemon-reload)', ok: s.fstabLoaded === (s.read('/etc/fstab') ?? '') },
+        { label: 'volume server je připojené v /mnt/replika', ok: s.mounts.some((m) => m.target === '/mnt/replika' && m.type === 'glusterfs' && /:\/?server$/.test(m.src)) },
       ];
     },
   },

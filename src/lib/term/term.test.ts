@@ -226,8 +226,29 @@ describe('Linux – NFS a GlusterFS', () => {
     expect(allOk(t.check(s))).toEqual([]);
   });
 
+  it('GlusterFS z hodiny 23. 10.: klient v kontejneru potřebuje /dev/fuse a název volume', () => {
+    const t = task('lx-gluster-replika');
+    const s = t.create();
+    s.saveFile('/etc/hosts', (s.read('/etc/hosts') ?? '') + '10.0.3.11 node01\n');
+    s.exec('mkdir /mnt/replika');
+    s.exec('apt install glusterfs-client -y');
+    expect(s.exec('mount -t glusterfs node01:/server /mnt/replika').out.join()).toMatch(/Mount failed[\s\S]*\/dev\/fuse/);
+    expect(s.exec('mknod /dev/fuse').out.join()).toMatch(/chybí operand/);
+    expect(s.exec('mknod /dev/fuse c').out.join()).toMatch(/hlavní i vedlejší/);
+    expect(s.exec('mknod /dev/fuse c 10 229').out).toEqual([]);
+    expect(s.devFuse).toBe(true);
+    expect(s.exec('mknod /dev/fuse c 10 229').out.join()).toMatch(/již existuje/);
+    // za dvojtečkou je název volume, ne adresář bricku
+    expect(s.exec('mount -t glusterfs node01:/gluster /mnt/replika').out.join()).toMatch(/Mount failed/);
+    expect(s.exec('mount -t glusterfs node01:/server /mnt/replika').out).toEqual([]);
+    expect(s.exec('exec bash').out).toEqual([]);
+    expect(s.exec('su -').out).toEqual([]);
+    // mimo kontejner /dev/fuse existuje
+    expect(new LinuxSim({}).devFuse).toBe(true);
+  });
+
   it('vzorová řešení nových úloh (příkazy + obsah souborů z editoru)', () => {
-    for (const id of ['lx-nfs-server', 'lx-nfs-klient', 'lx-gluster', 'lx-gluster-klient']) {
+    for (const id of ['lx-nfs-server', 'lx-nfs-klient', 'lx-gluster', 'lx-gluster-klient', 'lx-gluster-hodina', 'lx-gluster-replika']) {
       const t = task(id);
       const s = t.create();
       expect(allOk(t.check(s)).length, id).toBeGreaterThan(0);

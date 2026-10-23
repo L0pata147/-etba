@@ -1,6 +1,6 @@
 {
-  "version": "1.38.0",
+  "version": "1.39.0",
   "notes": [
-    "Stavebnice topologie: propojování zařízení kabely jako v Packet Traceru s kontrolou zapojení. U knih nové tlačítko Vyměnit."
+    "GlusterFS podle hodiny 23. 10.: postup pro node01–node03 a klienta (/mnt/replika, mknod /dev/fuse) a dvě nové úlohy v terminálu."
   ]
 }
