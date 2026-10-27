@@ -137,7 +137,8 @@ body {
 @media print {
   @page {
     size: A4;
-    margin: 10mm;
+    /* okraje dělá padding taháku – tisk pak vypadá stejně v každém prohlížeči i v Android aplikaci */
+    margin: 0;
   }
   html,
   body {

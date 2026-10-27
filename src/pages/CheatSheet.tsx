@@ -13,8 +13,9 @@ type Source = Extract<SubjectId, 'cjl' | 'site' | 'hw' | 'cloud'>;
 type Size = 'auto' | 'S' | 'M';
 
 /** Výška a šířka tiskové plochy A4 při okrajích 10 mm (v CSS px, 96 dpi) s malou rezervou */
-const PAGE_W_MM = 190;
-const PAGE_H_PX = 1030;
+// Okraj 12 mm je přímo v taháku (padding), protože prohlížeče okraje z @page často ignorují a tisknou až ke kraji papíru
+const PAGE_W_MM = 210 - 2 * 12;
+const PAGE_H_PX = Math.floor(((297 - 2 * 12 - 5) * 96) / 25.4);
 const FIXED_PX: Record<Exclude<Size, 'auto'>, number> = { S: 11, M: 13 };
 
 export function CheatSheetPage() {
@@ -154,7 +155,7 @@ function SheetView({ sheet: s, size }: { sheet: Sheet; size: Size }) {
         </div>
       )}
       <article
-        className="mx-auto max-w-[210mm] break-after-page rounded-lg bg-white p-6 leading-snug text-slate-900 shadow-lg ring-1 ring-slate-200 print:max-w-none print:rounded-none print:p-0 print:shadow-none print:ring-0 [&:last-child]:break-after-auto"
+        className="mx-auto max-w-[210mm] break-after-page rounded-lg bg-white p-6 leading-snug text-slate-900 shadow-lg ring-1 ring-slate-200 print:max-w-none print:rounded-none print:p-[12mm] print:shadow-none print:ring-0 [&:last-child]:break-after-auto"
         style={{ fontSize: `${px}px` }}
       >
         <SheetBody sheet={s} />

@@ -1,6 +1,6 @@
 {
-  "version": "1.41.0",
+  "version": "1.42.0",
   "notes": [
-    "Taháky k tisku: písmo se samo zvětší tak, aby tahák vyplnil celou stránku A4 (a pořád se na ni vešel)."
+    "Taháky k tisku mají okraj 12 mm na každé straně v každém prohlížeči (už netisknou ke kraji papíru)."
   ]
 }
