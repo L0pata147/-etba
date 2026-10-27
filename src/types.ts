@@ -241,6 +241,8 @@ interface QuestionBase {
   difficulty: Difficulty;
   /** Otázka se týká více knih (např. přiřazování) */
   relatedBookIds?: string[];
+  /** Otázka na poznání díla (z jakého díla je postava, scéna, popis) – smysl má jen při míchání více knih */
+  identify?: boolean;
   /** Text, který se zobrazí nad otázkou (neumělecký text, výňatek) */
   passage?: { label: string; text: string; mono?: boolean }[];
 }

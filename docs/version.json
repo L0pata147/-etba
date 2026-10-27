@@ -1,6 +1,6 @@
 {
-  "version": "1.39.0",
+  "version": "1.40.0",
   "notes": [
-    "GlusterFS podle hodiny 23. 10.: postup pro node01–node03 a klienta (/mnt/replika, mknod /dev/fuse) a dvě nové úlohy v terminálu."
+    "Trénink knihy: pryč otázky „z jakého díla je postava“ (u jedné knihy nedávají smysl), nové otázky „která postava to je“ a rovnoměrnější rozložení po osnově."
   ]
 }

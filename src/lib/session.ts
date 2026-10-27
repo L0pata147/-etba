@@ -125,6 +125,9 @@ export function buildSession(data: AppData, cfg: SessionConfig): Question[] {
   // Maturitní obtížnost – jen otázky podle osnovy a hlubší otevřené otázky
   if (cfg.difficulty === 'maturita') pool = pool.filter((q) => q.difficulty === 'maturita' || q.difficulty === 'hard' || q.bookId.startsWith('nonart') || q.bookId === 'terms');
   if (cfg.onlyDue) pool = pool.filter((q) => (data.srs[q.id]?.due ?? Infinity) <= now);
+  // „Z jakého díla je postava / scéna…“ – u tréninku jedné knihy je odpověď předem jasná
+  const bookCount = new Set(pool.filter((q) => !q.relatedBookIds && q.bookId !== 'global' && q.bookId !== 'terms' && !q.bookId.startsWith('nonart') && q.bookId !== 'pravopis').map((q) => q.bookId)).size;
+  if (bookCount <= 1 && !cfg.onlyUnknown) pool = pool.filter((q) => !q.identify);
 
   const weights = pool.map((q) => weightFor(data, q, cfg.difficulty, now));
   // Předvyber více, poté odstraň duplicitní fakta
@@ -136,6 +139,11 @@ export function buildSession(data: AppData, cfg: SessionConfig): Question[] {
   // Limit na jednu knihu / téma jen když je z čeho míchat
   const multiItem = new Set(pool.map((q) => q.bookId)).size > 1 && (books.length > 1 || (!!cfg.subject && cfg.subject !== 'cjl'));
   const bookCap = multiItem ? Math.max(2, Math.ceil((cfg.count || 20) * 0.45)) : Infinity;
+  // při míchání více knih nejvýš pětina otázek na poznání díla
+  const identifyCap = Math.max(2, Math.round((cfg.count || questionsForMinutes(cfg.minutes || 15)) * 0.2));
+  let identifyCount = 0;
+  // trénink jedné knihy bez zvolené oblasti: žádná oblast (např. postavy) nezabere víc než ~pětinu
+  const areaCap = cfg.perArea ?? (bookCount <= 1 && !cfg.areas.length && cfg.count ? Math.max(3, Math.ceil(cfg.count * 0.2)) : Infinity);
   let budget = cfg.minutes ? cfg.minutes * 60 : Infinity;
   // Dlouhé otázky (vlastní odpověď) smí zabrat nejvýš ~třetinu času, aby trénink nebyl jen ze 2 otázek
   let openBudget = cfg.minutes ? cfg.minutes * 60 * 0.35 : Infinity;
@@ -146,7 +154,8 @@ export function buildSession(data: AppData, cfg: SessionConfig): Question[] {
     const fk = `${q.bookId}|${q.factKey}`;
     if (facts.has(fk)) continue;
     if ((perBook.get(q.bookId) ?? 0) >= bookCap) continue;
-    if (cfg.perArea && (perArea.get(`${q.bookId}|${q.area}`) ?? 0) >= cfg.perArea) continue;
+    if (q.identify && identifyCount >= identifyCap) continue;
+    if ((perArea.get(`${q.bookId}|${q.area}`) ?? 0) >= areaCap) continue;
     const s = estimateSeconds(q);
     const isLong = q.type === 'open' || q.type === 'speech';
     if (s > budget || (isLong && s > openBudget)) {
@@ -156,6 +165,7 @@ export function buildSession(data: AppData, cfg: SessionConfig): Question[] {
     budget -= s;
     if (isLong) openBudget -= s;
     facts.add(fk);
+    if (q.identify) identifyCount++;
     perBook.set(q.bookId, (perBook.get(q.bookId) ?? 0) + 1);
     perArea.set(`${q.bookId}|${q.area}`, (perArea.get(`${q.bookId}|${q.area}`) ?? 0) + 1);
     out.push(q);

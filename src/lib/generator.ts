@@ -140,6 +140,9 @@ function makeOpen(base: Base, modelAnswer: string, points: KeyPoint[]): OpenQues
   return { ...base, id: qid(base, 'open'), type: 'open', modelAnswer, points };
 }
 
+/** Označí otázku na poznání díla (v tréninku jedné knihy se nepoužije) */
+const identify = <T extends Question>(q: T | null): T | null => (q ? { ...q, identify: true } : null);
+
 function push<T>(arr: T[], item: T | null | undefined) {
   if (item) arr.push(item);
 }
@@ -403,20 +406,26 @@ export function generateBookQuestions(b: Book, all: Book[]): Question[] {
     );
     qs.push(makeFlash(base(`char-${i}`, 'characters', 'easy', `Charakterizuj postavu ${c.name} (${T}).`, exp), c.description));
     if (isNamedCharacter(c.name)) {
-      qs.push(
-        makeFill(
-          base(`char-work-${i}`, 'characters', 'medium', `Ve kterém díle vystupuje postava ${c.name}?`, `${c.name} je postava z díla ${T} (${b.author}). ${desc}`),
-          'identifyWork',
-          T,
-          titleAccepted(b),
+      push(
+        qs,
+        identify(
+          makeFill(
+            base(`char-work-${i}`, 'characters', 'medium', `Ve kterém díle vystupuje postava ${c.name}?`, `${c.name} je postava z díla ${T} (${b.author}). ${desc}`),
+            'identifyWork',
+            T,
+            titleAccepted(b),
+          ),
         ),
       );
       const foreignTitles = uniqueStrings(others.map((o) => o.title));
-      qs.push(
-        makeTF(
-          base(`char-work-${i}`, 'characters', 'easy', '', `${c.name} je postava z díla ${T}.`),
-          `${c.name} je postava z díla ${T}.`,
-          sample(foreignTitles, 2).map((t) => `${c.name} je postava z díla ${t}.`),
+      push(
+        qs,
+        identify(
+          makeTF(
+            base(`char-work-${i}`, 'characters', 'easy', '', `${c.name} je postava z díla ${T}.`),
+            `${c.name} je postava z díla ${T}.`,
+            sample(foreignTitles, 2).map((t) => `${c.name} je postava z díla ${t}.`),
+          ),
         ),
       );
     }
@@ -432,6 +441,34 @@ export function generateBookQuestions(b: Book, all: Book[]): Question[] {
       ),
     );
   }
+  // Poznej postavu podle popisu (jména postav téhož díla) – učí, kdo je kdo
+  const named = allChars.filter((c) => isNamedCharacter(c.name));
+  const foreignNames = uniqueStrings(foreignChars.filter((f) => isNamedCharacter(f.c.name)).map((f) => f.c.name));
+  named.slice(0, 6).forEach((c, i) => {
+    const desc = firstSentence(c.description, 160);
+    if (!desc || nameAccepted(c.name).some((n) => n.length >= 3 && desc.toLowerCase().includes(n.toLowerCase()))) return;
+    const own = named.filter((x) => x.name !== c.name).map((x) => x.name);
+    push(
+      qs,
+      makeAbc(
+        base(`char-name-${i}`, 'characters', 'easy', `${T}: Která postava to je?\n„${desc}“`, `${c.name}: ${c.description}`),
+        c.name,
+        own.length >= 2 ? own : [...own, ...sample(foreignNames, 3 - own.length)],
+      ),
+    );
+  });
+  // Pravda / nepravda: sedí popis k postavě? (popisy jiných postav téhož díla)
+  b.mainCharacters.forEach((c, i) => {
+    const otherDescs = allChars.filter((x) => x.name !== c.name && x.description.trim()).map((x) => firstSentence(x.description, 140));
+    if (!c.description.trim() || !otherDescs.length) return;
+    qs.push(
+      makeTF(
+        base(`char-tf-${i}`, 'characters', 'easy', '', `${c.name}: ${c.description}`),
+        `${c.name} (${T}): ${firstSentence(c.description, 140)}`,
+        sample(otherDescs, 2).map((d) => `${c.name} (${T}): ${d}`),
+      ),
+    );
+  });
   b.sideCharacters.slice(0, 5).forEach((c, i) => {
     const exp = `${c.name}: ${c.description}`;
     const otherDescs = allChars.filter((x) => x.name !== c.name).map((x) => firstSentence(x.description, 150));
@@ -498,14 +535,14 @@ export function generateBookQuestions(b: Book, all: Book[]): Question[] {
       ),
     );
     qs.push(makeFlash(base(`scene-${i}`, 'context', 'medium', `${T} – kam v díle patří tato scéna?\n„${s.scene}“`, exp), s.context));
-    qs.push(makeFill(base(`scene-id-${i}`, 'context', 'medium', `Ze kterého díla je tato scéna?\n„${s.scene}“`, `Scéna je z díla ${T} (${b.author}). ${s.context}`), 'identifyWork', T, titleAccepted(b)));
+    push(qs, identify(makeFill(base(`scene-id-${i}`, 'context', 'medium', `Ze kterého díla je tato scéna?\n„${s.scene}“`, `Scéna je z díla ${T} (${b.author}). ${s.context}`), 'identifyWork', T, titleAccepted(b))));
   });
 
   // --- Nápovědy (identifikace díla) ---
   b.clues.forEach((clue, i) => {
     const exp = `Jde o dílo ${T} (${b.author}).`;
-    qs.push(makeFill(base(`clue-${i}`, 'basics', 'medium', `O jaké dílo jde?\n„${clue}“`, exp), 'identifyWork', T, titleAccepted(b)));
-    push(qs, makeAbc(base(`clue-${i}`, 'basics', 'easy', `Které dílo odpovídá popisu?\n„${clue}“`, exp), T, [...others.map((o) => o.title), ...FALLBACK_TITLES]));
+    push(qs, identify(makeFill(base(`clue-${i}`, 'basics', 'medium', `O jaké dílo jde?\n„${clue}“`, exp), 'identifyWork', T, titleAccepted(b))));
+    push(qs, identify(makeAbc(base(`clue-${i}`, 'basics', 'easy', `Které dílo odpovídá popisu?\n„${clue}“`, exp), T, [...others.map((o) => o.title), ...FALLBACK_TITLES])));
   });
 
   // --- Kompozice, vyprávěcí způsoby, promluvy, jazyk, tropy ---

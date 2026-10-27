@@ -95,7 +95,7 @@ function SimulationInner({ book }: { book: Book }) {
     return EXAM_AREAS.map((area): Step | null => {
       const q = all.find((x) => x.type === 'open' && x.factKey === `exam-${area}`) as OpenQuestion | undefined;
       if (!q) return null;
-      const abcs = all.filter((x): x is AbcQuestion => x.type === 'abc' && x.area === area);
+      const abcs = all.filter((x): x is AbcQuestion => x.type === 'abc' && x.area === area && !x.identify);
       return { area, q: voice ? { ...q, type: 'speech' as const } : q, followUp: abcs.length ? pick(abcs) : undefined };
     }).filter((s): s is Step => s !== null);
   });

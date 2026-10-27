@@ -145,6 +145,31 @@ describe('sestavení tréninku', () => {
       expect(q.area).toBe('characters');
     });
   });
+  it('trénink jedné knihy nemá otázky „z jakého díla je…“, mix jich má nejvýš pětinu', () => {
+    for (const b of data.books) {
+      for (let i = 0; i < 5; i++) {
+        const qs = buildSession(data, { title: 't', mode: 't', difficulty: 'medium', bookIds: [b.id], areas: [], types: ['abc', 'fill', 'identifyWork', 'truefalse'], count: 20 });
+        expect(qs.filter((q) => q.identify), b.id).toEqual([]);
+        expect(qs.some((q) => /Ve kterém díle vystupuje|Ze kterého díla je|O jaké dílo jde|Které dílo odpovídá popisu|je postava z díla/.test(q.prompt)), b.id).toBe(false);
+      }
+    }
+    for (let i = 0; i < 10; i++) {
+      const qs = buildSession(data, { title: 't', mode: 't', difficulty: 'medium', bookIds: [], areas: [], types: ['abc', 'fill', 'identifyWork', 'truefalse'], count: 20 });
+      expect(qs.filter((q) => q.identify).length).toBeLessThanOrEqual(4);
+    }
+  });
+  it('postavy: poznej postavu podle popisu (jména z téhož díla, popis jméno neprozradí)', () => {
+    const b = data.books.find((x) => x.id === 'valka-s-mloky')!;
+    const qs = generateBookQuestions(b, data.books).filter((q) => q.factKey.startsWith('char-name-'));
+    expect(qs.length).toBeGreaterThan(2);
+    for (const q of qs) {
+      if (q.type !== 'abc') throw new Error('abc');
+      const correct = q.options[q.correctIndex];
+      expect(q.prompt.toLowerCase()).not.toContain(correct.toLowerCase());
+      const names = [...b.mainCharacters, ...b.sideCharacters].map((c) => c.name);
+      expect(q.options.every((o) => names.includes(o))).toBe(true);
+    }
+  });
   it('časový režim se vejde do rozpočtu', () => {
     const qs = buildSession(data, { title: 't', mode: 't', difficulty: 'medium', bookIds: [], areas: [], types: ['abc', 'truefalse', 'open'], count: 50, minutes: 5 });
     const secs = qs.reduce((s, q) => s + (q.type === 'open' ? 150 : q.type === 'truefalse' ? 12 : 20), 0);
