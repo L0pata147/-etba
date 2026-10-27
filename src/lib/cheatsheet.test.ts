@@ -10,6 +10,7 @@ describe('Taháky k tisku', () => {
     expect(firstSentences('Jedna! Dvě? Tři.', 2)).toBe('Jedna! Dvě?');
     expect(firstSentences('Bez tečky na konci', 2)).toBe('Bez tečky na konci');
     expect(firstSentences('', 2)).toBe('');
+    expect(firstSentences('Monolog: „Zloději! Vrahové!“ Pak pláče. Konec.', 1)).toBe('Monolog: „Zloději! Vrahové!“ Pak pláče.');
   });
 
   it('každá kniha z databáze má tahák s hlavními částmi', () => {

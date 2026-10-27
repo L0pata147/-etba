@@ -32,6 +32,9 @@ export function firstSentences(text: string | undefined, n: number): string {
   for (let m = re.exec(t); m; m = re.exec(t)) {
     const end = m.index + m[0].length;
     if (m[0] === '.' && ABBR.test(t.slice(Math.max(0, end - 12), end))) continue;
+    // uvnitř citátu („Zloději!“) věta nekončí
+    const head = t.slice(0, end);
+    if ((head.match(/„/g)?.length ?? 0) > (head.match(/“/g)?.length ?? 0)) continue;
     if (++count === n) return t.slice(0, end);
   }
   return t;

@@ -1,6 +1,6 @@
 {
-  "version": "1.40.0",
+  "version": "1.41.0",
   "notes": [
-    "Trénink knihy: pryč otázky „z jakého díla je postava“ (u jedné knihy nedávají smysl), nové otázky „která postava to je“ a rovnoměrnější rozložení po osnově."
+    "Taháky k tisku: písmo se samo zvětší tak, aby tahák vyplnil celou stránku A4 (a pořád se na ni vešel)."
   ]
 }

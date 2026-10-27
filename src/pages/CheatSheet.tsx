@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Printer } from 'lucide-react';
 import type { SubjectId } from '../types';
@@ -10,7 +10,12 @@ import { printPage } from '../lib/native';
 import { Button, Card, PageHeader, Segmented, Toggle, cx } from '../components/ui';
 
 type Source = Extract<SubjectId, 'cjl' | 'site' | 'hw' | 'cloud'>;
-type Size = 'S' | 'M';
+type Size = 'auto' | 'S' | 'M';
+
+/** Výška a šířka tiskové plochy A4 při okrajích 10 mm (v CSS px, 96 dpi) s malou rezervou */
+const PAGE_W_MM = 190;
+const PAGE_H_PX = 1030;
+const FIXED_PX: Record<Exclude<Size, 'auto'>, number> = { S: 11, M: 13 };
 
 export function CheatSheetPage() {
   const [params] = useSearchParams();
@@ -24,7 +29,7 @@ function CheatSheetInner() {
   const initialTopic = params.get('t') ? ALL_TOPIC_MAP[params.get('t')!] : undefined;
   const [source, setSource] = useState<Source>(initialTopic && initialTopic.subject !== 'cjl' ? initialTopic.subject : 'cjl');
   const [picked, setPicked] = useState<Set<string>>(() => new Set([params.get('k') ?? params.get('t') ?? ''].filter(Boolean)));
-  const [size, setSize] = useState<Size>('S');
+  const [size, setSize] = useState<Size>('auto');
   const [notes, setNotes] = useState(false);
 
   const books = useMemo(() => [...data.books].sort((a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)), [data.books]);
@@ -94,7 +99,8 @@ function CheatSheetInner() {
               value={size}
               onChange={setSize}
               options={[
-                { value: 'S', label: 'Menší (vejde se víc)' },
+                { value: 'auto', label: 'Vyplnit A4' },
+                { value: 'S', label: 'Menší' },
                 { value: 'M', label: 'Větší' },
               ]}
             />
@@ -121,19 +127,53 @@ function CheatSheetInner() {
 
 /** Jedna stránka taháku – vždy černá na bílé (i v tmavém režimu), jako papír */
 function SheetView({ sheet: s, size }: { sheet: Sheet; size: Size }) {
+  const [fit, setFit] = useState(11);
+  const probe = useRef<HTMLDivElement>(null);
+  // „Vyplnit A4“: největší písmo, se kterým se tahák ještě vejde na jednu stránku (měří se na skryté kopii v šířce A4)
+  useLayoutEffect(() => {
+    const el = probe.current;
+    if (size !== 'auto' || !el) return;
+    let lo = 8;
+    let hi = 17;
+    for (let i = 0; i < 9; i++) {
+      const mid = (lo + hi) / 2;
+      el.style.fontSize = `${mid}px`;
+      if (el.offsetHeight <= PAGE_H_PX) lo = mid;
+      else hi = mid;
+    }
+    setFit(Math.floor(lo * 4) / 4);
+  }, [s, size]);
+  const px = size === 'auto' ? fit : FIXED_PX[size];
   return (
-    <article
-      className={cx(
-        'mx-auto max-w-[210mm] break-after-page rounded-lg bg-white p-6 text-slate-900 shadow-lg ring-1 ring-slate-200 print:max-w-none print:rounded-none print:p-0 print:shadow-none print:ring-0 [&:last-child]:break-after-auto',
-        size === 'S' ? 'text-[11px] leading-snug' : 'text-[13px] leading-normal',
+    <>
+      {size === 'auto' && (
+        <div aria-hidden className="pointer-events-none fixed left-[-10000px] top-0 print:hidden" style={{ width: `${PAGE_W_MM}mm` }}>
+          <div ref={probe} className="bg-white leading-snug">
+            <SheetBody sheet={s} cols />
+          </div>
+        </div>
       )}
-    >
+      <article
+        className="mx-auto max-w-[210mm] break-after-page rounded-lg bg-white p-6 leading-snug text-slate-900 shadow-lg ring-1 ring-slate-200 print:max-w-none print:rounded-none print:p-0 print:shadow-none print:ring-0 [&:last-child]:break-after-auto"
+        style={{ fontSize: `${px}px` }}
+      >
+        <SheetBody sheet={s} />
+      </article>
+    </>
+  );
+}
+
+function SheetBody({ sheet: s, cols }: { sheet: Sheet; cols?: boolean }) {
+  return (
+    <>
       <header className="mb-3 border-b-2 border-slate-900 pb-2">
-        <h1 className={cx('font-extrabold leading-tight', size === 'S' ? 'text-xl' : 'text-2xl')}>{s.title}</h1>
+        <h1 className="font-extrabold leading-tight" style={{ fontSize: '1.75em' }}>
+          {s.title}
+        </h1>
         <div className="font-semibold text-slate-700">{s.subtitle}</div>
         {s.meta.length > 0 && <div className="mt-0.5 text-slate-600">{s.meta.join(' · ')}</div>}
       </header>
-      <div className="gap-5 sm:columns-2 print:columns-2">
+      <div className={cx('gap-5 print:columns-2', cols ? 'columns-2' : 'sm:columns-2')}>
         {s.sections.map((sec) => (
           <section key={sec.title} className="mb-2.5 break-inside-avoid">
             <h2 className="mb-0.5 font-bold uppercase tracking-wide text-slate-800" style={{ fontSize: '0.85em' }}>
@@ -167,6 +207,6 @@ function SheetView({ sheet: s, size }: { sheet: Sheet; size: Size }) {
           </section>
         ))}
       </div>
-    </article>
+    </>
   );
 }
