@@ -111,3 +111,32 @@ describe('Taháky na praktickou zkoušku a sloh', () => {
     expect(s.sections.map((x) => x.title)).toContain('20. století (do roku 1945)');
   });
 });
+
+describe('Barvy taháků podle předmětu', () => {
+  it('sítě zelená, cloud oranžová, HW červená, pojmy světle modrá, knihy bez barvy', async () => {
+    const m = await import('./cheatsheet');
+    const { ALL_TOPICS } = await import('../data/subjects');
+    const { ALL_COMMANDS } = await import('../data/site/commands');
+    const { ALL_PROCEDURES } = await import('../data/site/procedures');
+    const { BOOK_DATABASE, seedToBook } = await import('../data/books');
+    const want = { site: '#22c55e', cloud: '#f97316', hw: '#ef4444' } as const;
+    for (const t of ALL_TOPICS) if (t.subject !== 'cjl') expect(m.topicSheet(t).accent, t.id).toBe(want[t.subject]);
+    expect(m.commandSheets('cisco', 'Cisco', ALL_COMMANDS)[0].accent).toBe(want.site);
+    expect(
+      m.procedureSheets(
+        'linux',
+        'Linux',
+        ALL_PROCEDURES.filter((p) => p.platform === 'linux'),
+      )[0].accent,
+    ).toBe(want.site);
+    expect(
+      m.procedureSheets(
+        'storage',
+        'Úložiště',
+        ALL_PROCEDURES.filter((p) => p.platform === 'storage'),
+      )[0].accent,
+    ).toBe(want.cloud);
+    expect(m.termSheet('sloh').accent).toBe('#38bdf8');
+    expect(m.bookSheet(seedToBook(BOOK_DATABASE[0])).accent).toBeUndefined();
+  });
+});

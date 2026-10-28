@@ -89,12 +89,18 @@ export function bookSheet(b: Book, withNotes = false): Sheet {
   };
 }
 
+/** Barvy čáry pod nadpisem podle předmětu */
+export const SUBJECT_ACCENT = { site: '#22c55e', cloud: '#f97316', hw: '#ef4444' } as const;
+const SITE_PLATFORMS: Platform[] = ['cisco', 'linux', 'windows'];
+const platformAccent = (p: Platform) => (SITE_PLATFORMS.includes(p) ? SUBJECT_ACCENT.site : SUBJECT_ACCENT.cloud);
+
 export function topicSheet(t: Topic): Sheet {
   const subj = SUBJECTS[t.subject];
   return {
     id: t.id,
     title: `${t.number}. ${t.title}`,
     subtitle: `${subj.emoji} ${subj.label}`,
+    accent: t.subject === 'cjl' ? undefined : SUBJECT_ACCENT[t.subject],
     meta: [],
     sections: [{ title: 'Shrnutí', text: t.summary }, ...t.outline.map((o) => ({ title: o.heading, list: o.points })), { title: 'Pojmy', pairs: t.terms }].filter(nonEmpty),
   };
@@ -172,7 +178,7 @@ function weight(s: SheetSection): number {
 }
 
 /** Rozdělí části na stránky tak, aby každá měla nejvýš `budget` znaků (část se nikdy nedělí) */
-export function packSheets(base: { id: string; title: string; subtitle: string }, sections: SheetSection[], budget = 3600): Sheet[] {
+export function packSheets(base: { id: string; title: string; subtitle: string; accent?: string }, sections: SheetSection[], budget = 3600): Sheet[] {
   const pages: SheetSection[][] = [];
   let cur: SheetSection[] = [];
   let used = 0;
@@ -191,6 +197,7 @@ export function packSheets(base: { id: string; title: string; subtitle: string }
     id: `${base.id}-${i + 1}`,
     title: pages.length > 1 ? `${base.title} (${i + 1}/${pages.length})` : base.title,
     subtitle: base.subtitle,
+    accent: base.accent,
     meta: [],
     sections: p,
     // bez pevného limitu rozdělí stránky až UI podle změřené výšky
@@ -203,7 +210,7 @@ export function commandSheets(platform: Platform, label: string, commands: Comma
   const own = commands.filter((c) => c.platform === platform);
   const names = [...new Set(own.map((c) => c.group))].filter((g) => !groups || groups.includes(g));
   return packSheets(
-    { id: `prikazy-${platform}`, title: `Příkazy – ${label}`, subtitle: '🛠️ Praktická zkouška' },
+    { id: `prikazy-${platform}`, title: `Příkazy – ${label}`, subtitle: '🛠️ Praktická zkouška', accent: platformAccent(platform) },
     names.map((g) => ({ title: g, mono: true, pairs: own.filter((c) => c.group === g).map((c) => ({ term: c.command, def: c.task + (c.note ? ` (${c.note})` : '') })) })),
     Infinity,
   );
@@ -211,8 +218,9 @@ export function commandSheets(platform: Platform, label: string, commands: Comma
 
 /** Postupy krok za krokem (víc postupů na stránku) */
 export function procedureSheets(id: string, label: string, procedures: Procedure[]): Sheet[] {
+  const accent = procedures[0] ? platformAccent(procedures[0].platform) : undefined;
   return packSheets(
-    { id: `postupy-${id}`, title: `Postupy – ${label}`, subtitle: '🛠️ Praktická zkouška' },
+    { id: `postupy-${id}`, title: `Postupy – ${label}`, subtitle: '🛠️ Praktická zkouška', accent },
     procedures.map((p) => ({ title: p.title, text: p.goal, steps: p.steps })),
     Infinity,
   );
