@@ -3,6 +3,7 @@ import type { Book, Term, TermCategory, Topic } from '../types';
 import { TERMS, TERM_CATEGORIES } from '../data/terms';
 import { CATEGORIES, KINDS } from '../data/osnova';
 import { SUBJECTS } from '../data/subjects';
+import type { Author } from './authors';
 
 export interface SheetSection {
   title: string;
@@ -114,5 +115,28 @@ export function termSheet(groupId: string, terms: Term[] = TERMS): Sheet {
         pairs: terms.filter((t) => t.category === c).map((t) => ({ term: t.name, def: termDef(t, g.detail) })),
       }))
       .filter(nonEmpty),
+  };
+}
+
+export interface AuthorCard {
+  id: string;
+  name: string;
+  life: string;
+  rows: { label: string; text: string }[];
+}
+
+/** Malá kartička autora – podklady z knih v seznamu (autorův kontext, díla, další díla) */
+export function authorCard(a: Author): AuthorCard {
+  const first = a.books.find((b) => b.authorContext.trim()) ?? a.books[0];
+  return {
+    id: a.id,
+    name: a.name,
+    life: a.life,
+    rows: [
+      { label: 'Směr', text: a.movements.join(' · ') },
+      { label: 'O autorovi', text: firstSentences(first?.authorContext, 2) },
+      { label: 'Ze seznamu', text: a.books.map((b) => `${b.title}${b.year ? ` (${b.year.replace(/\s*\(.*\)$/, '')})` : ''}`).join(', ') },
+      { label: 'Další díla', text: a.otherWorks.slice(0, 6).join(', ') },
+    ].filter((r) => r.text.trim()),
   };
 }

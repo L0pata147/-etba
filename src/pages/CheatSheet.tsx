@@ -5,14 +5,15 @@ import type { SubjectId } from '../types';
 import { useStore } from '../store';
 import { CATEGORY_ORDER } from '../data/osnova';
 import { SUBJECTS, SUBJECT_TOPICS, ALL_TOPIC_MAP } from '../data/subjects';
-import { TERM_SHEET_GROUPS, bookSheet, termSheet, topicSheet, type Sheet } from '../lib/cheatsheet';
+import { TERM_SHEET_GROUPS, authorCard, bookSheet, termSheet, topicSheet, type AuthorCard, type Sheet } from '../lib/cheatsheet';
+import { groupAuthors } from '../lib/authors';
 import { TERMS } from '../data/terms';
 import { printPage } from '../lib/native';
 import { Button, Card, PageHeader, Segmented, Toggle, cx } from '../components/ui';
 
-type Source = Extract<SubjectId, 'cjl' | 'site' | 'hw' | 'cloud'> | 'pojmy';
-const SOURCES: Source[] = ['cjl', 'pojmy', 'site', 'hw', 'cloud'];
-const sourceLabel = (s: Source) => (s === 'pojmy' ? '📖 Literární pojmy' : `${SUBJECTS[s].emoji} ${SUBJECTS[s].short}`);
+type Source = Extract<SubjectId, 'cjl' | 'site' | 'hw' | 'cloud'> | 'pojmy' | 'autori';
+const SOURCES: Source[] = ['cjl', 'autori', 'pojmy', 'site', 'hw', 'cloud'];
+const sourceLabel = (s: Source) => (s === 'pojmy' ? '📖 Literární pojmy' : s === 'autori' ? '✍️ Autoři (kartičky)' : `${SUBJECTS[s].emoji} ${SUBJECTS[s].short}`);
 type Size = 'auto' | 'S' | 'M';
 
 /** Výška a šířka tiskové plochy A4 při okrajích 10 mm (v CSS px, 96 dpi) s malou rezervou */
@@ -24,7 +25,7 @@ const FIXED_PX: Record<Exclude<Size, 'auto'>, number> = { S: 11, M: 13 };
 export function CheatSheetPage() {
   const [params] = useSearchParams();
   // odkaz z jiné knihy / tématu otevře výběr znovu
-  return <CheatSheetInner key={params.get('k') ?? params.get('t') ?? params.get('pojmy') ?? ''} />;
+  return <CheatSheetInner key={params.get('k') ?? params.get('t') ?? (params.has('pojmy') ? 'pojmy' : params.has('autori') ? 'autori' : '')} />;
 }
 
 function CheatSheetInner() {
@@ -32,25 +33,36 @@ function CheatSheetInner() {
   const [params] = useSearchParams();
   const initialTopic = params.get('t') ? ALL_TOPIC_MAP[params.get('t')!] : undefined;
   const termsLink = params.has('pojmy');
-  const [source, setSource] = useState<Source>(termsLink ? 'pojmy' : initialTopic && initialTopic.subject !== 'cjl' ? initialTopic.subject : 'cjl');
-  const [picked, setPicked] = useState<Set<string>>(() => new Set(termsLink ? TERM_SHEET_GROUPS.map((g) => g.id) : [params.get('k') ?? params.get('t') ?? ''].filter(Boolean)));
+  const authorsLink = params.has('autori');
+  const [source, setSource] = useState<Source>(termsLink ? 'pojmy' : authorsLink ? 'autori' : initialTopic && initialTopic.subject !== 'cjl' ? initialTopic.subject : 'cjl');
+  const [picked, setPicked] = useState<Set<string>>(
+    () => new Set(termsLink ? TERM_SHEET_GROUPS.map((g) => g.id) : authorsLink ? groupAuthors(data.books).map((a) => a.id) : [params.get('k') ?? params.get('t') ?? ''].filter(Boolean)),
+  );
+  const [perPage, setPerPage] = useState<4 | 6>(6);
   const [size, setSize] = useState<Size>('auto');
   const [notes, setNotes] = useState(false);
 
   const books = useMemo(() => [...data.books].sort((a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)), [data.books]);
+  const authors = useMemo(() => groupAuthors(books), [books]);
   const items =
-    source === 'cjl'
-      ? books.map((b) => ({ id: b.id, label: b.title || 'Bez názvu', sub: b.author }))
-      : source === 'pojmy'
-        ? TERM_SHEET_GROUPS.map((g) => ({ id: g.id, label: g.title, sub: `${TERMS.filter((t) => g.categories.includes(t.category)).length} pojmů` }))
-        : SUBJECT_TOPICS[source].map((t) => ({ id: t.id, label: `${t.number}. ${t.title}`, sub: '' }));
+    source === 'autori'
+      ? authors.map((a) => ({ id: a.id, label: a.name, sub: a.books.map((b) => b.title).join(', ') }))
+      : source === 'cjl'
+        ? books.map((b) => ({ id: b.id, label: b.title || 'Bez názvu', sub: b.author }))
+        : source === 'pojmy'
+          ? TERM_SHEET_GROUPS.map((g) => ({ id: g.id, label: g.title, sub: `${TERMS.filter((t) => g.categories.includes(t.category)).length} pojmů` }))
+          : SUBJECT_TOPICS[source].map((t) => ({ id: t.id, label: `${t.number}. ${t.title}`, sub: '' }));
   const chosen = items.filter((i) => picked.has(i.id));
+  const cards: AuthorCard[] = source === 'autori' ? authors.filter((a) => picked.has(a.id)).map(authorCard) : [];
+  const cardPages = Array.from({ length: Math.ceil(cards.length / perPage) }, (_, i) => cards.slice(i * perPage, (i + 1) * perPage));
   const sheets: Sheet[] =
-    source === 'cjl'
-      ? books.filter((b) => picked.has(b.id)).map((b) => bookSheet(b, notes))
-      : source === 'pojmy'
-        ? TERM_SHEET_GROUPS.filter((g) => picked.has(g.id)).map((g) => termSheet(g.id))
-        : SUBJECT_TOPICS[source].filter((t) => picked.has(t.id)).map(topicSheet);
+    source === 'autori'
+      ? []
+      : source === 'cjl'
+        ? books.filter((b) => picked.has(b.id)).map((b) => bookSheet(b, notes))
+        : source === 'pojmy'
+          ? TERM_SHEET_GROUPS.filter((g) => picked.has(g.id)).map((g) => termSheet(g.id))
+          : SUBJECT_TOPICS[source].filter((t) => picked.has(t.id)).map(topicSheet);
 
   const toggle = (id: string) =>
     setPicked((s) => {
@@ -64,7 +76,7 @@ function CheatSheetInner() {
     setPicked(new Set());
   };
   const print = () => {
-    const name = sheets.length === 1 ? `Tahák – ${sheets[0].title}` : `Taháky – ${source === 'pojmy' ? 'literární pojmy' : SUBJECTS[source].short}`;
+    const name = source === 'autori' ? 'Kartičky autorů' : sheets.length === 1 ? `Tahák – ${sheets[0].title}` : `Taháky – ${source === 'pojmy' ? 'literární pojmy' : SUBJECTS[source].short}`;
     if (!printPage(name)) toast('Tisk umí až nová verze Android aplikace – stáhni si ji v Nastavení.', 'error');
   };
 
@@ -76,7 +88,9 @@ function CheatSheetInner() {
           <Segmented value={source} onChange={switchSource} options={SOURCES.map((s) => ({ value: s, label: sourceLabel(s) }))} />
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold">{source === 'cjl' ? 'Knihy z mého seznamu' : source === 'pojmy' ? 'Skupiny pojmů (každá na jednu stránku)' : 'Témata'}</span>
+              <span className="font-semibold">
+                {source === 'cjl' ? 'Knihy z mého seznamu' : source === 'autori' ? 'Autoři knih z mého seznamu' : source === 'pojmy' ? 'Skupiny pojmů (každá na jednu stránku)' : 'Témata'}
+              </span>
               <span className="text-slate-500 dark:text-slate-400">· vybráno {chosen.length}</span>
               <button className="ml-auto font-semibold text-brand-700 hover:underline dark:text-brand-400" onClick={() => setPicked(new Set(items.map((i) => i.id)))}>
                 Vybrat vše
@@ -119,20 +133,35 @@ function CheatSheetInner() {
               ]}
             />
             {source === 'cjl' && <Toggle checked={notes} onChange={setNotes} label="Přidat moje poznámky" />}
+            {source === 'autori' && (
+              <Segmented
+                value={perPage}
+                onChange={setPerPage}
+                options={[
+                  { value: 6, label: '6 na stránku' },
+                  { value: 4, label: '4 na stránku' },
+                ]}
+              />
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Button icon={<Printer size={18} />} onClick={print} disabled={!sheets.length}>
+            <Button icon={<Printer size={18} />} onClick={print} disabled={!sheets.length && !cards.length}>
               Vytisknout / uložit PDF
             </Button>
-            <span className="text-xs text-slate-500 dark:text-slate-400">V okně tisku vyber tiskárnu, nebo „Uložit jako PDF“. Každý tahák začíná na nové stránce.</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              V okně tisku vyber tiskárnu, nebo „Uložit jako PDF“. {source === 'autori' ? 'Kartičky mají čárkovaný okraj na vystřižení.' : 'Každý tahák začíná na nové stránce.'}
+            </span>
           </div>
         </Card>
-        {sheets.length > 0 && <h2 className="mb-3 text-lg font-bold">Náhled</h2>}
+        {(sheets.length > 0 || cards.length > 0) && <h2 className="mb-3 text-lg font-bold">Náhled</h2>}
       </div>
 
       <div className="space-y-6 print:space-y-0">
         {sheets.map((s) => (
           <SheetView key={s.id} sheet={s} size={size} />
+        ))}
+        {cardPages.map((p, i) => (
+          <CardPage key={`${perPage}-${i}-${p.map((c) => c.id).join()}`} cards={p} perPage={perPage} size={size} />
         ))}
       </div>
     </div>
@@ -221,6 +250,87 @@ function SheetBody({ sheet: s, cols }: { sheet: Sheet; cols?: boolean }) {
           </section>
         ))}
       </div>
+    </>
+  );
+}
+
+const CARD_GAP_MM = 4;
+const CARD_PAD_MM = 3;
+const mmToPx = (mm: number) => (mm * 96) / 25.4;
+
+/** Stránka kartiček autorů (2 sloupce × 2 nebo 3 řady) – kartičky stejně velké, na vystřižení */
+function CardPage({ cards, perPage, size }: { cards: AuthorCard[]; perPage: 4 | 6; size: Size }) {
+  const rows = perPage / 2;
+  const cellH = (297 - 2 * 12 - 5 - CARD_GAP_MM * (rows - 1)) / rows;
+  const cellW = (PAGE_W_MM - CARD_GAP_MM) / 2;
+  const [fit, setFit] = useState(10);
+  const probes = useRef<(HTMLDivElement | null)[]>([]);
+  // „Vyplnit A4“: největší písmo, se kterým se do své kartičky vejde i ten nejdelší autor ze stránky
+  useLayoutEffect(() => {
+    if (size !== 'auto') return;
+    // rezerva na čárkovaný rámeček a zaokrouhlení při tisku
+    const limit = mmToPx(cellH - 2 * CARD_PAD_MM) - 8;
+    let lo = 7;
+    let hi = 18;
+    for (let i = 0; i < 9; i++) {
+      const mid = (lo + hi) / 2;
+      const ok = probes.current.every((el) => {
+        if (!el) return true;
+        el.style.fontSize = `${mid}px`;
+        return el.offsetHeight <= limit;
+      });
+      if (ok) lo = mid;
+      else hi = mid;
+    }
+    setFit(Math.floor(lo * 4) / 4);
+  }, [cards, size, cellH]);
+  const px = size === 'auto' ? fit : FIXED_PX[size];
+  return (
+    <>
+      {size === 'auto' && (
+        <div aria-hidden className="pointer-events-none fixed left-[-10000px] top-0 print:hidden">
+          {cards.map((c, i) => (
+            <div key={c.id} style={{ width: `${cellW - 2 * CARD_PAD_MM - 1}mm` }}>
+              <div
+                ref={(el) => {
+                  probes.current[i] = el;
+                }}
+                className="bg-white leading-snug"
+              >
+                <CardBody card={c} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <article
+        className="mx-auto max-w-[210mm] break-after-page rounded-lg bg-white p-6 leading-snug text-slate-900 shadow-lg ring-1 ring-slate-200 print:max-w-none print:rounded-none print:p-[12mm] print:shadow-none print:ring-0 [&:last-child]:break-after-auto"
+        style={{ fontSize: `${px}px` }}
+      >
+        <div className="grid gap-[4mm] sm:grid-cols-2 print:grid-cols-2">
+          {cards.map((c) => (
+            <div key={c.id} className="overflow-hidden rounded-[2mm] border border-dashed border-slate-400 p-[3mm] print:h-[var(--cell-h)]" style={{ ['--cell-h' as string]: `${cellH}mm` }}>
+              <CardBody card={c} />
+            </div>
+          ))}
+        </div>
+      </article>
+    </>
+  );
+}
+
+function CardBody({ card: c }: { card: AuthorCard }) {
+  return (
+    <>
+      <div className="font-extrabold leading-tight" style={{ fontSize: '1.4em' }}>
+        {c.name}
+      </div>
+      {c.life && <div className="mb-1 font-semibold text-slate-600">{c.life}</div>}
+      {c.rows.map((r) => (
+        <p key={r.label} className="mt-1">
+          <b>{r.label}:</b> {r.text}
+        </p>
+      ))}
     </>
   );
 }

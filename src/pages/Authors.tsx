@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Dumbbell, UserRound } from 'lucide-react';
+import { ArrowLeft, BookOpen, Dumbbell, Printer, UserRound } from 'lucide-react';
 import { useStore } from '../store';
 import { authorQuestions, groupAuthors, type Author } from '../lib/authors';
 import { bookProgress } from '../lib/progress';
@@ -36,9 +36,14 @@ export function Authors() {
         title="Autoři"
         sub={`${authors.length} autorů z tvé četby – život, díla, směr a kontext tvorby.`}
         action={
-          <Button icon={<Dumbbell size={18} />} onClick={() => train('Otázky na autory')}>
-            Trénovat autory
-          </Button>
+          <>
+            <Button variant="secondary" icon={<Printer size={18} />} to="/tahak?autori">
+              Kartičky k tisku
+            </Button>
+            <Button icon={<Dumbbell size={18} />} onClick={() => train('Otázky na autory')}>
+              Trénovat autory
+            </Button>
+          </>
         }
       />
       <p className="mb-5 text-sm text-slate-500 dark:text-slate-400">

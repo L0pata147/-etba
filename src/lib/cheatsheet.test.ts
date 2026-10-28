@@ -50,3 +50,23 @@ describe('Tahák literárních pojmů', () => {
     for (const g of TERM_SHEET_GROUPS) for (const s of termSheet(g.id).sections) for (const p of s.pairs!) expect(p.def.length, p.term).toBeGreaterThan(10);
   });
 });
+
+describe('Kartičky autorů', () => {
+  it('každý autor z výchozího seznamu má kartičku se směrem, díly a textem o autorovi', async () => {
+    const { defaultData } = await import('./storage');
+    const { groupAuthors } = await import('./authors');
+    const { authorCard } = await import('./cheatsheet');
+    const authors = groupAuthors(defaultData().books);
+    expect(authors.length).toBeGreaterThan(10);
+    expect(authors.some((a) => /nezn/i.test(a.name))).toBe(false);
+    for (const a of authors) {
+      const c = authorCard(a);
+      const labels = c.rows.map((r) => r.label);
+      for (const l of ['Směr', 'O autorovi', 'Ze seznamu']) expect(labels, a.name).toContain(l);
+      expect(c.rows.find((r) => r.label === 'Ze seznamu')!.text, a.name).toContain(a.books[0].title);
+    }
+    // autor s více knihami v seznamu (Čapek) má obě na jedné kartičce
+    const capek = authors.find((a) => a.name === 'Karel Čapek')!;
+    expect(authorCard(capek).rows.find((r) => r.label === 'Ze seznamu')!.text).toMatch(/R\.U\.R\.[\s\S]*Válka s mloky|Válka s mloky[\s\S]*R\.U\.R\./);
+  });
+});
