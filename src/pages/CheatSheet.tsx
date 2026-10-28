@@ -333,7 +333,10 @@ function SheetView({ sheet: s, size }: { sheet: Sheet; size: Size }) {
 function SheetBody({ sheet: s, cols }: { sheet: Sheet; cols?: boolean }) {
   return (
     <>
-      <header className="mb-3 border-b-2 border-slate-900 pb-2">
+      <header
+        className="mb-3 border-b-2 border-slate-900 pb-2"
+        style={s.accent ? { borderColor: s.accent, borderBottomWidth: 3, printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } : undefined}
+      >
         <h1 className="font-extrabold leading-tight" style={{ fontSize: '1.75em' }}>
           {s.title}
         </h1>

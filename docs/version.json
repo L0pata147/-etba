@@ -1,6 +1,6 @@
 {
-  "version": "1.46.0",
+  "version": "1.47.0",
   "notes": [
-    "Taháky k tisku rozdělené podle zkoušek (čeština ústní / písemka, sítě ústní / praktická, HW, cloud) a odkaz na ně v menu každé zkoušky."
+    "Tahák literárních pojmů má světle modrou čáru pod nadpisem – na první pohled se odliší od taháků ke knihám."
   ]
 }

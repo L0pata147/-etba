@@ -33,6 +33,8 @@ export interface Sheet {
   sections: SheetSection[];
   /** Dlouhý tahák – rozdělí se na stránky podle změřené výšky částí */
   pack?: boolean;
+  /** Barva čáry pod nadpisem (odliší druh taháku, např. pojmy od knih) */
+  accent?: string;
 }
 
 const ABBR = /(?:^|[\s(])(?:\p{L}|\d+|tzv|tj|např|atd|apod|sv|st|r|př|n\.\s?l|kap|č|ing|mgr|dr)\.$/iu;
@@ -120,6 +122,7 @@ export function termSheet(groupId: string, terms: Term[] = TERMS): Sheet {
     id: `pojmy-${g.id}`,
     title: g.title,
     subtitle: '📖 Literární pojmy',
+    accent: '#38bdf8',
     meta: [],
     sections: g.categories
       .map((c) => ({
