@@ -4,7 +4,7 @@ import { Printer } from 'lucide-react';
 import type { SubjectId } from '../types';
 import { useStore } from '../store';
 import { CATEGORY_ORDER } from '../data/osnova';
-import { SUBJECTS, SUBJECT_TOPICS, ALL_TOPIC_MAP } from '../data/subjects';
+import { SUBJECT_TOPICS, ALL_TOPIC_MAP } from '../data/subjects';
 import {
   TERM_SHEET_GROUPS,
   authorCard,
@@ -30,17 +30,35 @@ import { TERMS } from '../data/terms';
 import { printPage } from '../lib/native';
 import { Button, Card, PageHeader, Segmented, Toggle, cx } from '../components/ui';
 
-type Source = Extract<SubjectId, 'cjl' | 'site' | 'hw' | 'cloud'> | 'pojmy' | 'autori' | 'chronologie' | 'sloh' | 'prikazy' | 'postupy';
-const SOURCES: Source[] = ['cjl', 'autori', 'pojmy', 'chronologie', 'sloh', 'site', 'prikazy', 'postupy', 'hw', 'cloud'];
-const EXTRA_LABEL: Partial<Record<Source, string>> = {
-  pojmy: '📖 Literární pojmy',
+type Source = Extract<SubjectId, 'cjl' | 'site' | 'hw' | 'cloud'> | 'pojmy' | 'autori' | 'chronologie' | 'sloh' | 'prikazy' | 'postupy-site' | 'postupy-cloud';
+const EXTRA_LABEL: Record<Source, string> = {
+  cjl: '📚 Četba (knihy)',
   autori: '✍️ Autoři (kartičky)',
+  pojmy: '📖 Literární pojmy',
   chronologie: '🗓️ Chronologie četby',
-  sloh: '📝 Sloh (písemka)',
+  sloh: '📝 Slohové útvary a styly',
+  site: '🌐 Témata',
   prikazy: '⌨️ Příkazy Cisco a Linux',
-  postupy: '🪜 Postupy krok za krokem',
+  'postupy-site': '🪜 Postupy (Cisco, Linux, Windows)',
+  hw: '🖥️ Okruhy',
+  cloud: '☁️ Okruhy',
+  'postupy-cloud': '🪜 Postupy (úložiště, Docker, virtualizace)',
 };
-const sourceLabel = (s: Source) => EXTRA_LABEL[s] ?? `${SUBJECTS[s as SubjectId].emoji} ${SUBJECTS[s as SubjectId].short}`;
+const sourceLabel = (s: Source) => EXTRA_LABEL[s];
+/** Taháky rozdělené podle zkoušek (id zkoušek odpovídají menu) */
+const EXAMS: { id: string; label: string; sources: Source[] }[] = [
+  { id: 'cjl-ustni', label: '📚 Čeština – ústní', sources: ['cjl', 'autori', 'pojmy', 'chronologie'] },
+  { id: 'cjl-pisemna', label: '📝 Čeština – písemka', sources: ['sloh'] },
+  { id: 'site-ustni', label: '🌐 Sítě – ústní', sources: ['site'] },
+  { id: 'site-prakticka', label: '🛠️ Sítě – praktická', sources: ['prikazy', 'postupy-site'] },
+  { id: 'hw-test', label: '🖥️ HW – test', sources: ['hw'] },
+  { id: 'cloud-prakticka', label: '☁️ Cloud – praktická', sources: ['cloud', 'postupy-cloud'] },
+];
+const examOf = (s: Source) => EXAMS.find((e) => e.sources.includes(s))!;
+const PROC_PLATFORMS: Record<'postupy-site' | 'postupy-cloud', Platform[]> = {
+  'postupy-site': ['cisco', 'linux', 'windows'],
+  'postupy-cloud': ['storage', 'docker', 'virtualbox', 'proxmox', 'hyperv'],
+};
 /** Platformy na tahák příkazů */
 const CMD_PLATFORMS: Platform[] = ['cisco', 'linux'];
 const cmdKey = (p: Platform, g: string) => `${p}|${g}`;
@@ -49,6 +67,14 @@ const SLOH_ITEMS = [
   { id: 'styly', label: 'Funkční styly', sub: `${FUNCTIONAL_STYLES.length} stylů – znaky, postupy, útvary` },
 ];
 type Size = 'auto' | 'S' | 'M';
+
+/** Co se po přepnutí taháku rovnou vybere – u taháků s pár položkami vše */
+function defaultPick(s: Source): Set<string> {
+  if (s === 'chronologie') return new Set(['chronologie']);
+  if (s === 'sloh') return new Set(SLOH_ITEMS.map((x) => x.id));
+  if (s === 'pojmy') return new Set(TERM_SHEET_GROUPS.map((g) => g.id));
+  return new Set();
+}
 
 /** Výška a šířka tiskové plochy A4 při okrajích 10 mm (v CSS px, 96 dpi) s malou rezervou */
 // Okraj 12 mm je přímo v taháku (padding), protože prohlížeče okraje z @page často ignorují a tisknou až ke kraji papíru
@@ -59,18 +85,27 @@ const FIXED_PX: Record<Exclude<Size, 'auto'>, number> = { S: 11, M: 13 };
 export function CheatSheetPage() {
   const [params] = useSearchParams();
   // odkaz z jiné knihy / tématu otevře výběr znovu
-  return <CheatSheetInner key={params.get('k') ?? params.get('t') ?? (params.has('pojmy') ? 'pojmy' : params.has('autori') ? 'autori' : '')} />;
+  return <CheatSheetInner key={params.get('k') ?? params.get('t') ?? (params.has('pojmy') ? 'pojmy' : params.has('autori') ? 'autori' : (params.get('zk') ?? ''))} />;
 }
 
 function CheatSheetInner() {
   const { data, toast } = useStore();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const initialTopic = params.get('t') ? ALL_TOPIC_MAP[params.get('t')!] : undefined;
   const termsLink = params.has('pojmy');
   const authorsLink = params.has('autori');
-  const [source, setSource] = useState<Source>(termsLink ? 'pojmy' : authorsLink ? 'autori' : initialTopic && initialTopic.subject !== 'cjl' ? initialTopic.subject : 'cjl');
-  const [picked, setPicked] = useState<Set<string>>(
-    () => new Set(termsLink ? TERM_SHEET_GROUPS.map((g) => g.id) : authorsLink ? groupAuthors(data.books).map((a) => a.id) : [params.get('k') ?? params.get('t') ?? ''].filter(Boolean)),
+  const examLink = EXAMS.find((e) => e.id === params.get('zk'));
+  const [source, setSource] = useState<Source>(
+    termsLink ? 'pojmy' : authorsLink ? 'autori' : initialTopic && initialTopic.subject !== 'cjl' ? initialTopic.subject : examLink ? examLink.sources[0] : 'cjl',
+  );
+  const [picked, setPicked] = useState<Set<string>>(() =>
+    termsLink
+      ? new Set(TERM_SHEET_GROUPS.map((g) => g.id))
+      : authorsLink
+        ? new Set(groupAuthors(data.books).map((a) => a.id))
+        : examLink && !params.get('k') && !params.get('t')
+          ? defaultPick(examLink.sources[0])
+          : new Set([params.get('k') ?? params.get('t') ?? ''].filter(Boolean)),
   );
   const [perPage, setPerPage] = useState<4 | 6>(6);
   const [size, setSize] = useState<Size>('auto');
@@ -87,8 +122,8 @@ function CheatSheetInner() {
             sub: `${ALL_COMMANDS.filter((c) => c.platform === p && c.group === g).length} příkazů`,
           })),
         )
-      : source === 'postupy'
-        ? ALL_PROCEDURES.map((p) => ({ id: p.id, label: p.title, sub: PLATFORM_LABEL[p.platform] }))
+      : source === 'postupy-site' || source === 'postupy-cloud'
+        ? ALL_PROCEDURES.filter((p) => PROC_PLATFORMS[source].includes(p.platform)).map((p) => ({ id: p.id, label: p.title, sub: PLATFORM_LABEL[p.platform] }))
         : source === 'chronologie'
           ? [{ id: 'chronologie', label: 'Všechny knihy z mého seznamu podle doby vzniku', sub: `${books.length} děl` }]
           : source === 'sloh'
@@ -113,8 +148,8 @@ function CheatSheetInner() {
             [...new Set(ALL_COMMANDS.filter((c) => c.platform === p).map((c) => c.group))].filter((g) => picked.has(cmdKey(p, g))),
           ),
         )
-      : source === 'postupy'
-        ? (['cisco', 'linux', 'windows', 'storage', 'docker', 'virtualbox', 'proxmox', 'hyperv'] as Platform[]).flatMap((p) => {
+      : source === 'postupy-site' || source === 'postupy-cloud'
+        ? PROC_PLATFORMS[source].flatMap((p) => {
             const list = ALL_PROCEDURES.filter((x) => x.platform === p && picked.has(x.id));
             return list.length ? procedureSheets(p, PLATFORM_LABEL[p], list) : [];
           })
@@ -141,12 +176,12 @@ function CheatSheetInner() {
     });
   const switchSource = (s: Source) => {
     setSource(s);
-    // chronologie a sloh mají jen pár položek – rovnou vybrat vše
-    setPicked(new Set(s === 'chronologie' ? ['chronologie'] : s === 'sloh' ? SLOH_ITEMS.map((x) => x.id) : []));
+    setPicked(defaultPick(s));
   };
+  const exam = examOf(source);
   const print = () => {
     const name =
-      source === 'autori' ? 'Kartičky autorů' : sheets.length === 1 ? `Tahák – ${sheets[0].title}` : `Taháky – ${EXTRA_LABEL[source]?.replace(/^\S+\s/, '') ?? SUBJECTS[source as SubjectId].short}`;
+      source === 'autori' ? 'Kartičky autorů' : sheets.length === 1 ? `Tahák – ${sheets[0].title}` : `Taháky – ${exam.label.replace(/^\S+\s/, '')} – ${EXTRA_LABEL[source].replace(/^\S+\s/, '')}`;
     if (!printPage(name)) toast('Tisk umí až nová verze Android aplikace – stáhni si ji v Nastavení.', 'error');
   };
 
@@ -155,7 +190,16 @@ function CheatSheetInner() {
       <div className="print:hidden">
         <PageHeader title="Taháky k tisku" emoji="🖨️" sub="To nejdůležitější z knihy nebo tématu na jednu stránku A4. Vytiskni si je, nebo je ulož jako PDF." />
         <Card className="mb-5 space-y-4 p-5">
-          <Segmented value={source} onChange={switchSource} options={SOURCES.map((s) => ({ value: s, label: sourceLabel(s) }))} />
+          <div>
+            <div className="mb-1.5 text-sm font-semibold">Zkouška</div>
+            <Segmented value={exam.id} onChange={(id) => setParams({ zk: id }, { replace: true })} options={EXAMS.map((e) => ({ value: e.id, label: e.label }))} />
+          </div>
+          {exam.sources.length > 1 && (
+            <div>
+              <div className="mb-1.5 text-sm font-semibold">Tahák</div>
+              <Segmented value={source} onChange={switchSource} options={exam.sources.map((s) => ({ value: s, label: sourceLabel(s) }))} />
+            </div>
+          )}
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
               <span className="font-semibold">
@@ -167,7 +211,7 @@ function CheatSheetInner() {
                       ? 'Skupiny pojmů (každá na jednu stránku)'
                       : source === 'prikazy'
                         ? 'Skupiny příkazů (víc skupin na stránku)'
-                        : source === 'postupy'
+                        : source === 'postupy-site' || source === 'postupy-cloud'
                           ? 'Postupy (víc postupů na stránku)'
                           : source === 'chronologie' || source === 'sloh'
                             ? 'Co vytisknout'

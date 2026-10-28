@@ -1,6 +1,6 @@
 {
-  "version": "1.45.0",
+  "version": "1.46.0",
   "notes": [
-    "Nové taháky k tisku: příkazy Cisco a Linux, postupy krok za krokem, chronologie četby a sloh (útvary + funkční styly). Dlouhé taháky se samy rozdělí na stránky."
+    "Taháky k tisku rozdělené podle zkoušek (čeština ústní / písemka, sítě ústní / praktická, HW, cloud) a odkaz na ně v menu každé zkoušky."
   ]
 }
