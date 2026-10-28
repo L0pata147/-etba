@@ -4,6 +4,10 @@ import { TERMS, TERM_CATEGORIES } from '../data/terms';
 import { CATEGORIES, KINDS } from '../data/osnova';
 import { SUBJECTS } from '../data/subjects';
 import type { Author } from './authors';
+import type { CommandItem, Platform, Procedure } from '../types';
+import type { WritingForm } from '../data/writing';
+import type { FunctionalStyle } from '../data/styles';
+import { approxYear } from './generator';
 
 export interface SheetSection {
   title: string;
@@ -13,6 +17,12 @@ export interface SheetSection {
   ordered?: boolean;
   /** Dvojice pojem – výklad */
   pairs?: { term: string; def: string }[];
+  /** Pojem v páru je příkaz (neproporcionální písmo) */
+  mono?: boolean;
+  /** Kroky postupu (s příkazem) */
+  steps?: { text: string; cmd?: string }[];
+  /** Řádky „popisek: text“ */
+  rows?: { label: string; text: string }[];
 }
 
 export interface Sheet {
@@ -21,6 +31,8 @@ export interface Sheet {
   subtitle: string;
   meta: string[];
   sections: SheetSection[];
+  /** Dlouhý tahák – rozdělí se na stránky podle změřené výšky částí */
+  pack?: boolean;
 }
 
 const ABBR = /(?:^|[\s(])(?:\p{L}|\d+|tzv|tj|např|atd|apod|sv|st|r|př|n\.\s?l|kap|č|ing|mgr|dr)\.$/iu;
@@ -42,7 +54,7 @@ export function firstSentences(text: string | undefined, n: number): string {
   return t;
 }
 
-const nonEmpty = (s: SheetSection) => !!(s.text?.trim() || s.list?.length || s.pairs?.length);
+const nonEmpty = (s: SheetSection) => !!(s.text?.trim() || s.list?.length || s.pairs?.length || s.steps?.length || s.rows?.length);
 
 export function bookSheet(b: Book, withNotes = false): Sheet {
   const people = (list: Book['mainCharacters'], n: number) => list.filter((c) => c.name.trim()).map((c) => (c.description.trim() ? `${c.name} – ${firstSentences(c.description, n)}` : c.name));
@@ -138,5 +150,127 @@ export function authorCard(a: Author): AuthorCard {
       { label: 'Ze seznamu', text: a.books.map((b) => `${b.title}${b.year ? ` (${b.year.replace(/\s*\(.*\)$/, '')})` : ''}`).join(', ') },
       { label: 'Další díla', text: a.otherWorks.slice(0, 6).join(', ') },
     ].filter((r) => r.text.trim()),
+  };
+}
+
+// ---------- taháky na více stránek (příkazy, postupy, sloh) ----------
+
+/** Přibližná „délka“ části taháku ve znacích – podle ní se části rozdělí na stránky */
+function weight(s: SheetSection): number {
+  const len = (x?: string) => (x ?? '').length;
+  return (
+    60 +
+    len(s.text) +
+    (s.list ?? []).reduce((a, x) => a + len(x) + 25, 0) +
+    (s.pairs ?? []).reduce((a, p) => a + len(p.term) * 1.3 + len(p.def) + 25, 0) +
+    (s.steps ?? []).reduce((a, x) => a + len(x.text) + len(x.cmd) * 1.3 + (x.cmd ? 20 * x.cmd.split('\n').length : 0) + 25, 0) +
+    (s.rows ?? []).reduce((a, r) => a + len(r.label) + len(r.text) + 25, 0)
+  );
+}
+
+/** Rozdělí části na stránky tak, aby každá měla nejvýš `budget` znaků (část se nikdy nedělí) */
+export function packSheets(base: { id: string; title: string; subtitle: string }, sections: SheetSection[], budget = 3600): Sheet[] {
+  const pages: SheetSection[][] = [];
+  let cur: SheetSection[] = [];
+  let used = 0;
+  for (const s of sections.filter(nonEmpty)) {
+    const w = weight(s);
+    if (cur.length && used + w > budget) {
+      pages.push(cur);
+      cur = [];
+      used = 0;
+    }
+    cur.push(s);
+    used += w;
+  }
+  if (cur.length) pages.push(cur);
+  return pages.map((p, i) => ({
+    id: `${base.id}-${i + 1}`,
+    title: pages.length > 1 ? `${base.title} (${i + 1}/${pages.length})` : base.title,
+    subtitle: base.subtitle,
+    meta: [],
+    sections: p,
+    // bez pevného limitu rozdělí stránky až UI podle změřené výšky
+    pack: budget === Infinity,
+  }));
+}
+
+/** Příkazy jedné platformy po skupinách (úkol → příkaz) */
+export function commandSheets(platform: Platform, label: string, commands: CommandItem[], groups?: string[]): Sheet[] {
+  const own = commands.filter((c) => c.platform === platform);
+  const names = [...new Set(own.map((c) => c.group))].filter((g) => !groups || groups.includes(g));
+  return packSheets(
+    { id: `prikazy-${platform}`, title: `Příkazy – ${label}`, subtitle: '🛠️ Praktická zkouška' },
+    names.map((g) => ({ title: g, mono: true, pairs: own.filter((c) => c.group === g).map((c) => ({ term: c.command, def: c.task + (c.note ? ` (${c.note})` : '') })) })),
+    Infinity,
+  );
+}
+
+/** Postupy krok za krokem (víc postupů na stránku) */
+export function procedureSheets(id: string, label: string, procedures: Procedure[]): Sheet[] {
+  return packSheets(
+    { id: `postupy-${id}`, title: `Postupy – ${label}`, subtitle: '🛠️ Praktická zkouška' },
+    procedures.map((p) => ({ title: p.title, text: p.goal, steps: p.steps })),
+    Infinity,
+  );
+}
+
+/** Nadpis části chronologie podle roku – století, 20. století rozdělené rokem 1945 */
+function periodLabel(y: number, raw: string): string {
+  if (!y) return /stolet/.test(raw) ? raw.replace(/^.*?(\d+\.\s*stolet\S*).*$/, '$1') : 'Bez data';
+  const c = Math.floor((y - 1) / 100) + 1;
+  if (c === 20) return y <= 1945 ? '20. století (do roku 1945)' : '20. století (po roce 1945)';
+  return `${c}. století`;
+}
+
+/** Chronologie četby – knihy seřazené podle roku vzniku */
+export function chronologySheet(books: Book[]): Sheet {
+  const sorted = [...books].sort((a, b) => (approxYear(a.year) || 99999) - (approxYear(b.year) || 99999));
+  const groups: SheetSection[] = [];
+  for (const b of sorted) {
+    const label = periodLabel(approxYear(b.year), b.year);
+    let g = groups[groups.length - 1];
+    if (!g || g.title !== label) groups.push((g = { title: label, pairs: [] }));
+    g.pairs!.push({
+      term: b.year || '?',
+      def: `${b.title} – ${b.author} (${CATEGORIES[b.category].short})${b.movement ? ` · ${b.movement}` : ''}${b.genre ? ` · ${firstSentences(b.genre, 1)}` : ''}`,
+    });
+  }
+  return { id: 'chronologie', title: 'Chronologie mé četby', subtitle: '📚 Literárněhistorický kontext', meta: [`${books.length} děl seřazených podle doby vzniku`], sections: groups };
+}
+
+/** Slohové útvary k písemné práci */
+export function writingSheets(forms: WritingForm[]): Sheet[] {
+  return packSheets(
+    { id: 'sloh-utvary', title: 'Slohové útvary', subtitle: '✍️ Písemná práce' },
+    forms.map((f) => ({
+      title: f.name,
+      rows: [
+        { label: 'Styl a postup', text: f.style },
+        { label: 'Účel', text: f.purpose },
+        { label: 'Stavba', text: f.structure.join(' → ') },
+        { label: 'Jazyk', text: f.language.join('; ') },
+        { label: 'Pozor na', text: f.pitfalls.join('; ') },
+      ],
+    })),
+    Infinity,
+  );
+}
+
+/** Funkční styly na jednu stránku */
+export function stylesSheet(styles: FunctionalStyle[]): Sheet {
+  return {
+    id: 'sloh-styly',
+    title: 'Funkční styly',
+    subtitle: '✍️ Písemná práce a neumělecký text',
+    meta: [],
+    sections: styles.map((s) => ({
+      title: `Styl ${s.name}`,
+      rows: [
+        { label: 'Znaky', text: s.features.join(', ') },
+        { label: 'Slohové postupy', text: s.procedures.join(', ') },
+        { label: 'Útvary', text: s.forms.join(', ') },
+      ],
+    })),
   };
 }

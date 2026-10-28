@@ -5,15 +5,49 @@ import type { SubjectId } from '../types';
 import { useStore } from '../store';
 import { CATEGORY_ORDER } from '../data/osnova';
 import { SUBJECTS, SUBJECT_TOPICS, ALL_TOPIC_MAP } from '../data/subjects';
-import { TERM_SHEET_GROUPS, authorCard, bookSheet, termSheet, topicSheet, type AuthorCard, type Sheet } from '../lib/cheatsheet';
+import {
+  TERM_SHEET_GROUPS,
+  authorCard,
+  bookSheet,
+  chronologySheet,
+  commandSheets,
+  procedureSheets,
+  stylesSheet,
+  termSheet,
+  topicSheet,
+  writingSheets,
+  type AuthorCard,
+  type Sheet,
+  type SheetSection,
+} from '../lib/cheatsheet';
+import { ALL_COMMANDS, PLATFORM_LABEL } from '../data/site/commands';
+import { ALL_PROCEDURES } from '../data/site/procedures';
+import { WRITING_FORMS } from '../data/writing';
+import { FUNCTIONAL_STYLES } from '../data/styles';
+import type { Platform } from '../types';
 import { groupAuthors } from '../lib/authors';
 import { TERMS } from '../data/terms';
 import { printPage } from '../lib/native';
 import { Button, Card, PageHeader, Segmented, Toggle, cx } from '../components/ui';
 
-type Source = Extract<SubjectId, 'cjl' | 'site' | 'hw' | 'cloud'> | 'pojmy' | 'autori';
-const SOURCES: Source[] = ['cjl', 'autori', 'pojmy', 'site', 'hw', 'cloud'];
-const sourceLabel = (s: Source) => (s === 'pojmy' ? '📖 Literární pojmy' : s === 'autori' ? '✍️ Autoři (kartičky)' : `${SUBJECTS[s].emoji} ${SUBJECTS[s].short}`);
+type Source = Extract<SubjectId, 'cjl' | 'site' | 'hw' | 'cloud'> | 'pojmy' | 'autori' | 'chronologie' | 'sloh' | 'prikazy' | 'postupy';
+const SOURCES: Source[] = ['cjl', 'autori', 'pojmy', 'chronologie', 'sloh', 'site', 'prikazy', 'postupy', 'hw', 'cloud'];
+const EXTRA_LABEL: Partial<Record<Source, string>> = {
+  pojmy: '📖 Literární pojmy',
+  autori: '✍️ Autoři (kartičky)',
+  chronologie: '🗓️ Chronologie četby',
+  sloh: '📝 Sloh (písemka)',
+  prikazy: '⌨️ Příkazy Cisco a Linux',
+  postupy: '🪜 Postupy krok za krokem',
+};
+const sourceLabel = (s: Source) => EXTRA_LABEL[s] ?? `${SUBJECTS[s as SubjectId].emoji} ${SUBJECTS[s as SubjectId].short}`;
+/** Platformy na tahák příkazů */
+const CMD_PLATFORMS: Platform[] = ['cisco', 'linux'];
+const cmdKey = (p: Platform, g: string) => `${p}|${g}`;
+const SLOH_ITEMS = [
+  { id: 'utvary', label: 'Slohové útvary', sub: `${WRITING_FORMS.length} útvarů – stavba, jazyk, chyby` },
+  { id: 'styly', label: 'Funkční styly', sub: `${FUNCTIONAL_STYLES.length} stylů – znaky, postupy, útvary` },
+];
 type Size = 'auto' | 'S' | 'M';
 
 /** Výška a šířka tiskové plochy A4 při okrajích 10 mm (v CSS px, 96 dpi) s malou rezervou */
@@ -45,24 +79,58 @@ function CheatSheetInner() {
   const books = useMemo(() => [...data.books].sort((a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)), [data.books]);
   const authors = useMemo(() => groupAuthors(books), [books]);
   const items =
-    source === 'autori'
-      ? authors.map((a) => ({ id: a.id, label: a.name, sub: a.books.map((b) => b.title).join(', ') }))
-      : source === 'cjl'
-        ? books.map((b) => ({ id: b.id, label: b.title || 'Bez názvu', sub: b.author }))
-        : source === 'pojmy'
-          ? TERM_SHEET_GROUPS.map((g) => ({ id: g.id, label: g.title, sub: `${TERMS.filter((t) => g.categories.includes(t.category)).length} pojmů` }))
-          : SUBJECT_TOPICS[source].map((t) => ({ id: t.id, label: `${t.number}. ${t.title}`, sub: '' }));
+    source === 'prikazy'
+      ? CMD_PLATFORMS.flatMap((p) =>
+          [...new Set(ALL_COMMANDS.filter((c) => c.platform === p).map((c) => c.group))].map((g) => ({
+            id: cmdKey(p, g),
+            label: `${p === 'cisco' ? 'Cisco' : 'Linux'} – ${g}`,
+            sub: `${ALL_COMMANDS.filter((c) => c.platform === p && c.group === g).length} příkazů`,
+          })),
+        )
+      : source === 'postupy'
+        ? ALL_PROCEDURES.map((p) => ({ id: p.id, label: p.title, sub: PLATFORM_LABEL[p.platform] }))
+        : source === 'chronologie'
+          ? [{ id: 'chronologie', label: 'Všechny knihy z mého seznamu podle doby vzniku', sub: `${books.length} děl` }]
+          : source === 'sloh'
+            ? SLOH_ITEMS
+            : source === 'autori'
+              ? authors.map((a) => ({ id: a.id, label: a.name, sub: a.books.map((b) => b.title).join(', ') }))
+              : source === 'cjl'
+                ? books.map((b) => ({ id: b.id, label: b.title || 'Bez názvu', sub: b.author }))
+                : source === 'pojmy'
+                  ? TERM_SHEET_GROUPS.map((g) => ({ id: g.id, label: g.title, sub: `${TERMS.filter((t) => g.categories.includes(t.category)).length} pojmů` }))
+                  : SUBJECT_TOPICS[source].map((t) => ({ id: t.id, label: `${t.number}. ${t.title}`, sub: '' }));
   const chosen = items.filter((i) => picked.has(i.id));
   const cards: AuthorCard[] = source === 'autori' ? authors.filter((a) => picked.has(a.id)).map(authorCard) : [];
   const cardPages = Array.from({ length: Math.ceil(cards.length / perPage) }, (_, i) => cards.slice(i * perPage, (i + 1) * perPage));
   const sheets: Sheet[] =
-    source === 'autori'
-      ? []
-      : source === 'cjl'
-        ? books.filter((b) => picked.has(b.id)).map((b) => bookSheet(b, notes))
-        : source === 'pojmy'
-          ? TERM_SHEET_GROUPS.filter((g) => picked.has(g.id)).map((g) => termSheet(g.id))
-          : SUBJECT_TOPICS[source].filter((t) => picked.has(t.id)).map(topicSheet);
+    source === 'prikazy'
+      ? CMD_PLATFORMS.flatMap((p) =>
+          commandSheets(
+            p,
+            PLATFORM_LABEL[p],
+            ALL_COMMANDS,
+            [...new Set(ALL_COMMANDS.filter((c) => c.platform === p).map((c) => c.group))].filter((g) => picked.has(cmdKey(p, g))),
+          ),
+        )
+      : source === 'postupy'
+        ? (['cisco', 'linux', 'windows', 'storage', 'docker', 'virtualbox', 'proxmox', 'hyperv'] as Platform[]).flatMap((p) => {
+            const list = ALL_PROCEDURES.filter((x) => x.platform === p && picked.has(x.id));
+            return list.length ? procedureSheets(p, PLATFORM_LABEL[p], list) : [];
+          })
+        : source === 'chronologie'
+          ? picked.has('chronologie')
+            ? [chronologySheet(books)]
+            : []
+          : source === 'sloh'
+            ? [...(picked.has('utvary') ? writingSheets(WRITING_FORMS) : []), ...(picked.has('styly') ? [stylesSheet(FUNCTIONAL_STYLES)] : [])]
+            : source === 'autori'
+              ? []
+              : source === 'cjl'
+                ? books.filter((b) => picked.has(b.id)).map((b) => bookSheet(b, notes))
+                : source === 'pojmy'
+                  ? TERM_SHEET_GROUPS.filter((g) => picked.has(g.id)).map((g) => termSheet(g.id))
+                  : SUBJECT_TOPICS[source].filter((t) => picked.has(t.id)).map(topicSheet);
 
   const toggle = (id: string) =>
     setPicked((s) => {
@@ -73,10 +141,12 @@ function CheatSheetInner() {
     });
   const switchSource = (s: Source) => {
     setSource(s);
-    setPicked(new Set());
+    // chronologie a sloh mají jen pár položek – rovnou vybrat vše
+    setPicked(new Set(s === 'chronologie' ? ['chronologie'] : s === 'sloh' ? SLOH_ITEMS.map((x) => x.id) : []));
   };
   const print = () => {
-    const name = source === 'autori' ? 'Kartičky autorů' : sheets.length === 1 ? `Tahák – ${sheets[0].title}` : `Taháky – ${source === 'pojmy' ? 'literární pojmy' : SUBJECTS[source].short}`;
+    const name =
+      source === 'autori' ? 'Kartičky autorů' : sheets.length === 1 ? `Tahák – ${sheets[0].title}` : `Taháky – ${EXTRA_LABEL[source]?.replace(/^\S+\s/, '') ?? SUBJECTS[source as SubjectId].short}`;
     if (!printPage(name)) toast('Tisk umí až nová verze Android aplikace – stáhni si ji v Nastavení.', 'error');
   };
 
@@ -89,7 +159,19 @@ function CheatSheetInner() {
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
               <span className="font-semibold">
-                {source === 'cjl' ? 'Knihy z mého seznamu' : source === 'autori' ? 'Autoři knih z mého seznamu' : source === 'pojmy' ? 'Skupiny pojmů (každá na jednu stránku)' : 'Témata'}
+                {source === 'cjl'
+                  ? 'Knihy z mého seznamu'
+                  : source === 'autori'
+                    ? 'Autoři knih z mého seznamu'
+                    : source === 'pojmy'
+                      ? 'Skupiny pojmů (každá na jednu stránku)'
+                      : source === 'prikazy'
+                        ? 'Skupiny příkazů (víc skupin na stránku)'
+                        : source === 'postupy'
+                          ? 'Postupy (víc postupů na stránku)'
+                          : source === 'chronologie' || source === 'sloh'
+                            ? 'Co vytisknout'
+                            : 'Témata'}
               </span>
               <span className="text-slate-500 dark:text-slate-400">· vybráno {chosen.length}</span>
               <button className="ml-auto font-semibold text-brand-700 hover:underline dark:text-brand-400" onClick={() => setPicked(new Set(items.map((i) => i.id)))}>
@@ -157,9 +239,7 @@ function CheatSheetInner() {
       </div>
 
       <div className="space-y-6 print:space-y-0">
-        {sheets.map((s) => (
-          <SheetView key={s.id} sheet={s} size={size} />
-        ))}
+        {sheets.map((s) => (s.pack ? <PackedSheets key={s.id} sheet={s} size={size} /> : <SheetView key={s.id} sheet={s} size={size} />))}
         {cardPages.map((p, i) => (
           <CardPage key={`${perPage}-${i}-${p.map((c) => c.id).join()}`} cards={p} perPage={perPage} size={size} />
         ))}
@@ -217,37 +297,8 @@ function SheetBody({ sheet: s, cols }: { sheet: Sheet; cols?: boolean }) {
         {s.meta.length > 0 && <div className="mt-0.5 text-slate-600">{s.meta.join(' · ')}</div>}
       </header>
       <div className={cx('gap-5 print:columns-2', cols ? 'columns-2' : 'sm:columns-2')}>
-        {s.sections.map((sec) => (
-          <section key={sec.title} className={cx('mb-2.5', !sec.pairs && 'break-inside-avoid')}>
-            <h2 className="mb-0.5 break-after-avoid font-bold uppercase tracking-wide text-slate-800" style={{ fontSize: '0.85em' }}>
-              {sec.title}
-            </h2>
-            {sec.text && <p className="whitespace-pre-line">{sec.text}</p>}
-            {sec.list &&
-              (sec.ordered ? (
-                <ol className="list-decimal space-y-0.5 pl-4">
-                  {sec.list.map((x, i) => (
-                    <li key={i}>{x}</li>
-                  ))}
-                </ol>
-              ) : (
-                <ul className="list-disc space-y-0.5 pl-4">
-                  {sec.list.map((x, i) => (
-                    <li key={i}>{x}</li>
-                  ))}
-                </ul>
-              ))}
-            {sec.pairs && (
-              <dl className="space-y-0.5">
-                {sec.pairs.map((p) => (
-                  <div key={p.term} className="break-inside-avoid">
-                    <dt className="inline font-semibold">{p.term}</dt>
-                    <dd className="inline"> – {p.def}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </section>
+        {s.sections.map((sec, k) => (
+          <SectionView key={`${sec.title}-${k}`} sec={sec} />
         ))}
       </div>
     </>
@@ -330,6 +381,128 @@ function CardBody({ card: c }: { card: AuthorCard }) {
         <p key={r.label} className="mt-1">
           <b>{r.label}:</b> {r.text}
         </p>
+      ))}
+    </>
+  );
+}
+
+function SectionView({ sec }: { sec: SheetSection }) {
+  return (
+    <section className={cx('mb-2.5', !sec.pairs && !sec.steps && 'break-inside-avoid')}>
+      <h2 className="mb-0.5 break-after-avoid font-bold uppercase tracking-wide text-slate-800" style={{ fontSize: '0.85em' }}>
+        {sec.title}
+      </h2>
+      {sec.text && <p className="whitespace-pre-line">{sec.text}</p>}
+      {sec.list &&
+        (sec.ordered ? (
+          <ol className="list-decimal space-y-0.5 pl-4">
+            {sec.list.map((x, i) => (
+              <li key={i}>{x}</li>
+            ))}
+          </ol>
+        ) : (
+          <ul className="list-disc space-y-0.5 pl-4">
+            {sec.list.map((x, i) => (
+              <li key={i}>{x}</li>
+            ))}
+          </ul>
+        ))}
+      {sec.pairs && (
+        <dl className="space-y-0.5">
+          {sec.pairs.map((p, i) => (
+            <div key={`${p.term}-${i}`} className="break-inside-avoid">
+              <dt className={cx('inline font-semibold', sec.mono && 'rounded bg-slate-100 px-1 font-mono [overflow-wrap:anywhere]')} style={sec.mono ? { fontSize: '0.92em' } : undefined}>
+                {p.term}
+              </dt>
+              <dd className="inline"> – {p.def}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+      {sec.steps && (
+        <ol className="list-decimal space-y-0.5 pl-4">
+          {sec.steps.map((st, i) => (
+            <li key={i} className="break-inside-avoid">
+              {st.text}
+              {st.cmd && (
+                <pre className="mt-0.5 whitespace-pre-wrap rounded [overflow-wrap:anywhere] bg-slate-100 px-1.5 py-0.5 font-mono text-slate-900" style={{ fontSize: '0.9em' }}>
+                  {st.cmd}
+                </pre>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
+      {sec.rows?.map((r) => (
+        <p key={r.label}>
+          <b>{r.label}:</b> {r.text}
+        </p>
+      ))}
+    </section>
+  );
+}
+
+/** Měřítko pro rozdělení dlouhých taháků (příkazy, postupy) na stránky – písmo, při kterém se stránky plní */
+const PACK_PX = 11.5;
+
+/** Tahák, který se nevejde na jednu A4: části se změří a rozdělí na co nejméně stránek, každá stránka pak dostane vlastní velikost písma */
+function PackedSheets({ sheet, size }: { sheet: Sheet; size: Size }) {
+  const [pages, setPages] = useState<Sheet[] | null>(null);
+  const head = useRef<HTMLDivElement>(null);
+  const parts = useRef<(HTMLDivElement | null)[]>([]);
+  useLayoutEffect(() => {
+    const headH = head.current?.offsetHeight ?? 80;
+    const cap = 2 * (PAGE_H_PX - headH) * 0.9;
+    const heights = sheet.sections.map((_, i) => (parts.current[i]?.offsetHeight ?? 100) + 10);
+    const pack = (limit: number) => {
+      const res: SheetSection[][] = [];
+      let cur: SheetSection[] = [];
+      let used = 0;
+      sheet.sections.forEach((sec, i) => {
+        if (cur.length && used + heights[i] > limit) {
+          res.push(cur);
+          cur = [];
+          used = 0;
+        }
+        cur.push(sec);
+        used += heights[i];
+      });
+      if (cur.length) res.push(cur);
+      return res;
+    };
+    let out = pack(cap);
+    // stejný počet stránek, ale obsah rozdělený rovnoměrně (podobné písmo na všech stránkách)
+    const total = heights.reduce((s, h) => s + h, 0);
+    for (let f = 1; f <= 1.3 && out.length > 1; f += 0.05) {
+      const even = pack(Math.min(cap, Math.max(...heights, (total / out.length) * f)));
+      if (even.length === out.length) {
+        out = even;
+        break;
+      }
+    }
+    setPages(out.map((sections, i) => ({ ...sheet, id: `${sheet.id}-${i + 1}`, title: out.length > 1 ? `${sheet.title} (${i + 1}/${out.length})` : sheet.title, sections, pack: false })));
+  }, [sheet]);
+  return (
+    <>
+      <div aria-hidden className="pointer-events-none fixed left-[-10000px] top-0 bg-white leading-snug print:hidden" style={{ width: `${PAGE_W_MM}mm`, fontSize: `${PACK_PX}px` }}>
+        <div ref={head}>
+          <SheetBody sheet={{ ...sheet, sections: [] }} />
+        </div>
+        <div style={{ width: `calc((${PAGE_W_MM}mm - 1.25rem) / 2)` }}>
+          {sheet.sections.map((sec, i) => (
+            <div
+              key={i}
+              ref={(el) => {
+                parts.current[i] = el;
+              }}
+            >
+              <SectionView sec={sec} />
+            </div>
+          ))}
+        </div>
+      </div>
+      {pages?.map((p) => (
+        <SheetView key={p.id} sheet={p} size={size} />
       ))}
     </>
   );

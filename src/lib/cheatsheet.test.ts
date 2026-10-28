@@ -45,7 +45,11 @@ describe('Tahák literárních pojmů', () => {
   it('skupiny pokryjí všechny pojmy právě jednou', async () => {
     const { TERMS } = await import('../data/terms');
     const { TERM_SHEET_GROUPS, termSheet } = await import('./cheatsheet');
-    const all = TERM_SHEET_GROUPS.flatMap((g) => termSheet(g.id).sections.flatMap((s) => s.pairs ?? []).map((p) => p.term));
+    const all = TERM_SHEET_GROUPS.flatMap((g) =>
+      termSheet(g.id)
+        .sections.flatMap((s) => s.pairs ?? [])
+        .map((p) => p.term),
+    );
     expect(all.sort()).toEqual(TERMS.map((t) => t.name).sort());
     for (const g of TERM_SHEET_GROUPS) for (const s of termSheet(g.id).sections) for (const p of s.pairs!) expect(p.def.length, p.term).toBeGreaterThan(10);
   });
@@ -68,5 +72,42 @@ describe('Kartičky autorů', () => {
     // autor s více knihami v seznamu (Čapek) má obě na jedné kartičce
     const capek = authors.find((a) => a.name === 'Karel Čapek')!;
     expect(authorCard(capek).rows.find((r) => r.label === 'Ze seznamu')!.text).toMatch(/R\.U\.R\.[\s\S]*Válka s mloky|Válka s mloky[\s\S]*R\.U\.R\./);
+  });
+});
+
+describe('Taháky na praktickou zkoušku a sloh', () => {
+  it('příkazy Cisco a Linux: všechny příkazy, skupiny, neproporcionální písmo', async () => {
+    const { ALL_COMMANDS } = await import('../data/site/commands');
+    const { commandSheets } = await import('./cheatsheet');
+    for (const p of ['cisco', 'linux'] as const) {
+      const [s] = commandSheets(p, p, ALL_COMMANDS);
+      expect(s.pack).toBe(true);
+      expect(s.sections.every((x) => x.mono)).toBe(true);
+      expect(s.sections.flatMap((x) => x.pairs!).length).toBe(ALL_COMMANDS.filter((c) => c.platform === p).length);
+    }
+    const [one] = commandSheets('cisco', 'Cisco', ALL_COMMANDS, ['VLAN']);
+    expect(one.sections.map((x) => x.title)).toEqual(['VLAN']);
+  });
+  it('postupy, sloh a funkční styly mají všechny části', async () => {
+    const { ALL_PROCEDURES } = await import('../data/site/procedures');
+    const { WRITING_FORMS } = await import('../data/writing');
+    const { FUNCTIONAL_STYLES } = await import('../data/styles');
+    const { procedureSheets, writingSheets, stylesSheet } = await import('./cheatsheet');
+    const cisco = ALL_PROCEDURES.filter((p) => p.platform === 'cisco');
+    expect(procedureSheets('cisco', 'Cisco', cisco)[0].sections.map((s) => s.title)).toEqual(cisco.map((p) => p.title));
+    expect(writingSheets(WRITING_FORMS)[0].sections.length).toBe(WRITING_FORMS.length);
+    expect(stylesSheet(FUNCTIONAL_STYLES).sections.length).toBe(FUNCTIONAL_STYLES.length);
+  });
+  it('chronologie řadí knihy podle roku a dělí je podle století', async () => {
+    const { defaultData } = await import('./storage');
+    const { chronologySheet } = await import('./cheatsheet');
+    const books = defaultData().books;
+    const s = chronologySheet(books);
+    const titles = s.sections.flatMap((x) => x.pairs!.map((p) => p.def.split(' – ')[0]));
+    expect(titles.length).toBe(books.length);
+    expect(titles[0]).toBe('Podkoní a žák');
+    expect(titles.indexOf('Lakomec')).toBeLessThan(titles.indexOf('Máj'));
+    expect(new Set(s.sections.map((x) => x.title)).size).toBe(s.sections.length); // žádný nadpis dvakrát
+    expect(s.sections.map((x) => x.title)).toContain('20. století (do roku 1945)');
   });
 });
