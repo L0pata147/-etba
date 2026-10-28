@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, Play, Search } from 'lucide-react';
+import { ChevronDown, Play, Printer, Search } from 'lucide-react';
 import type { Term, TermCategory } from '../types';
 import { TERMS, TERM_CATEGORIES } from '../data/terms';
 import { normalize } from '../lib/text';
@@ -44,9 +44,26 @@ export function Terms() {
         emoji="📖"
         sub={`${TERMS.length} pojmů s definicí, vysvětlením a příklady z tvé četby · procvičeno ${attempts}×`}
         action={
-          <Button icon={<Play size={18} />} onClick={() => start(termsConfig(cat === 'all' ? 'Literární pojmy' : `Pojmy: ${TERM_CATEGORIES[cat]}`, list.map((t) => t.id), 15))} disabled={!list.length}>
-            Otestovat {cat === 'all' && !query ? 'pojmy' : `zobrazené (${list.length})`}
-          </Button>
+          <>
+            <Button variant="secondary" icon={<Printer size={18} />} to="/tahak?pojmy">
+              Tahák k tisku
+            </Button>
+            <Button
+              icon={<Play size={18} />}
+              onClick={() =>
+                start(
+                  termsConfig(
+                    cat === 'all' ? 'Literární pojmy' : `Pojmy: ${TERM_CATEGORIES[cat]}`,
+                    list.map((t) => t.id),
+                    15,
+                  ),
+                )
+              }
+              disabled={!list.length}
+            >
+              Otestovat {cat === 'all' && !query ? 'pojmy' : `zobrazené (${list.length})`}
+            </Button>
+          </>
         }
       />
       <Card className="mb-5 space-y-3 p-4">

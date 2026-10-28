@@ -40,3 +40,13 @@ describe('Taháky k tisku', () => {
     }
   });
 });
+
+describe('Tahák literárních pojmů', () => {
+  it('skupiny pokryjí všechny pojmy právě jednou', async () => {
+    const { TERMS } = await import('../data/terms');
+    const { TERM_SHEET_GROUPS, termSheet } = await import('./cheatsheet');
+    const all = TERM_SHEET_GROUPS.flatMap((g) => termSheet(g.id).sections.flatMap((s) => s.pairs ?? []).map((p) => p.term));
+    expect(all.sort()).toEqual(TERMS.map((t) => t.name).sort());
+    for (const g of TERM_SHEET_GROUPS) for (const s of termSheet(g.id).sections) for (const p of s.pairs!) expect(p.def.length, p.term).toBeGreaterThan(10);
+  });
+});

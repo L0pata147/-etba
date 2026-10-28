@@ -1,5 +1,6 @@
 /** Taháky k tisku – výběr toho nejdůležitějšího z knihy / tématu tak, aby se to vešlo zhruba na A4 */
-import type { Book, Topic } from '../types';
+import type { Book, Term, TermCategory, Topic } from '../types';
+import { TERMS, TERM_CATEGORIES } from '../data/terms';
 import { CATEGORIES, KINDS } from '../data/osnova';
 import { SUBJECTS } from '../data/subjects';
 
@@ -81,5 +82,37 @@ export function topicSheet(t: Topic): Sheet {
     subtitle: `${subj.emoji} ${subj.label}`,
     meta: [],
     sections: [{ title: 'Shrnutí', text: t.summary }, ...t.outline.map((o) => ({ title: o.heading, list: o.points })), { title: 'Pojmy', pairs: t.terms }].filter(nonEmpty),
+  };
+}
+
+/** Literární pojmy na taháky – příbuzné kategorie spojené tak, aby každá skupina byla jedna stránka A4 */
+export const TERM_SHEET_GROUPS: { id: string; title: string; categories: TermCategory[]; detail: 'short' | 'full' }[] = [
+  // tropů a figur je nejvíc – jen definice a příklad, s vysvětlením by písmo bylo moc drobné
+  { id: 'tropy-figury', title: 'Tropy a figury', categories: ['tropy', 'figury'], detail: 'short' },
+  { id: 'jazyk-vers', title: 'Jazykové prostředky a verš', categories: ['jazyk', 'vers'], detail: 'full' },
+  { id: 'vypravec-kompozice', title: 'Vypravěč, typy promluv a kompozice', categories: ['vypravec', 'promluvy', 'kompozice'], detail: 'full' },
+  { id: 'druhy-zanry', title: 'Literární druhy a žánry', categories: ['druhy', 'zanry'], detail: 'full' },
+  { id: 'sloh', title: 'Sloh a neumělecký text', categories: ['sloh'], detail: 'full' },
+];
+
+/** Definice pojmu na tahák; „full“ přidá vysvětlení a příklad z četby */
+function termDef(t: Term, detail: 'short' | 'full'): string {
+  const parts = [t.short, detail === 'full' ? t.detail : '', t.example && `Např. ${t.example}`, detail === 'full' && t.bookExample ? `Z četby: ${t.bookExample}` : ''];
+  return parts.filter(Boolean).join(' ');
+}
+
+export function termSheet(groupId: string, terms: Term[] = TERMS): Sheet {
+  const g = TERM_SHEET_GROUPS.find((x) => x.id === groupId)!;
+  return {
+    id: `pojmy-${g.id}`,
+    title: g.title,
+    subtitle: '📖 Literární pojmy',
+    meta: [],
+    sections: g.categories
+      .map((c) => ({
+        title: TERM_CATEGORIES[c],
+        pairs: terms.filter((t) => t.category === c).map((t) => ({ term: t.name, def: termDef(t, g.detail) })),
+      }))
+      .filter(nonEmpty),
   };
 }

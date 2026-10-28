@@ -5,11 +5,14 @@ import type { SubjectId } from '../types';
 import { useStore } from '../store';
 import { CATEGORY_ORDER } from '../data/osnova';
 import { SUBJECTS, SUBJECT_TOPICS, ALL_TOPIC_MAP } from '../data/subjects';
-import { bookSheet, topicSheet, type Sheet } from '../lib/cheatsheet';
+import { TERM_SHEET_GROUPS, bookSheet, termSheet, topicSheet, type Sheet } from '../lib/cheatsheet';
+import { TERMS } from '../data/terms';
 import { printPage } from '../lib/native';
 import { Button, Card, PageHeader, Segmented, Toggle, cx } from '../components/ui';
 
-type Source = Extract<SubjectId, 'cjl' | 'site' | 'hw' | 'cloud'>;
+type Source = Extract<SubjectId, 'cjl' | 'site' | 'hw' | 'cloud'> | 'pojmy';
+const SOURCES: Source[] = ['cjl', 'pojmy', 'site', 'hw', 'cloud'];
+const sourceLabel = (s: Source) => (s === 'pojmy' ? '📖 Literární pojmy' : `${SUBJECTS[s].emoji} ${SUBJECTS[s].short}`);
 type Size = 'auto' | 'S' | 'M';
 
 /** Výška a šířka tiskové plochy A4 při okrajích 10 mm (v CSS px, 96 dpi) s malou rezervou */
@@ -21,23 +24,33 @@ const FIXED_PX: Record<Exclude<Size, 'auto'>, number> = { S: 11, M: 13 };
 export function CheatSheetPage() {
   const [params] = useSearchParams();
   // odkaz z jiné knihy / tématu otevře výběr znovu
-  return <CheatSheetInner key={params.get('k') ?? params.get('t') ?? ''} />;
+  return <CheatSheetInner key={params.get('k') ?? params.get('t') ?? params.get('pojmy') ?? ''} />;
 }
 
 function CheatSheetInner() {
   const { data, toast } = useStore();
   const [params] = useSearchParams();
   const initialTopic = params.get('t') ? ALL_TOPIC_MAP[params.get('t')!] : undefined;
-  const [source, setSource] = useState<Source>(initialTopic && initialTopic.subject !== 'cjl' ? initialTopic.subject : 'cjl');
-  const [picked, setPicked] = useState<Set<string>>(() => new Set([params.get('k') ?? params.get('t') ?? ''].filter(Boolean)));
+  const termsLink = params.has('pojmy');
+  const [source, setSource] = useState<Source>(termsLink ? 'pojmy' : initialTopic && initialTopic.subject !== 'cjl' ? initialTopic.subject : 'cjl');
+  const [picked, setPicked] = useState<Set<string>>(() => new Set(termsLink ? TERM_SHEET_GROUPS.map((g) => g.id) : [params.get('k') ?? params.get('t') ?? ''].filter(Boolean)));
   const [size, setSize] = useState<Size>('auto');
   const [notes, setNotes] = useState(false);
 
   const books = useMemo(() => [...data.books].sort((a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)), [data.books]);
   const items =
-    source === 'cjl' ? books.map((b) => ({ id: b.id, label: b.title || 'Bez názvu', sub: b.author })) : SUBJECT_TOPICS[source].map((t) => ({ id: t.id, label: `${t.number}. ${t.title}`, sub: '' }));
+    source === 'cjl'
+      ? books.map((b) => ({ id: b.id, label: b.title || 'Bez názvu', sub: b.author }))
+      : source === 'pojmy'
+        ? TERM_SHEET_GROUPS.map((g) => ({ id: g.id, label: g.title, sub: `${TERMS.filter((t) => g.categories.includes(t.category)).length} pojmů` }))
+        : SUBJECT_TOPICS[source].map((t) => ({ id: t.id, label: `${t.number}. ${t.title}`, sub: '' }));
   const chosen = items.filter((i) => picked.has(i.id));
-  const sheets: Sheet[] = source === 'cjl' ? books.filter((b) => picked.has(b.id)).map((b) => bookSheet(b, notes)) : SUBJECT_TOPICS[source].filter((t) => picked.has(t.id)).map(topicSheet);
+  const sheets: Sheet[] =
+    source === 'cjl'
+      ? books.filter((b) => picked.has(b.id)).map((b) => bookSheet(b, notes))
+      : source === 'pojmy'
+        ? TERM_SHEET_GROUPS.filter((g) => picked.has(g.id)).map((g) => termSheet(g.id))
+        : SUBJECT_TOPICS[source].filter((t) => picked.has(t.id)).map(topicSheet);
 
   const toggle = (id: string) =>
     setPicked((s) => {
@@ -51,7 +64,7 @@ function CheatSheetInner() {
     setPicked(new Set());
   };
   const print = () => {
-    const name = sheets.length === 1 ? `Tahák – ${sheets[0].title}` : `Taháky – ${SUBJECTS[source].short}`;
+    const name = sheets.length === 1 ? `Tahák – ${sheets[0].title}` : `Taháky – ${source === 'pojmy' ? 'literární pojmy' : SUBJECTS[source].short}`;
     if (!printPage(name)) toast('Tisk umí až nová verze Android aplikace – stáhni si ji v Nastavení.', 'error');
   };
 
@@ -60,10 +73,10 @@ function CheatSheetInner() {
       <div className="print:hidden">
         <PageHeader title="Taháky k tisku" emoji="🖨️" sub="To nejdůležitější z knihy nebo tématu na jednu stránku A4. Vytiskni si je, nebo je ulož jako PDF." />
         <Card className="mb-5 space-y-4 p-5">
-          <Segmented value={source} onChange={switchSource} options={(['cjl', 'site', 'hw', 'cloud'] as Source[]).map((s) => ({ value: s, label: `${SUBJECTS[s].emoji} ${SUBJECTS[s].short}` }))} />
+          <Segmented value={source} onChange={switchSource} options={SOURCES.map((s) => ({ value: s, label: sourceLabel(s) }))} />
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold">{source === 'cjl' ? 'Knihy z mého seznamu' : 'Témata'}</span>
+              <span className="font-semibold">{source === 'cjl' ? 'Knihy z mého seznamu' : source === 'pojmy' ? 'Skupiny pojmů (každá na jednu stránku)' : 'Témata'}</span>
               <span className="text-slate-500 dark:text-slate-400">· vybráno {chosen.length}</span>
               <button className="ml-auto font-semibold text-brand-700 hover:underline dark:text-brand-400" onClick={() => setPicked(new Set(items.map((i) => i.id)))}>
                 Vybrat vše
@@ -176,8 +189,8 @@ function SheetBody({ sheet: s, cols }: { sheet: Sheet; cols?: boolean }) {
       </header>
       <div className={cx('gap-5 print:columns-2', cols ? 'columns-2' : 'sm:columns-2')}>
         {s.sections.map((sec) => (
-          <section key={sec.title} className="mb-2.5 break-inside-avoid">
-            <h2 className="mb-0.5 font-bold uppercase tracking-wide text-slate-800" style={{ fontSize: '0.85em' }}>
+          <section key={sec.title} className={cx('mb-2.5', !sec.pairs && 'break-inside-avoid')}>
+            <h2 className="mb-0.5 break-after-avoid font-bold uppercase tracking-wide text-slate-800" style={{ fontSize: '0.85em' }}>
               {sec.title}
             </h2>
             {sec.text && <p className="whitespace-pre-line">{sec.text}</p>}
@@ -198,7 +211,7 @@ function SheetBody({ sheet: s, cols }: { sheet: Sheet; cols?: boolean }) {
             {sec.pairs && (
               <dl className="space-y-0.5">
                 {sec.pairs.map((p) => (
-                  <div key={p.term}>
+                  <div key={p.term} className="break-inside-avoid">
                     <dt className="inline font-semibold">{p.term}</dt>
                     <dd className="inline"> – {p.def}</dd>
                   </div>
