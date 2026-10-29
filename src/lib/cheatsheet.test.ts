@@ -140,3 +140,19 @@ describe('Barvy taháků podle předmětu', () => {
     expect(m.bookSheet(seedToBook(BOOK_DATABASE[0])).accent).toBeUndefined();
   });
 });
+
+describe('Šablony slohových útvarů', () => {
+  it('každý útvar má šablonu a úřední dopis odpovídá ČSN 01 6910', async () => {
+    const { WRITING_FORMS } = await import('../data/writing');
+    const { WRITING_TEMPLATES, templateFor } = await import('../data/writingTemplates');
+    const { countWords, analyzeWriting } = await import('./writingcheck');
+    for (const f of WRITING_FORMS) expect(templateFor(f.id), f.id).toBeTruthy();
+    for (const t of WRITING_TEMPLATES) for (const v of t.variants) expect(countWords(v.text), v.id).toBeLessThan(25);
+    const dopis = templateFor('dopis')!.variants.find((v) => v.id === 'dopis-uredni')!.text;
+    expect(dopis).not.toMatch(/Věc:/);
+    expect(dopis).toMatch(/^Vážená paní, vážený pane,\n\n\[[a-zěščřžýáíéůú]/m);
+    expect(dopis).toMatch(/^S pozdravem$/m);
+    expect(analyzeWriting(dopis).issues.some((i) => i.message.includes('nevyplněné místo'))).toBe(true);
+    expect(countWords('[doplň] Ahoj světe')).toBe(2);
+  });
+});

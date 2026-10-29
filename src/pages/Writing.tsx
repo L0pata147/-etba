@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Bot, CheckCircle2, Dices, PenLine, Trash2 } from 'lucide-react';
+import { Bot, CheckCircle2, Copy, Dices, FileText, PenLine, Trash2 } from 'lucide-react';
 import type { Writing } from '../types';
 import { useStore } from '../store';
 import { MIN_WORDS, WRITING_CRITERIA, WRITING_FORMS, WRITING_MINUTES, WRITING_PROMPTS, type WritingPrompt } from '../data/writing';
 import { analyzeWriting, countWords } from '../lib/writingcheck';
+import { templateFor } from '../data/writingTemplates';
 import { describeAiError, streamTeacher } from '../lib/ai';
 import { sample, uid } from '../lib/random';
 import { SPELLING, SPELLING_CATEGORIES, type SpellingCategory } from '../data/spelling';
@@ -129,6 +130,7 @@ function Editor({ w, onDone }: { w: Writing; onDone: () => void }) {
   const [text, setText] = useState(w.text);
   const [seconds, setSeconds] = useState(w.seconds);
   const [showForm, setShowForm] = useState(false);
+  const [showTemplate, setShowTemplate] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const latest = useRef({ text, seconds });
   latest.current = { text, seconds };
@@ -176,7 +178,12 @@ function Editor({ w, onDone }: { w: Writing; onDone: () => void }) {
         <div className="hidden w-32 sm:block">
           <ProgressBar value={words / MIN_WORDS} />
         </div>
-        <Button size="sm" variant="ghost" className="ml-auto" onClick={() => setShowForm((x) => !x)}>
+        {templateFor(w.form) && (
+          <Button size="sm" variant="ghost" className="ml-auto" icon={<FileText size={15} />} onClick={() => setShowTemplate(true)}>
+            Šablona
+          </Button>
+        )}
+        <Button size="sm" variant="ghost" className={templateFor(w.form) ? '' : 'ml-auto'} onClick={() => setShowForm((x) => !x)}>
           {showForm ? 'Skrýt tahák' : 'Tahák k útvaru'}
         </Button>
         <Button size="sm" icon={<CheckCircle2 size={16} />} onClick={() => setConfirm(true)}>
@@ -202,6 +209,23 @@ function Editor({ w, onDone }: { w: Writing; onDone: () => void }) {
         className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-[16px] leading-relaxed dark:border-white/10 dark:bg-slate-900"
       />
       <p className="mt-1 text-xs text-slate-500">Kontrola pravopisu prohlížeče je vypnutá – u zkoušky ji také mít nebudeš. Koncept se ukládá automaticky.</p>
+      <Modal open={showTemplate} onClose={() => setShowTemplate(false)} title="Šablona útvaru" wide>
+        <TemplateView
+          form={w.form}
+          action={(t) => (
+            <Button
+              size="sm"
+              icon={<PenLine size={15} />}
+              onClick={() => {
+                setText((cur) => (cur.trim() ? `${cur.trimEnd()}\n\n${t}` : t));
+                setShowTemplate(false);
+              }}
+            >
+              {text.trim() ? 'Přidat na konec textu' : 'Vložit do textu'}
+            </Button>
+          )}
+        />
+      </Modal>
       <Modal open={confirm} onClose={() => setConfirm(false)} title="Dokončit práci?">
         <p>
           Napsáno <b>{words}</b> slov{words < MIN_WORDS ? ` – chybí ještě ${MIN_WORDS - words} do minima` : ''}.
@@ -434,12 +458,76 @@ function FormCard({ f }: { f: (typeof WRITING_FORMS)[number] }) {
   );
 }
 
+/** Šablona útvaru: varianty kostry a hotové obraty */
+function TemplateView({ form, action }: { form: string; action: (text: string) => ReactNode }) {
+  const t = templateFor(form);
+  const [vid, setVid] = useState(t?.variants[0].id ?? '');
+  if (!t) return null;
+  const v = t.variants.find((x) => x.id === vid) ?? t.variants[0];
+  return (
+    <div>
+      {t.variants.length > 1 && <Segmented className="mb-3" value={v.id} onChange={setVid} options={t.variants.map((x) => ({ value: x.id, label: x.label }))} />}
+      <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">Co je [v hranatých závorkách], nahraď vlastním textem. Nevyplněná místa se nepočítají do slov a kontrola na ně upozorní.</p>
+      <pre data-template={v.id} className="max-h-[50vh] overflow-auto whitespace-pre-wrap rounded-xl bg-slate-100 p-4 font-sans text-[14px] leading-relaxed dark:bg-white/[0.05]">
+        {v.text}
+      </pre>
+      <div className="mt-2 flex flex-wrap gap-2">{action(v.text)}</div>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        {t.phrases.map((p) => (
+          <div key={p.part}>
+            <div className="text-sm font-semibold">{p.part}</div>
+            <ul className="mt-1 list-disc space-y-0.5 pl-5 text-sm text-slate-600 dark:text-slate-300">
+              {p.items.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Forms() {
+  const [open, setOpen] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   return (
     <div>
       {WRITING_FORMS.map((f) => (
-        <FormCard key={f.id} f={f} />
+        <div key={f.id}>
+          <FormCard f={f} />
+          {templateFor(f.id) && (
+            <div className="-mt-1 mb-4">
+              <Button size="sm" variant="secondary" icon={<FileText size={15} />} onClick={() => setOpen(f.id)}>
+                Šablona a obraty
+              </Button>
+            </div>
+          )}
+        </div>
       ))}
+      <Modal open={!!open} onClose={() => setOpen(null)} title={`Šablona – ${open ? formName(open) : ''}`} wide>
+        {open && (
+          <TemplateView
+            form={open}
+            action={(text) => (
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<Copy size={15} />}
+                onClick={() => {
+                  navigator.clipboard?.writeText(text).then(
+                    () => setCopied(true),
+                    () => undefined,
+                  );
+                  setTimeout(() => setCopied(false), 1500);
+                }}
+              >
+                {copied ? 'Zkopírováno' : 'Kopírovat'}
+              </Button>
+            )}
+          />
+        )}
+      </Modal>
     </div>
   );
 }

@@ -53,9 +53,9 @@ export const WRITING_FORMS: WritingForm[] = [
     name: 'Dopis (osobní / úřední), žádost, stížnost, motivační dopis',
     style: 'prostě sdělovací (osobní) / administrativní (úřední) styl',
     purpose: 'Písemná komunikace s konkrétním adresátem – sdělení, žádost, reklamace, omluva.',
-    structure: ['úřední: odesílatel, adresát, místo a datum, věc, oslovení', 'text – důvod, konkrétní informace, požadavek', 'zdvořilostní závěr, pozdrav, podpis, případně přílohy'],
-    language: ['oslovení s čárkou a vykáním (Vážená paní, … / Vážený pane, …)', 'zájmena Vy/Váš s velkým písmenem v dopise jednomu adresátovi', 'úřední – věcnost, ustálené obraty, bez citově zabarvených slov', 'osobní – může být hovorovější, ale stále spisovně'],
-    pitfalls: ['chybějící formální náležitosti (věc, datum, podpis)', 'nevhodný tón vůči adresátovi', 'nejasný požadavek'],
+    structure: ['úřední: odesílatel, adresát, místo a datum, předmět dopisu (slovo „Věc“ se podle ČSN 01 6910 už nepíše), oslovení', 'text – důvod, konkrétní informace, požadavek', 'zdvořilostní závěr, pozdrav, podpis, případně přílohy'],
+    language: ['oslovení s čárkou a vykáním (Vážená paní, … / Vážený pane, …)', 'po oslovení s čárkou pokračuje text malým písmenem', 'zájmena Vy, Vám, Váš se v dopise píšou vždy s velkým písmenem (jednotlivci i více adresátům)', 'za pozdravem „S pozdravem“ se nepíše žádné znaménko', 'úřední – věcnost, ustálené obraty, bez citově zabarvených slov', 'osobní – může být hovorovější, ale stále spisovně'],
+    pitfalls: ['chybějící formální náležitosti (předmět, datum, podpis)', 'nevhodný tón vůči adresátovi', 'nejasný požadavek'],
   },
   {
     id: 'clanek',

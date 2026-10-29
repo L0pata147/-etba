@@ -16,8 +16,12 @@ export interface WritingAnalysis {
   issues: WritingIssue[];
 }
 
+/** Nevyplněná místa ze šablony – [text v hranatých závorkách] */
+export const PLACEHOLDER = /\[[^\]\n]*\]/g;
+
+/** Počet slov bez nevyplněných míst ze šablony */
 export function countWords(text: string): number {
-  return (text.match(/[\p{L}\p{N}]+(?:[-'’][\p{L}\p{N}]+)*/gu) ?? []).length;
+  return (text.replace(PLACEHOLDER, ' ').match(/[\p{L}\p{N}]+(?:[-'’][\p{L}\p{N}]+)*/gu) ?? []).length;
 }
 
 const RULES: { re: RegExp; kind: WritingIssue['kind']; message: (m: RegExpExecArray) => string }[] = [
@@ -54,6 +58,8 @@ export function analyzeWriting(text: string): WritingAnalysis {
     .filter((s) => countWords(s) > 0);
   const lens = sentenceList.map(countWords);
   const issues: WritingIssue[] = [];
+  const holes = text.match(PLACEHOLDER) ?? [];
+  if (holes.length) issues.push({ kind: 'styl', message: `V textu zůstalo ${holes.length}× nevyplněné místo ze šablony – nahraď ho vlastním textem.`, excerpt: (holes[0] ?? '').slice(0, 60) });
 
   for (const r of RULES) {
     r.re.lastIndex = 0;
