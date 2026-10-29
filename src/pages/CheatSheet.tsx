@@ -16,6 +16,7 @@ import {
   termSheet,
   topicSheet,
   writingSheets,
+  templateSheets,
   type AuthorCard,
   type Sheet,
   type SheetSection,
@@ -23,6 +24,7 @@ import {
 import { ALL_COMMANDS, PLATFORM_LABEL } from '../data/site/commands';
 import { ALL_PROCEDURES } from '../data/site/procedures';
 import { WRITING_FORMS } from '../data/writing';
+import { WRITING_TEMPLATES } from '../data/writingTemplates';
 import { FUNCTIONAL_STYLES } from '../data/styles';
 import type { Platform } from '../types';
 import { groupAuthors } from '../lib/authors';
@@ -64,6 +66,7 @@ const CMD_PLATFORMS: Platform[] = ['cisco', 'linux'];
 const cmdKey = (p: Platform, g: string) => `${p}|${g}`;
 const SLOH_ITEMS = [
   { id: 'utvary', label: 'Slohové útvary', sub: `${WRITING_FORMS.length} útvarů – stavba, jazyk, chyby` },
+  { id: 'sablony', label: 'Šablony útvarů', sub: `kostra textu a obraty – ${WRITING_TEMPLATES.length} útvarů` },
   { id: 'styly', label: 'Funkční styly', sub: `${FUNCTIONAL_STYLES.length} stylů – znaky, postupy, útvary` },
 ];
 type Size = 'auto' | 'S' | 'M';
@@ -158,7 +161,7 @@ function CheatSheetInner() {
             ? [chronologySheet(books)]
             : []
           : source === 'sloh'
-            ? [...(picked.has('utvary') ? writingSheets(WRITING_FORMS) : []), ...(picked.has('styly') ? [stylesSheet(FUNCTIONAL_STYLES)] : [])]
+            ? [...(picked.has('utvary') ? writingSheets(WRITING_FORMS) : []), ...(picked.has('sablony') ? templateSheets(WRITING_TEMPLATES, (id) => WRITING_FORMS.find((f) => f.id === id)?.name.split(' (')[0] ?? id) : []), ...(picked.has('styly') ? [stylesSheet(FUNCTIONAL_STYLES)] : [])]
             : source === 'autori'
               ? []
               : source === 'cjl'

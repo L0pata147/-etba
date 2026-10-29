@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Bot, CheckCircle2, Copy, Dices, FileText, PenLine, Trash2 } from 'lucide-react';
+import { Bot, CheckCircle2, Copy, Dices, FileText, PenLine, Printer, Trash2 } from 'lucide-react';
 import type { Writing } from '../types';
 import { useStore } from '../store';
 import { MIN_WORDS, WRITING_CRITERIA, WRITING_FORMS, WRITING_MINUTES, WRITING_PROMPTS, type WritingPrompt } from '../data/writing';
@@ -493,6 +493,12 @@ function Forms() {
   const [copied, setCopied] = useState(false);
   return (
     <div>
+      <Card className="mb-4 flex flex-wrap items-center gap-3 p-4">
+        <p className="flex-1 text-sm text-slate-600 dark:text-slate-300">Šablony všech útvarů i tenhle přehled si můžeš vytisknout na A4.</p>
+        <Button size="sm" icon={<Printer size={15} />} to="/tahak?zk=cjl-pisemna">
+          Vytisknout šablony
+        </Button>
+      </Card>
       {WRITING_FORMS.map((f) => (
         <div key={f.id}>
           <FormCard f={f} />

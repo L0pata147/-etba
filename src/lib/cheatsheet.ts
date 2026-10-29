@@ -6,6 +6,7 @@ import { SUBJECTS } from '../data/subjects';
 import type { Author } from './authors';
 import type { CommandItem, Platform, Procedure } from '../types';
 import type { WritingForm } from '../data/writing';
+import type { WritingTemplate } from '../data/writingTemplates';
 import type { FunctionalStyle } from '../data/styles';
 import { approxYear } from './generator';
 
@@ -264,6 +265,18 @@ export function writingSheets(forms: WritingForm[]): Sheet[] {
         { label: 'Pozor na', text: f.pitfalls.join('; ') },
       ],
     })),
+    Infinity,
+  );
+}
+
+/** Šablony slohových útvarů k tisku: kostra textu a hotové obraty u každého útvaru */
+export function templateSheets(templates: WritingTemplate[], formName: (id: string) => string): Sheet[] {
+  return packSheets(
+    { id: 'sloh-sablony', title: 'Šablony slohových útvarů', subtitle: '✍️ Písemná práce – [v závorkách] doplň vlastní text' },
+    templates.flatMap((t) => [
+      ...t.variants.map((v) => ({ title: v.label === formName(t.form) ? v.label : `${formName(t.form)} – ${v.label}`, text: v.text })),
+      { title: `${formName(t.form)} – obraty`, rows: t.phrases.map((p) => ({ label: p.part, text: p.items.join(' · ') })) },
+    ]),
     Infinity,
   );
 }
