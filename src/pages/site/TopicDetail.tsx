@@ -10,6 +10,8 @@ import { Button, Card, EmptyState, PageHeader, Pct, ProgressBar, Segmented, Sect
 import { useStartSession } from '../SessionPage';
 import { siteConfig, topicConfig } from './common';
 import { teacherChapters } from '../../data/site/teacher';
+import { TOPIC_DIAGRAMS } from '../../data/site/diagrams';
+import { DiagramView } from '../../components/Diagram';
 
 type Tab = 'vyklad' | 'pojmy' | 'kviz' | 'poznamky';
 
@@ -28,6 +30,7 @@ function TopicInner({ id }: { id?: string }) {
   if (!t || t.subject === 'cjl') return <EmptyState icon="❓" title="Téma nenalezeno" action={<Button to="/site">Zpět na témata</Button>} />;
   const list = SUBJECT_TOPICS[t.subject];
   const home = SUBJECTS[t.subject].path;
+  const diagrams = TOPIC_DIAGRAMS[t.id] ?? [];
 
   const p = topicProgress(data, t.id);
   const idx = list.findIndex((x) => x.id === t.id);
@@ -147,6 +150,24 @@ function TopicInner({ id }: { id?: string }) {
               )}
             </Card>
           ))}
+          {diagrams.length > 0 && (
+            <Card className="p-5">
+              <SectionTitle sub="Stejná schémata jsou i v taháku k tisku.">Schémata</SectionTitle>
+              <div className="space-y-4">
+                {diagrams.map((d) => (
+                  <div key={d.title}>
+                    <h3 className="mb-1 text-sm font-bold">{d.title}</h3>
+                    {/* schéma je kreslené světle kvůli tisku – na tmavém pozadí ve světlé kartě */}
+                    <div className="overflow-x-auto rounded-xl bg-white p-3 text-[14px]">
+                      <div className={cx((d.wide ?? d.kind === 'fields') && 'min-w-[560px]')}>
+                        <DiagramView d={d} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
         </div>
       )}
 

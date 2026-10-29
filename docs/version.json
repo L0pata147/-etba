@@ -1,6 +1,6 @@
 {
-  "version": "1.54.0",
+  "version": "1.55.0",
   "notes": [
-    "Taháky ze sítí se schématy: Ethernet, 802.1Q, IPv4, IPv6, UDP, TCP, DHCP, ARP"
+    "Schémata ve všech 20 tématech sítí – v tahácích i v aplikaci (OSI, RJ-45, bity adres, VLSM, AD, DNS, NAT, Wi-Fi…)"
   ]
 }

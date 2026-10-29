@@ -102,10 +102,11 @@ const platformAccent = (p: Platform) => (SITE_PLATFORMS.includes(p) ? SUBJECT_AC
 
 export function topicSheet(t: Topic): Sheet {
   const subj = SUBJECTS[t.subject];
-  // rámce a hlavičky přes celou šířku nahoře, výměna zpráv se vejde do sloupce
+  // široká schémata (rámce, hlavičky, velké tabulky) přes celou šířku nahoře, menší do sloupce
   const diagrams = TOPIC_DIAGRAMS[t.id] ?? [];
-  const wideDiagrams = diagrams.filter((d) => d.kind === 'fields');
-  const flows = diagrams.filter((d) => d.kind === 'flow');
+  const isWide = (d: Diagram) => d.wide ?? d.kind === 'fields';
+  const wideDiagrams = diagrams.filter(isWide);
+  const flows = diagrams.filter((d) => !isWide(d));
   return {
     id: t.id,
     title: `${t.number}. ${t.title}`,

@@ -164,7 +164,20 @@ describe('Schémata k sítím', () => {
       expect(ALL_TOPICS.some((t) => t.id === id), id).toBe(true);
       for (const d of ds) if (d.kind === 'fields' && d.words) for (const r of d.rows) expect(r.reduce((a, x) => a + x.span, 0), `${d.title}`).toBe(32);
     }
+    for (const t of ALL_TOPICS.filter((x) => x.subject === 'site')) expect(TOPIC_DIAGRAMS[t.id]?.length, t.id).toBeGreaterThan(0);
+    for (const ds of Object.values(TOPIC_DIAGRAMS)) for (const d of ds) if (d.kind === 'table') for (const r of d.rows) expect(r.length, d.title).toBe(d.headers.length);
     const s = topicSheet(ALL_TOPICS.find((t) => t.id === 'site-tcp')!);
     expect(s.sections.filter((x) => x.diagram)).toHaveLength(2);
+  });
+});
+
+describe('Výpočty adres ve schématech', () => {
+  it('podsíť a VLSM odpovídají osnově tématu', async () => {
+    const { subnetInfo, prefixMask, TOPIC_DIAGRAMS } = await import('../data/site/diagrams');
+    expect(subnetInfo('192.168.1.70', 26)).toMatchObject({ mask: '255.255.255.192', network: '192.168.1.64', broadcast: '192.168.1.127', first: '192.168.1.65', last: '192.168.1.126', hosts: 62 });
+    expect(prefixMask(20)).toBe('255.255.240.0');
+    const vlsm = TOPIC_DIAGRAMS['site-vlsm'].find((d) => d.kind === 'table')!;
+    const nets = vlsm.kind === 'table' ? vlsm.rows.map((r) => `${r[3]}/${String(r[2]).slice(1)}`) : [];
+    expect(nets).toEqual(['192.168.1.0/25', '192.168.1.128/26', '192.168.1.192/27', '192.168.1.224/30', '192.168.1.228/30']);
   });
 });

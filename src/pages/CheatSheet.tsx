@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Printer } from 'lucide-react';
-import type { Diagram } from '../data/site/diagrams';
+import { DiagramView } from '../components/Diagram';
 import type { SubjectId } from '../types';
 import { useStore } from '../store';
 import { CATEGORY_ORDER } from '../data/osnova';
@@ -491,72 +491,6 @@ function SectionView({ sec }: { sec: SheetSection }) {
       ))}
       {sec.diagram && <DiagramView d={sec.diagram} />}
     </section>
-  );
-}
-
-const PRINT_EXACT = { printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } as const;
-
-/** Schéma rámce / hlavičky (pole v řádcích) nebo výměny zpráv mezi dvěma stranami */
-function DiagramView({ d }: { d: Diagram }) {
-  if (d.kind === 'flow')
-    return (
-      <div className="mt-0.5" style={{ fontSize: '0.92em' }}>
-        <div className="flex justify-between font-semibold">
-          <span>{d.left}</span>
-          <span>{d.right}</span>
-        </div>
-        <div className="border-x-2 border-slate-700 px-1">
-          {d.steps.map((s, i) => (
-            <div key={i} className="py-0.5">
-              <div className={cx('flex items-center', s.dir === '<' && 'flex-row-reverse')}>
-                <div className="h-0 flex-1 border-t-2 border-emerald-600" style={PRINT_EXACT} />
-                <span className="text-emerald-700" style={PRINT_EXACT}>
-                  {s.dir === '>' ? '▶' : '◀'}
-                </span>
-              </div>
-              <div className="-mt-0.5 text-center">
-                <b>{s.label}</b>
-                {s.note && <span className="text-slate-600"> – {s.note}</span>}
-              </div>
-            </div>
-          ))}
-        </div>
-        {d.note && <p className="mt-0.5 text-slate-600">{d.note}</p>}
-      </div>
-    );
-  const total = d.words ? 32 : 0;
-  return (
-    <div className="mt-0.5" style={{ fontSize: '0.88em' }}>
-      {d.words && (
-        <div className="flex justify-between text-slate-500" style={{ fontSize: '0.85em' }}>
-          <span>bit 0</span>
-          <span>8</span>
-          <span>16</span>
-          <span>24</span>
-          <span>31</span>
-        </div>
-      )}
-      <div className={cx(d.words && 'border-l border-t border-slate-700')}>
-        {d.rows.map((row, ri) => {
-          const sum = total || row.reduce((a, x) => a + x.span, 0);
-          return (
-            <div key={ri} className={cx('flex', !d.words && 'border-l border-t border-slate-700', !d.words && ri > 0 && 'mt-1')}>
-              {row.map((x, i) => (
-                <div
-                  key={i}
-                  className="flex min-w-0 flex-col items-center justify-center border-b border-r border-slate-700 px-0.5 py-0.5 text-center leading-tight"
-                  style={{ width: `${(x.span / sum) * 100}%`, background: x.data ? '#dcfce7' : i % 2 ? '#f0fdf4' : '#ffffff', ...PRINT_EXACT }}
-                >
-                  <span className="font-semibold [overflow-wrap:anywhere]">{x.label}</span>
-                  {x.size && <span className="text-slate-600" style={{ fontSize: '0.88em' }}>{x.size}</span>}
-                </div>
-              ))}
-            </div>
-          );
-        })}
-      </div>
-      {d.note && <p className="mt-0.5 text-slate-600">{d.note}</p>}
-    </div>
   );
 }
 
