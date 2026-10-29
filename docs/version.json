@@ -1,6 +1,6 @@
 {
-  "version": "1.53.0",
+  "version": "1.54.0",
   "notes": [
-    "Taháky k písemné práci se žlutou čarou"
+    "Taháky ze sítí se schématy: Ethernet, 802.1Q, IPv4, IPv6, UDP, TCP, DHCP, ARP"
   ]
 }
