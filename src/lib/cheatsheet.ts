@@ -252,9 +252,12 @@ export function chronologySheet(books: Book[]): Sheet {
 }
 
 /** Slohové útvary k písemné práci */
+/** Žlutá čára u taháků k písemné práci */
+export const WRITING_ACCENT = '#eab308';
+
 export function writingSheets(forms: WritingForm[]): Sheet[] {
   return packSheets(
-    { id: 'sloh-utvary', title: 'Slohové útvary', subtitle: '✍️ Písemná práce' },
+    { id: 'sloh-utvary', title: 'Slohové útvary', subtitle: '✍️ Písemná práce', accent: WRITING_ACCENT },
     forms.map((f) => ({
       title: f.name,
       rows: [
@@ -272,7 +275,7 @@ export function writingSheets(forms: WritingForm[]): Sheet[] {
 /** Šablony slohových útvarů k tisku: kostra textu a hotové obraty u každého útvaru */
 export function templateSheets(templates: WritingTemplate[], formName: (id: string) => string): Sheet[] {
   return packSheets(
-    { id: 'sloh-sablony', title: 'Šablony slohových útvarů', subtitle: '✍️ Písemná práce – [v závorkách] doplň vlastní text' },
+    { id: 'sloh-sablony', title: 'Šablony slohových útvarů', subtitle: '✍️ Písemná práce – [v závorkách] doplň vlastní text', accent: WRITING_ACCENT },
     templates.flatMap((t) => [
       ...t.variants.map((v) => ({ title: v.label === formName(t.form) ? v.label : `${formName(t.form)} – ${v.label}`, text: v.text })),
       { title: `${formName(t.form)} – obraty`, rows: t.phrases.map((p) => ({ label: p.part, text: p.items.join(' · ') })) },
@@ -287,6 +290,7 @@ export function stylesSheet(styles: FunctionalStyle[]): Sheet {
     id: 'sloh-styly',
     title: 'Funkční styly',
     subtitle: '✍️ Písemná práce a neumělecký text',
+    accent: WRITING_ACCENT,
     meta: [],
     sections: styles.map((s) => ({
       title: `Styl ${s.name}`,
