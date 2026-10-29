@@ -34,7 +34,6 @@ import {
   UserRound,
   Users,
   Wrench,
-  Zap,
   type LucideIcon,
 } from 'lucide-react';
 import type { SubjectId } from '../types';
@@ -126,9 +125,7 @@ export const NAV_SUBJECTS: NavSubject[] = [
           { to: '/site/prakticka?tab=postupy', label: 'Postupy', icon: ListOrdered },
           { to: '/site/prakticka?tab=kabelaz', label: 'Stavebnice topologie', icon: Cable },
           { to: '/site/prakticka?tab=klikani', label: 'Klikací trénink (Windows)', icon: MousePointerClick },
-          { to: '/site/prakticka?tab=chyby', label: 'Najdi chybu', icon: Wrench },
           { to: '/site/prakticka?tab=vypocty', label: 'Výpočty (adresace)', icon: Calculator },
-          { to: '/dril?predmet=site', label: 'Dril na čas', icon: Zap },
         ],
       },
     ],
@@ -146,7 +143,6 @@ export const NAV_SUBJECTS: NavSubject[] = [
           { to: '/hw/test', label: 'Cvičný test', icon: ClipboardList },
           { to: '/hw', label: 'Okruhy a převody', icon: Cpu },
           { to: '/hw/trenink', label: 'Trénink', icon: Dumbbell },
-          { to: '/dril?predmet=hw', label: 'Dril na čas', icon: Zap },
         ],
       },
     ],

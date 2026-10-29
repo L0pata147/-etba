@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Calculator, ClipboardList, Dumbbell, Zap } from 'lucide-react';
+import { Calculator, ClipboardList, Dumbbell } from 'lucide-react';
 import { useStore } from '../../store';
 import { HW_EXTRA_FROM, HW_TOPICS } from '../../data/hw/topics';
 import { HW_GENERATORS, generateHwCalcQuestions } from '../../lib/hwgen';
@@ -59,9 +59,6 @@ export function HwHome() {
           <div className="mt-3 flex flex-wrap gap-2">
             <Button size="sm" icon={<Calculator size={16} />} onClick={() => start(calcConfig(12, 'hw'))}>
               Mix příkladů
-            </Button>
-            <Button size="sm" variant="secondary" icon={<Zap size={16} />} to="/dril?predmet=hw">
-              Dril na čas
             </Button>
           </div>
         </Card>

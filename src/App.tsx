@@ -26,7 +26,6 @@ import { HwTest } from './pages/hw/HwTest';
 import { CloudHome } from './pages/cloud/CloudHome';
 import { CloudPractical } from './pages/cloud/CloudPractical';
 import { WritingPage } from './pages/Writing';
-import { Drill } from './pages/Drill';
 import { SearchPage } from './pages/Search';
 import { TerminalPage } from './pages/Terminal';
 import { QuestionOfDay } from './pages/QuestionOfDay';
@@ -77,7 +76,6 @@ export function App() {
         <Route path="/cloud/prakticka" element={<CloudPractical />} />
         <Route path="/cloud/trenink" element={<SiteTraining key="cloud" subject="cloud" />} />
         <Route path="/sloh" element={<WritingPage />} />
-        <Route path="/dril" element={<Drill />} />
         <Route path="/hledat" element={<SearchPage />} />
         <Route path="/tahak" element={<CheatSheetPage />} />
         <Route path="/hry" element={<GamesPage />} />

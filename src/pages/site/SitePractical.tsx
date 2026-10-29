@@ -16,11 +16,11 @@ import { ClickTab } from './ClickTrainer';
 import { CablingTab } from './Cabling';
 import { PLATFORMS, calcConfig, commandsConfig, proceduresConfig, siteConfig } from './common';
 
-type Tab = 'zadani' | 'prikazy' | 'postupy' | 'kabelaz' | 'klikani' | 'chyby' | 'vypocty';
+type Tab = 'zadani' | 'prikazy' | 'postupy' | 'kabelaz' | 'klikani' | 'vypocty';
 
 export function SitePractical() {
   const [params, setParams] = useSearchParams();
-  const tab = (['zadani', 'prikazy', 'postupy', 'kabelaz', 'klikani', 'chyby', 'vypocty'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
+  const tab = (['zadani', 'prikazy', 'postupy', 'kabelaz', 'klikani', 'vypocty'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
   return (
     <div>
       <PageHeader
@@ -38,7 +38,6 @@ export function SitePractical() {
           { value: 'postupy', label: 'Postupy' },
           { value: 'kabelaz', label: 'Kabeláž' },
           { value: 'klikani', label: 'Klikání (Windows)' },
-          { value: 'chyby', label: 'Najdi chybu' },
           { value: 'vypocty', label: 'Výpočty' },
         ]}
       />
@@ -47,7 +46,6 @@ export function SitePractical() {
       {tab === 'postupy' && <ProceduresTab />}
       {tab === 'kabelaz' && <CablingTab />}
       {tab === 'klikani' && <ClickTab />}
-      {tab === 'chyby' && <TroubleTab />}
       {tab === 'vypocty' && <CalcTab />}
     </div>
   );
@@ -470,9 +468,6 @@ function CalcTab() {
           <Button icon={<Calculator size={17} />} onClick={() => start(calcConfig(12))}>
             Mix všech výpočtů (12 příkladů)
           </Button>
-          <Button variant="secondary" to="/dril?predmet=site">
-            ⚡ Rychlostní dril
-          </Button>
         </div>
       </Card>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -521,7 +516,7 @@ export function TaskCard({ t, i, done, open, onDone, onOpen, locked }: { t: Scen
 }
 
 /** Hledání chyb v konfiguraci */
-export function TroubleTab({ platforms = PLATFORMS }: { platforms?: Platform[] }) {
+export function TroubleTab({ platforms }: { platforms: Platform[] }) {
   const start = useStartSession();
   const [shown, setShown] = useState<Set<string>>(new Set());
   const list = TROUBLE.filter((t) => platforms.includes(t.platform));
