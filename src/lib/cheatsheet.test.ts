@@ -156,3 +156,15 @@ describe('Šablony slohových útvarů', () => {
     expect(countWords('[doplň] Ahoj světe')).toBe(2);
   });
 });
+
+describe('Schémata k sítím', () => {
+  it('řádky hlaviček mají 32 bitů a témata existují', async () => {
+    const { TOPIC_DIAGRAMS } = await import('../data/site/diagrams');
+    for (const [id, ds] of Object.entries(TOPIC_DIAGRAMS)) {
+      expect(ALL_TOPICS.some((t) => t.id === id), id).toBe(true);
+      for (const d of ds) if (d.kind === 'fields' && d.words) for (const r of d.rows) expect(r.reduce((a, x) => a + x.span, 0), `${d.title}`).toBe(32);
+    }
+    const s = topicSheet(ALL_TOPICS.find((t) => t.id === 'site-tcp')!);
+    expect(s.sections.filter((x) => x.diagram)).toHaveLength(2);
+  });
+});

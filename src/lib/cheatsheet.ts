@@ -7,6 +7,7 @@ import type { Author } from './authors';
 import type { CommandItem, Platform, Procedure } from '../types';
 import type { WritingForm } from '../data/writing';
 import type { WritingTemplate } from '../data/writingTemplates';
+import { TOPIC_DIAGRAMS, type Diagram } from '../data/site/diagrams';
 import type { FunctionalStyle } from '../data/styles';
 import { approxYear } from './generator';
 
@@ -24,6 +25,10 @@ export interface SheetSection {
   steps?: { text: string; cmd?: string }[];
   /** Řádky „popisek: text“ */
   rows?: { label: string; text: string }[];
+  /** Schéma (stavba rámce / hlavičky, výměna zpráv) */
+  diagram?: Diagram;
+  /** Přes celou šířku stránky (ne do sloupce) */
+  wide?: boolean;
 }
 
 export interface Sheet {
@@ -57,7 +62,7 @@ export function firstSentences(text: string | undefined, n: number): string {
   return t;
 }
 
-const nonEmpty = (s: SheetSection) => !!(s.text?.trim() || s.list?.length || s.pairs?.length || s.steps?.length || s.rows?.length);
+const nonEmpty = (s: SheetSection) => !!(s.text?.trim() || s.list?.length || s.pairs?.length || s.steps?.length || s.rows?.length || s.diagram);
 
 export function bookSheet(b: Book, withNotes = false): Sheet {
   const people = (list: Book['mainCharacters'], n: number) => list.filter((c) => c.name.trim()).map((c) => (c.description.trim() ? `${c.name} – ${firstSentences(c.description, n)}` : c.name));
@@ -97,13 +102,23 @@ const platformAccent = (p: Platform) => (SITE_PLATFORMS.includes(p) ? SUBJECT_AC
 
 export function topicSheet(t: Topic): Sheet {
   const subj = SUBJECTS[t.subject];
+  // rámce a hlavičky přes celou šířku nahoře, výměna zpráv se vejde do sloupce
+  const diagrams = TOPIC_DIAGRAMS[t.id] ?? [];
+  const wideDiagrams = diagrams.filter((d) => d.kind === 'fields');
+  const flows = diagrams.filter((d) => d.kind === 'flow');
   return {
     id: t.id,
     title: `${t.number}. ${t.title}`,
     subtitle: `${subj.emoji} ${subj.label}`,
     accent: t.subject === 'cjl' ? undefined : SUBJECT_ACCENT[t.subject],
     meta: [],
-    sections: [{ title: 'Shrnutí', text: t.summary }, ...t.outline.map((o) => ({ title: o.heading, list: o.points })), { title: 'Pojmy', pairs: t.terms }].filter(nonEmpty),
+    sections: [
+      { title: 'Shrnutí', text: t.summary, wide: wideDiagrams.length > 0 },
+      ...wideDiagrams.map((d) => ({ title: d.title, diagram: d, wide: true })),
+      ...flows.map((d) => ({ title: d.title, diagram: d })),
+      ...t.outline.map((o) => ({ title: o.heading, list: o.points })),
+      { title: 'Pojmy', pairs: t.terms },
+    ].filter(nonEmpty),
   };
 }
 
