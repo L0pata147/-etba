@@ -1,76 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { CISCO_TASKS, CiscoSim, parseIf } from './cisco';
 import { LINUX_TASKS, LinuxSim } from './linux';
 
 const run = (s: { exec: (l: string) => { out: string[] } }, lines: string[]) => lines.map((l) => s.exec(l).out.join('\n')).join('\n');
 const allOk = (items: { label: string; ok: boolean }[]) => items.filter((i) => !i.ok).map((i) => i.label);
-
-describe('Cisco – úlohy podle vzorového řešení', () => {
-  for (const t of CISCO_TASKS) {
-    it(t.id, () => {
-      const s = t.create();
-      expect(allOk(t.check(s)).length).toBeGreaterThan(0);
-      const out = run(s, t.solution.split('\n').map((l) => l.trim()));
-      expect(out).not.toMatch(/Invalid input|Incomplete|Ambiguous/);
-      expect(allOk(t.check(s))).toEqual([]);
-    });
-  }
-});
-
-describe('Cisco – parser', () => {
-  it('názvy rozhraní', () => {
-    expect(parseIf('g0/0')).toBe('GigabitEthernet0/0');
-    expect(parseIf('gig0/0.10')).toBe('GigabitEthernet0/0.10');
-    expect(parseIf('FastEthernet0/1')).toBe('FastEthernet0/1');
-    expect(parseIf('s0/0/0')).toBe('Serial0/0/0');
-    expect(parseIf('vlan99')).toBe('Vlan99');
-    expect(parseIf('x0/0')).toBeNull();
-  });
-  it('zkratky, režimy a chyby', () => {
-    const s = new CiscoSim('router');
-    expect(s.prompt()).toBe('Router>');
-    expect(s.exec('e').out.join()).toMatch(/Ambiguous/);
-    s.exec('en');
-    expect(s.prompt()).toBe('Router#');
-    s.exec('conf t');
-    expect(s.prompt()).toBe('Router(config)#');
-    s.exec('int gig 0/0');
-    expect(s.prompt()).toBe('Router(config-if)#');
-    s.exec('ip add 192.168.1.1 255.255.255.0');
-    s.exec('no sh');
-    expect(s.exec('do sh ip int br').out.join('\n')).toMatch(/GigabitEthernet0\/0\s+192\.168\.1\.1\s+YES manual up/);
-    expect(s.exec('ip address').out.join()).toMatch(/Incomplete/);
-    expect(s.exec('ip adress 1.1.1.1 255.0.0.0').out.join()).toMatch(/Invalid input/);
-    // globální příkaz z podrežimu přepne do config
-    s.exec('hostname R9');
-    expect(s.prompt()).toBe('R9(config)#');
-    s.exec('int g0/1');
-    expect(s.exec('ip address 192.168.1.5 255.255.255.0').out.join()).toMatch(/overlaps with GigabitEthernet0\/0/);
-    expect(s.exec('ip address 10.0.0.0 255.255.255.252').out.join()).toMatch(/Bad mask/);
-    s.exec('end');
-    expect(s.prompt()).toBe('R9#');
-    expect(s.exec('sh run').out.join('\n')).toMatch(/hostname R9[\s\S]*interface GigabitEthernet0\/0\n ip address 192\.168\.1\.1 255\.255\.255\.0/);
-    expect(s.exec('ping 192.168.1.20').out.join()).toMatch(/!!!!!/);
-    expect(s.exec('ping 8.8.8.8').out.join()).toMatch(/\.\.\.\.\./);
-  });
-  it('switch – rozsahy a VLAN, router odmítne switchport', () => {
-    const s = new CiscoSim('switch');
-    run(s, ['en', 'conf t', 'int range fa0/1 - 3', 'sw mo acc', 'sw acc vl 30']);
-    expect(s.ifs.get('FastEthernet0/3')!.accessVlan).toBe(30);
-    expect(s.vlans.has(30)).toBe(true);
-    const r = new CiscoSim('router');
-    expect(run(r, ['en', 'conf t', 'int g0/0', 'switchport mode access'])).toMatch(/Invalid input/);
-  });
-  it('subrozhraní vyžaduje encapsulation před IP', () => {
-    const s = new CiscoSim('router');
-    expect(run(s, ['en', 'conf t', 'int g0/0.10', 'ip address 192.168.10.1 255.255.255.0'])).toMatch(/802\.1Q/);
-  });
-  it('RSA bez domény a s výchozím názvem', () => {
-    const s = new CiscoSim('router');
-    expect(run(s, ['en', 'conf t', 'crypto key generate rsa'])).toMatch(/hostname other than Router/);
-    expect(run(s, ['hostname R1', 'crypto key generate rsa'])).toMatch(/domain-name first/);
-  });
-});
 
 describe('Linux – úlohy', () => {
   it('druhá síťovka ve vnitřní síti', () => {

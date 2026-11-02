@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* tmavý režim jen na obrazovce – tisk (taháky, zadání) je vždy světlý */
+@custom-variant dark {
+  @media screen {
+    &:where(.dark, .dark *) {
+      @slot;
+    }
+  }
+}
 
 /* Písma přibalená v aplikaci (fungují i offline v APK) – jen latinka a latin-ext kvůli češtině */
 @font-face {

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Calculator, Dumbbell, Network, Shuffle, SquareTerminal, Terminal } from 'lucide-react';
+import { Calculator, Dumbbell, Network, Shuffle, Terminal } from 'lucide-react';
 import { useStore } from '../../store';
 import { SITE_TOPICS } from '../../data/site';
 import { sitePracticalProgress, topicLastStudied, topicProgress } from '../../lib/progress';
@@ -71,9 +71,6 @@ export function SiteHome() {
             </Button>
             <Button size="sm" variant="secondary" icon={<Calculator size={16} />} onClick={() => start(calcConfig())}>
               Výpočty
-            </Button>
-            <Button size="sm" variant="secondary" icon={<SquareTerminal size={16} />} to="/terminal">
-              Terminál
             </Button>
           </div>
         </Card>

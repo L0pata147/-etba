@@ -3,19 +3,19 @@ import { useSearchParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, ChevronUp, Lightbulb, ListChecks, RotateCcw, TerminalSquare } from 'lucide-react';
 import type { FlashcardQuestion, SessionRecord } from '../types';
 import { useStore } from '../store';
-import { CISCO_TASKS } from '../lib/term/cisco';
 import { LINUX_TASKS } from '../lib/term/linux';
 import type { CheckItem, Simulator, TermTask } from '../lib/term/types';
 import { uid } from '../lib/random';
-import { Button, Card, Modal, PageHeader, Segmented, Tag, cx } from '../components/ui';
+import { Button, Card, Modal, PageHeader, Tag, cx } from '../components/ui';
 
-type Platform = 'cisco' | 'linux';
-const TASKS: Record<Platform, TermTask[]> = { cisco: CISCO_TASKS as unknown as TermTask[], linux: LINUX_TASKS as unknown as TermTask[] };
-const LABEL: Record<Platform, string> = { cisco: 'Cisco IOS', linux: 'Linux' };
+// Packet Tracer se nesimuluje – sítě se trénují ve skutečném Packet Traceru podle „Zadání nanečisto“
+type Platform = 'linux';
+const TASKS: Record<Platform, TermTask[]> = { linux: LINUX_TASKS as unknown as TermTask[] };
+const LABEL: Record<Platform, string> = { linux: 'Linux' };
 
 export function TerminalPage() {
   const [params, setParams] = useSearchParams();
-  const platform: Platform = params.get('os') === 'linux' ? 'linux' : 'cisco';
+  const platform: Platform = 'linux';
   const taskId = params.get('uloha');
   const task = taskId ? TASKS[platform].find((t) => t.id === taskId) : undefined;
   const { data } = useStore();
@@ -28,21 +28,10 @@ export function TerminalPage() {
       <PageHeader
         title="Terminál"
         emoji="💻"
-        sub="Simulovaný příkazový řádek Cisco IOS a Linuxu. Splň zadání příkazy – kontroluje se výsledná konfigurace, ne jeden konkrétní příkaz."
-      />
-      <Segmented
-        className="mb-4"
-        value={platform}
-        onChange={(v) => setParams({ os: v })}
-        options={[
-          { value: 'cisco', label: '🛜 Cisco IOS (Packet Tracer)' },
-          { value: 'linux', label: '🐧 Linux (Debian 13)' },
-        ]}
+        sub="Simulovaný příkazový řádek Linuxu (Debian 13). Splň zadání příkazy – kontroluje se výsledná konfigurace, ne jeden konkrétní příkaz."
       />
       <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-        {platform === 'cisco'
-          ? 'Funguje jako CLI v Packet Traceru: režimy Router> / # / (config)#, zkratky (en, conf t, int g0/0, sh ip int br), „do“ v konfiguraci, ? pro nápovědu.'
-          : 'Debian 13 ve VirtualBoxu jako root (síťovky enp0s3, enp0s8): soubory upravuješ v editoru (nano / vim), síť v /etc/network/interfaces, služby přes systemctl, balíčky přes apt. Úlohy NFS a GlusterFS se počítají do cloudu. Napiš help pro seznam příkazů.'}
+        {'Debian 13 ve VirtualBoxu jako root (síťovky enp0s3, enp0s8): soubory upravuješ v editoru (nano / vim), síť v /etc/network/interfaces, služby přes systemctl, balíčky přes apt. Úlohy NFS a GlusterFS se počítají do cloudu. Napiš help pro seznam příkazů.'}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {TASKS[platform].map((t) => (
@@ -209,11 +198,6 @@ function TerminalRun({ task, platform, onBack }: { task: TermTask; platform: Pla
             <Button size="sm" variant="secondary" icon={<ChevronUp size={15} />} onClick={() => onKey({ key: 'ArrowUp', preventDefault: () => undefined } as KeyboardEvent<HTMLInputElement>)}>
               Předchozí příkaz
             </Button>
-            {platform === 'cisco' && (
-              <Button size="sm" variant="secondary" onClick={() => (setInput('?'), setTimeout(() => inputRef.current?.focus(), 0))}>
-                ?
-              </Button>
-            )}
             <Button size="sm" variant="ghost" icon={<RotateCcw size={15} />} className="ml-auto" onClick={restart}>
               Začít znovu
             </Button>
@@ -327,15 +311,9 @@ function TerminalRun({ task, platform, onBack }: { task: TermTask; platform: Pla
   );
 }
 
-function welcome(p: Platform): Line[] {
-  return p === 'cisco'
-    ? [
-        { text: 'Simulace Cisco IOS – napiš ? pro seznam příkazů v aktuálním režimu.', kind: 'out' },
-        { text: 'Press RETURN to get started!', kind: 'out' },
-        { text: '', kind: 'out' },
-      ]
-    : [
-        { text: 'Simulace Linuxu (přihlášen jako root) – napiš help pro seznam příkazů.', kind: 'out' },
-        { text: '', kind: 'out' },
-      ];
+function welcome(_p: Platform): Line[] {
+  return [
+    { text: 'Simulace Linuxu (přihlášen jako root) – napiš help pro seznam příkazů.', kind: 'out' },
+    { text: '', kind: 'out' },
+  ];
 }

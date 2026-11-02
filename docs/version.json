@@ -1,6 +1,6 @@
 {
-  "version": "1.55.0",
+  "version": "1.56.0",
   "notes": [
-    "Schémata ve všech 20 tématech sítí – v tahácích i v aplikaci (OSI, RJ-45, bity adres, VLSM, AD, DNS, NAT, Wi-Fi…)"
+    "Bez simulace Packet Traceru (Cisco terminál, stavebnice topologie) – zadání nanečisto jde vytisknout a udělat ve skutečném Packet Traceru"
   ]
 }

@@ -88,7 +88,7 @@ const ETHERNET: FieldDiagram = {
   kind: 'fields',
   title: 'Ethernetový rámec (Ethernet II)',
   rows: [
-    [f('Preambule', '7 B', 10), f('SFD', '1 B', 4), f('Cílová MAC', '6 B', 10), f('Zdrojová MAC', '6 B', 10), f('EtherType', '2 B', 7), f('Data (paket)', '46–1500 B', 20, true), f('FCS', '4 B', 6)],
+    [f('Preambule', '7 B', 10), f('SFD', '1 B', 4), f('Cílová MAC', '6 B', 10), f('Zdrojová MAC', '6 B', 10), f('EtherType', '2 B', 9), f('Data (paket)', '46–1500 B', 20, true), f('FCS', '4 B', 6)],
   ],
   note: 'Rámec bez preambule a SFD má 64–1518 B. EtherType: 0x0800 IPv4, 0x86DD IPv6, 0x0806 ARP.',
 };

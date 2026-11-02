@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Calculator, Check, Dices, ExternalLink, Eye, EyeOff, Flag, ListOrdered, Lock, RefreshCw, Terminal, Timer } from 'lucide-react';
+import { Calculator, Check, Dices, ExternalLink, Eye, EyeOff, Flag, ListOrdered, Lock, Printer, RefreshCw, Terminal, Timer } from 'lucide-react';
 import type { Platform } from '../../types';
 import { ALL_COMMANDS, COMMAND_GROUPS, PLATFORM_LABEL } from '../../data/site/commands';
 import { ALL_PROCEDURES } from '../../data/site/procedures';
@@ -12,31 +12,28 @@ import { useStore } from '../../store';
 import { Button, Card, PageHeader, Segmented, SectionTitle, Tag, cx } from '../../components/ui';
 import { useStartSession } from '../SessionPage';
 import { Topology } from './Topology';
+import { printPage } from '../../lib/native';
 import { ClickTab } from './ClickTrainer';
-import { CablingTab } from './Cabling';
 import { PLATFORMS, calcConfig, commandsConfig, proceduresConfig, siteConfig } from './common';
 
-type Tab = 'zadani' | 'prikazy' | 'postupy' | 'kabelaz' | 'klikani' | 'vypocty';
+type Tab = 'zadani' | 'prikazy' | 'postupy' | 'klikani' | 'vypocty';
 
 export function SitePractical() {
   const [params, setParams] = useSearchParams();
-  const tab = (['zadani', 'prikazy', 'postupy', 'kabelaz', 'klikani', 'vypocty'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
+  const tab = (['zadani', 'prikazy', 'postupy', 'klikani', 'vypocty'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
   return (
     <div>
-      <PageHeader
-        title="Praktická zkouška – sítě"
-        emoji="🛠️"
-        sub="Nejdřív Packet Tracer (Cisco), potom se losuje Linux (Debian 13), nebo Windows Server."
-      />
+      <div className="print:hidden">
+        <PageHeader title="Praktická zkouška – sítě" emoji="🛠️" sub="Nejdřív Packet Tracer (Cisco), potom se losuje Linux (Debian 13), nebo Windows Server." />
+      </div>
       <Segmented
-        className="mb-5"
+        className="mb-5 print:hidden"
         value={tab}
         onChange={(v) => setParams(v === 'zadani' ? {} : { tab: v }, { replace: true })}
         options={[
           { value: 'zadani', label: 'Zadání nanečisto' },
           { value: 'prikazy', label: 'Příkazy' },
           { value: 'postupy', label: 'Postupy' },
-          { value: 'kabelaz', label: 'Kabeláž' },
           { value: 'klikani', label: 'Klikání (Windows)' },
           { value: 'vypocty', label: 'Výpočty' },
         ]}
@@ -44,7 +41,6 @@ export function SitePractical() {
       {tab === 'zadani' && <ScenarioTab />}
       {tab === 'prikazy' && <CommandsTab />}
       {tab === 'postupy' && <ProceduresTab />}
-      {tab === 'kabelaz' && <CablingTab />}
       {tab === 'klikani' && <ClickTab />}
       {tab === 'vypocty' && <CalcTab />}
     </div>
@@ -184,7 +180,9 @@ function ScenarioTab() {
   );
 
   return (
-    <div className="space-y-5">
+    <>
+    {sc && <PrintScenario sc={sc} osShown={osShown} />}
+    <div className="space-y-5 print:hidden">
       <Card className="p-5">
         <h2 className="font-bold">Vygeneruj si zadání ve stylu praktické zkoušky</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -233,6 +231,9 @@ function ScenarioTab() {
               <Tag tone="brand">Firma {sc.company}</Tag>
               <Tag>Blok {sc.block}</Tag>
               <Tag>Doména {sc.domain}</Tag>
+              <Button size="sm" variant="secondary" className="ml-auto" icon={<Printer size={15} />} onClick={() => printPage(`Zadání Packet Tracer – ${sc.company}`)}>
+                Vytisknout zadání
+              </Button>
               <Tag tone="emerald">
                 Splněno {done.size}/{sc.ptTasks.length + (osShown ? sc.osTasks.length : 0)}
               </Tag>
@@ -278,6 +279,44 @@ function ScenarioTab() {
         </>
       )}
     </div>
+    </>
+  );
+}
+
+/** Zadání k tisku – bez řešení, ať ho máš u Packet Traceru na papíře */
+function PrintScenario({ sc, osShown }: { sc: Scenario; osShown: boolean }) {
+  const part = (title: string, tasks: ScenarioTask[]) => (
+    <section className="mt-4">
+      <h2 className="mb-1 border-b-2 border-emerald-600 pb-0.5 text-[15px] font-bold" style={{ printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }}>
+        {title}
+      </h2>
+      <ol className="space-y-1.5">
+        {tasks.map((t, i) => (
+          <li key={t.title} className="flex gap-2 break-inside-avoid">
+            <span className="mt-0.5 inline-block h-3.5 w-3.5 shrink-0 border border-slate-700" />
+            <span>
+              <b>
+                {i + 1}. {t.title}
+              </b>{' '}
+              – {t.detail}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+  return (
+    <article className="hidden text-[12.5px] leading-snug text-black print:block print:p-[12mm]">
+      <h1 className="text-xl font-bold">Praktická zkouška nanečisto – firma {sc.company}</h1>
+      <p className="text-slate-700">
+        Adresní blok {sc.block} · doména {sc.domain} · zaškrtávej splněné úkoly; řešení najdeš v aplikaci
+      </p>
+      <div className="mt-2 rounded border border-slate-300 p-1">
+        <Topology sc={sc} showAddresses={false} />
+      </div>
+      {part('Část 1: Packet Tracer (router R1, switch SW1, ISP)', sc.ptTasks)}
+      {osShown ? part(`Část 2: ${sc.os === 'linux' ? 'Linux (Debian 13)' : 'Windows Server'} – server ${sc.server.host}`, sc.osTasks) : <p className="mt-4 italic text-slate-700">Část 2 (Linux nebo Windows Server) se losuje v aplikaci až po Packet Traceru.</p>}
+    </article>
   );
 }
 
