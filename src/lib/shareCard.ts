@@ -11,7 +11,7 @@ const H = 1350;
 const DISPLAY = '"Bricolage Grotesque Variable", "Manrope Variable", system-ui, sans-serif';
 const SANS = '"Manrope Variable", system-ui, sans-serif';
 const INITIAL_COLORS = ['#f43f5e', '#f97316', '#f59e0b', '#10b981', '#14b8a6', '#0ea5e9', '#6366f1', '#8b5cf6', '#d946ef'];
-const SUBJECT_COLORS: Record<SubjectId, string> = { cjl: '#f43f5e', site: '#0ea5e9', hw: '#f59e0b', cloud: '#8b5cf6' };
+const SUBJECT_COLORS: Record<SubjectId, string> = { cjl: '#0ea5e9', site: '#10b981', hw: '#ef4444', cloud: '#f97316' };
 
 function hash(s: string): number {
   let h = 0;

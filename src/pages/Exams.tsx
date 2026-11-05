@@ -5,7 +5,7 @@ import { NAV_SUBJECTS } from '../components/navData';
 import { subjectProgress } from '../lib/insights';
 import { areaMastery, sitePracticalProgress, subjectTopicsProgress } from '../lib/progress';
 import { SUBJECT_TOPICS } from '../data/subjects';
-import { Card, PageHeader, Pct, ProgressBar } from '../components/ui';
+import { Card, PageHeader, Pct, ProgressBar, cx } from '../components/ui';
 import { SUBJECT_STYLE, SubjectIcon } from '../components/subjectStyle';
 
 /** Rozcestník: předměty → zkoušky → co k nim procvičit */
@@ -26,7 +26,7 @@ export function Exams() {
       <PageHeader title="Zkoušky" emoji="🎓" sub="Všechny maturitní zkoušky na jednom místě – u každé najdeš jen to, co k ní patří." />
       <div className="space-y-5">
         {NAV_SUBJECTS.map((subj) => (
-          <Card key={subj.id} className="p-5">
+          <Card key={subj.id} className={cx('border-l-4 p-5', SUBJECT_STYLE[subj.id].border)}>
             <div className="flex items-center justify-between gap-3">
               <h2 className="flex min-w-0 items-center gap-3 text-lg font-bold">
                 <SubjectIcon subject={subj.id} />
@@ -49,14 +49,16 @@ export function Exams() {
                     )}
                   </div>
                   <div className="text-sm text-slate-500 dark:text-slate-400">{ex.format}</div>
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3">
                     {ex.items.map((it) => (
                       <Link
                         key={it.to}
                         to={it.to}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-700 transition hover:border-brand-400 hover:text-brand-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200 dark:hover:text-brand-300"
+                        className="group flex min-h-[3.25rem] items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-sm font-semibold leading-tight text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-slate-200 dark:hover:border-white/20"
                       >
-                        <it.icon size={15} />
+                        <span className={cx('grid h-7 w-7 shrink-0 place-items-center rounded-lg', SUBJECT_STYLE[subj.id].chip)}>
+                          <it.icon size={15} />
+                        </span>
                         {it.label}
                       </Link>
                     ))}

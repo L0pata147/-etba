@@ -11,6 +11,7 @@ import { StorageWarning } from './StorageWarning';
 import { levelFromXp, streak } from '../lib/progress';
 import { NAV_BOTTOM, NAV_SUBJECTS, NAV_TOP, activeNavItem, type NavItem } from './navData';
 import { SubjectIcon } from './subjectStyle';
+import { SUBJECTS } from '../data/subjects';
 
 const MOBILE: NavItem[] = [
   { to: '/', label: 'Dnes', icon: Home },
@@ -124,7 +125,9 @@ export function Layout({ children }: { children: ReactNode }) {
               )}
             >
               <SubjectIcon subject={subj.id} size="sm" />
-              <span className="flex-1">{subj.label}</span>
+              <span className="flex-1" title={SUBJECTS[subj.id].label}>
+                {SUBJECTS[subj.id].short}
+              </span>
               <ChevronDown size={16} className={cx('shrink-0 text-slate-400 transition', isOpen && 'rotate-180')} />
             </button>
             {isOpen && (
@@ -182,16 +185,15 @@ export function Layout({ children }: { children: ReactNode }) {
       <header className="print:hidden sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/85 px-4 py-3 backdrop-blur dark:border-white/[0.06] dark:bg-ink/85 lg:hidden">
         <Brand compact />
         <div className="flex items-center gap-1">
-          <span className="mr-1 text-sm font-semibold text-slate-600 dark:text-slate-300">🔥 {st}</span>
+          <NavLink to="/pokrok" className="mr-1 rounded-full bg-orange-500/10 px-2 py-0.5 text-sm font-semibold text-orange-700 dark:text-orange-300" aria-label={`Série učení: ${st} dní`}>
+            🔥 {st}
+          </NavLink>
           <NavLink to="/profil" className="rounded-full p-1" aria-label="Můj profil">
             <Avatar name={displayName(data)} avatar={me.avatar} frame={me.frame} size="xs" />
           </NavLink>
           <NavLink to="/hledat" className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Hledat">
             <Search size={20} />
           </NavLink>
-          <button onClick={toggle} className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Přepnout motiv">
-            {dark ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
           <button onClick={() => setMenuOpen(true)} className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Menu">
             <Menu size={22} />
           </button>
@@ -209,6 +211,10 @@ export function Layout({ children }: { children: ReactNode }) {
               </button>
             </div>
             {navList}
+            <button onClick={toggle} className="mt-3 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-600 hover:bg-slate-900/[0.04] dark:text-slate-400 dark:hover:bg-white/[0.05]">
+              {dark ? <Sun size={18} /> : <Moon size={18} />}
+              {dark ? 'Světlý režim' : 'Tmavý režim'}
+            </button>
           </div>
         </div>
       )}
@@ -278,7 +284,7 @@ function Brand({ compact }: { compact?: boolean }) {
         <GraduationCap size={20} />
       </div>
       <div className="leading-tight">
-        <div className="font-display text-[17px] font-bold tracking-tight">Maturitní trenér</div>
+        <div className={cx('whitespace-nowrap font-display font-bold tracking-tight', compact ? 'text-[16px]' : 'text-[17px]')}>Maturitní trenér</div>
         {!compact && <div className="text-xs text-slate-500 dark:text-slate-400">Maturita IT – 4 předměty</div>}
       </div>
     </NavLink>

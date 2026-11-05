@@ -1,6 +1,6 @@
 {
-  "version": "1.56.0",
+  "version": "1.57.0",
   "notes": [
-    "Bez simulace Packet Traceru (Cisco terminál, stavebnice topologie) – zadání nanečisto jde vytisknout a udělat ve skutečném Packet Traceru"
+    "Nový vzhled: barvy předmětů jako na tahácích, přehlednější Zkoušky a seznamy témat, jednodušší horní lišta"
   ]
 }

@@ -76,9 +76,9 @@ export function Dashboard() {
         <div className="relative bg-gradient-to-br from-brand-700 via-brand-800 to-brand-950 p-5 text-white sm:p-7">
           <div className="text-xs font-bold uppercase tracking-[0.14em] text-brand-200">Dnes doporučujeme zopakovat</div>
           <ol className="mt-3 space-y-2">
-            {recs.map((r, i) => (
+            {recs.map((r) => (
               <li key={r.book.id + r.area} className="flex items-center gap-3">
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/15 text-sm font-bold">{i + 1}</span>
+                <SubjectIcon subject="cjl" className="h-7 w-7" size="sm" solid />
                 <div className="min-w-0">
                   <Link to={`/knihy/${r.book.id}`} className="font-bold hover:underline">
                     {r.book.title}
@@ -88,9 +88,9 @@ export function Dashboard() {
                 </div>
               </li>
             ))}
-            {itRecs.map((r, i) => (
+            {itRecs.map((r) => (
               <li key={r.topic.id} className="flex items-center gap-3">
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/15 text-sm font-bold">{recs.length + i + 1}</span>
+                <SubjectIcon subject={r.topic.subject} className="h-7 w-7" size="sm" solid />
                 <div className="min-w-0">
                   <Link to={`/tema/${r.topic.id}`} className="font-bold hover:underline">
                     {r.topic.title}
