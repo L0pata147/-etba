@@ -91,6 +91,18 @@ export function ProfilePage() {
 
       <Card className="mb-5 overflow-hidden">
         <ProfileHero name={name} profile={profile} xp={data.xp} week={stats.week}>
+          <div className="mb-3 flex flex-wrap gap-2 text-sm">
+            {[
+              ['🔥', `${stats.streak} ${stats.streak === 1 ? 'den' : stats.streak >= 2 && stats.streak <= 4 ? 'dny' : 'dní'} v řadě`],
+              ['✅', `${stats.total} odpovědí`],
+              ['🎯', `${Math.round(stats.accuracy * 100)} % správně`],
+              ['🏆', `${earnedCount} trofejí`],
+            ].map(([e, t]) => (
+              <span key={t} className="rounded-lg bg-black/20 px-2.5 py-1 font-semibold backdrop-blur">
+                {e} {t}
+              </span>
+            ))}
+          </div>
           <div className="flex flex-wrap gap-2">
             <NameEditor
               name={name === 'Ty' ? '' : name}
@@ -111,6 +123,8 @@ export function ProfilePage() {
           </div>
         </ProfileHero>
       </Card>
+
+      <NextRewards ctx={ctx} name={name} profile={profile} />
 
       <div className="mb-4 flex gap-1 overflow-x-auto rounded-xl bg-slate-900/[0.05] p-1 dark:bg-white/[0.06]">
         {tabs.map((t) => (
@@ -143,7 +157,7 @@ export function ProfilePage() {
 
           <Card className="p-5">
             <SectionTitle sub={`Rámeček kolem profilovky – odemčeno ${count(FRAMES, ctx)} z ${FRAMES.length}. Rámečky za předměty mají vlastní znak.`}>Rámeček</SectionTitle>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 lg:grid-cols-6">
               <Choice selected={!profile.frame} onClick={() => set({ frame: '' })} label="Bez rámečku">
                 <Avatar name={name} avatar={profile.avatar} size="md" />
               </Choice>
@@ -151,7 +165,7 @@ export function ProfilePage() {
                 const open = isUnlocked(f, ctx);
                 return (
                   <Choice key={f.id} selected={profile.frame === f.id} locked={!open} onClick={() => open && set({ frame: f.id })} label={f.label} hint={open ? undefined : f.how} progress={open ? undefined : unlockProgress(f, ctx)}>
-                    <Avatar name={name} avatar={profile.avatar} frame={f.id} size="md" className={cx(!open && 'opacity-40 grayscale')} />
+                    <Avatar name={name} avatar={profile.avatar} frame={f.id} size="md" className={cx(!open && 'opacity-60')} />
                   </Choice>
                 );
               })}
@@ -173,7 +187,10 @@ export function ProfilePage() {
                     aria-pressed={sel}
                     className={cx('overflow-hidden rounded-2xl text-left ring-1 transition', sel ? 'ring-2 ring-brand-500' : 'ring-slate-200 dark:ring-white/10', !open && 'cursor-not-allowed')}
                   >
-                    <div className={cx('flex h-16 items-end p-2', b.bg, !open && 'opacity-35 grayscale')}>{sel && <Check size={16} className="text-white" />}</div>
+                    <div className={cx('flex h-16 items-end justify-between p-2', b.bg, !open && 'opacity-60')}>
+                      {sel && <Check size={16} className="text-white" />}
+                      {!open && <Lock size={15} className="ml-auto text-white/90" />}
+                    </div>
                     <div className="p-2">
                       <div className="flex items-center gap-1 text-sm font-semibold">
                         {!open && <Lock size={12} className="text-slate-400" />}
@@ -209,7 +226,7 @@ export function ProfilePage() {
                     <ColoredName name={name} color={c.id} className="block truncate font-display text-lg font-bold" />
                     <span className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                       {!open && <Lock size={11} />}
-                      {open ? c.label : c.how}
+                      {open ? c.label : `${c.label} · ${c.how}`}
                     </span>
                     {!open && <MiniProgress value={unlockProgress(c, ctx)} />}
                   </button>
@@ -476,6 +493,45 @@ function Trophies({ showcase, onShowcase, groupCode }: { showcase: string[]; onS
         </div>
       </Card>
     </div>
+  );
+}
+
+/** Co odemkneš nejdřív – zamčené odměny seřazené podle toho, jak blízko k nim máš */
+function NextRewards({ ctx, name, profile }: { ctx: ProfileCtx; name: string; profile: ProfileT }) {
+  const all: { kind: string; u: Unlockable; preview: ReactNode }[] = [
+    ...FRAMES.map((f) => ({ kind: 'Rámeček', u: f as Unlockable, preview: <Avatar name={name} avatar={profile.avatar} frame={f.id} size="sm" /> })),
+    ...BANNERS.map((b) => ({ kind: 'Pozadí', u: b as Unlockable, preview: <span className={cx('block h-8 w-12 rounded-lg', b.bg)} /> })),
+    ...NAME_COLORS.map((c) => ({ kind: 'Barva jména', u: c as Unlockable, preview: <ColoredName name={name} color={c.id} className="font-display text-lg font-bold" /> })),
+    ...TITLES.map((t) => ({ kind: 'Titul', u: t as Unlockable, preview: <span className="text-xl">🏷️</span> })),
+  ];
+  const next = all
+    .filter((x) => x.u.goal && !isUnlocked(x.u, ctx))
+    .map((x) => ({ ...x, p: unlockProgress(x.u, ctx), g: x.u.goal!(ctx) }))
+    .sort((a, b) => b.p - a.p)
+    .slice(0, 3);
+  if (!next.length) return null;
+  return (
+    <Card className="mb-5 p-5">
+      <SectionTitle sub="Zamčené odměny, ke kterým máš nejblíž.">Nejbližší odměny</SectionTitle>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {next.map((x) => (
+          <div key={x.kind + x.u.id} className="flex items-center gap-3 rounded-xl p-3 ring-1 ring-slate-200 dark:ring-white/10">
+            <div className="grid h-12 w-12 shrink-0 place-items-center">{x.preview}</div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{x.kind}</div>
+              <div className="truncate font-semibold">{x.u.label}</div>
+              <div className="text-xs leading-tight text-slate-500 dark:text-slate-400">{x.u.how}</div>
+              <div className="mt-1 flex items-center gap-2">
+                <MiniProgress value={x.p} />
+                <span className="shrink-0 text-[11px] font-semibold tabular-nums text-slate-500">
+                  {Math.min(x.g[0], x.g[1])}/{x.g[1]}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 

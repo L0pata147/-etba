@@ -42,7 +42,7 @@ export function ProfileHero({ name, profile, xp, week, rank, className, children
           {profile.motto && <div className="mt-1 line-clamp-2 text-sm italic text-white/75">„{profile.motto}“</div>}
           <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-white/80">
             <span className="rounded-md bg-white/15 px-1.5 py-0.5 font-bold">Úroveň {lvl.level}</span>
-            <span>{levelName(lvl.level)}</span>
+            {levelName(lvl.level) !== TITLE_MAP[profile.title]?.label && <span>{levelName(lvl.level)}</span>}
             {rank ? (
               <span className="inline-flex items-center gap-1">
                 · <Trophy size={12} /> {rank}. místo
