@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Download, Eye, EyeOff, RotateCcw, Upload } from 'lucide-react';
+import { Download, RotateCcw, Upload } from 'lucide-react';
 import type { AppData } from '../types';
 import { useStore } from '../store';
 import { exportJson, readImportFile } from '../lib/storage';
@@ -15,7 +15,6 @@ export function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<AppData | null>(null);
   const [confirm, setConfirm] = useState<'progress' | 'all' | null>(null);
-  const [showKey, setShowKey] = useState(false);
 
   const onFile = async (f: File | undefined) => {
     if (!f) return;
@@ -75,41 +74,6 @@ export function SettingsPage() {
           <ReminderSettings />
         </Card>
       )}
-
-      <Card className="space-y-4 p-5">
-        <SectionTitle sub="Nepovinné. Bez klíče aplikace funguje, jen bez AI učitele.">AI učitel (Claude API)</SectionTitle>
-        <div>
-          <label className="label" htmlFor="set-key">
-            API klíč
-          </label>
-          <div className="flex gap-2">
-            <input
-              id="set-key"
-              className="input font-mono"
-              type={showKey ? 'text' : 'password'}
-              placeholder="sk-ant-…"
-              autoComplete="off"
-              value={s.aiApiKey}
-              onChange={(e) => updateSettings({ aiApiKey: e.target.value })}
-            />
-            <Button variant="secondary" onClick={() => setShowKey(!showKey)} aria-label={showKey ? 'Skrýt klíč' : 'Zobrazit klíč'}>
-              {showKey ? <EyeOff size={18} /> : <Eye size={18} />}
-            </Button>
-          </div>
-          <p className="mt-1 text-xs text-slate-500">
-            Klíč je uložen jen v úložišti tohoto prohlížeče a odesílá se pouze do API Anthropic. Není součástí exportu dat. Používej ho jen na svém zařízení.
-          </p>
-        </div>
-        <div>
-          <label className="label" htmlFor="set-model">
-            Model
-          </label>
-          <select id="set-model" className="input" value={s.aiModel} onChange={(e) => updateSettings({ aiModel: e.target.value })}>
-            <option value="claude-opus-5-5">Claude Opus 5.5 (doporučeno)</option>
-            <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (levnější)</option>
-          </select>
-        </div>
-      </Card>
 
       <SyncSettings />
 

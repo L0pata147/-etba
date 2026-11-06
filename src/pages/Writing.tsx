@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Bot, CheckCircle2, Copy, Dices, FileText, PenLine, Printer, Trash2 } from 'lucide-react';
+import { CheckCircle2, Copy, Dices, FileText, PenLine, Printer, Trash2 } from 'lucide-react';
 import type { Writing } from '../types';
 import { useStore } from '../store';
 import { MIN_WORDS, WRITING_CRITERIA, WRITING_FORMS, WRITING_MINUTES, WRITING_PROMPTS, type WritingPrompt } from '../data/writing';
 import { analyzeWriting, countWords } from '../lib/writingcheck';
 import { templateFor } from '../data/writingTemplates';
-import { describeAiError, streamTeacher } from '../lib/ai';
 import { sample, uid } from '../lib/random';
 import { SPELLING, SPELLING_CATEGORIES, type SpellingCategory } from '../data/spelling';
 import { generateSpellingQuestions } from '../lib/spellinggen';
@@ -243,12 +242,9 @@ function Editor({ w, onDone }: { w: Writing; onDone: () => void }) {
 }
 
 function Review({ w, onBack, onContinue }: { w: Writing; onBack: () => void; onContinue: () => void }) {
-  const { data, saveWriting, deleteWriting, recordSession, toast } = useStore();
+  const { saveWriting, deleteWriting, recordSession, toast } = useStore();
   const a = useMemo(() => analyzeWriting(w.text), [w.text]);
   const [scores, setScores] = useState<Record<string, number>>(w.selfScores ?? {});
-  const [ai, setAi] = useState(w.aiFeedback ?? '');
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
   const rated = WRITING_CRITERIA.filter((c) => scores[c.id] !== undefined).length;
   const total = WRITING_CRITERIA.reduce((s, c) => s + (scores[c.id] ?? 0), 0);
   const max = WRITING_CRITERIA.length * 4;
@@ -275,24 +271,6 @@ function Review({ w, onBack, onContinue }: { w: Writing; onBack: () => void; onC
       },
       40,
     );
-  };
-
-  const askAi = async () => {
-    setBusy(true);
-    setErr(null);
-    setAi('');
-    const system =
-      'Jsi zkušená učitelka češtiny a hodnotitelka maturitních písemných prací. Hodnotíš česky, věcně a povzbudivě. Nehodnoť podle vymyšlených oficiálních bodových tabulek – použij tato kritéria: splnění zadání a obsah; útvar a komunikační situace; pravopis; tvarosloví a stavba vět; slovní zásoba; kompozice a členění. U každého kritéria napiš krátké hodnocení a body 0–4. Pak vypiš konkrétní chyby (citace → oprava) a 3 rady, co příště zlepšit. Nepřepisuj celý text.';
-    const content = `Útvar: ${formName(w.form)}\nZadání: ${w.prompt}\nPočet slov: ${a.words} (minimum ${MIN_WORDS})\n\nText:\n${w.text}`;
-    try {
-      const out = await streamTeacher(data.settings.aiApiKey, data.settings.aiModel, system, [{ role: 'user', content }], (d) => setAi((x) => x + d));
-      setAi(out);
-      saveWriting({ ...w, selfScores: scores, aiFeedback: out, updatedAt: Date.now() });
-    } catch (e) {
-      setErr(await describeAiError(e));
-    } finally {
-      setBusy(false);
-    }
   };
 
   const issueTone = { chyba: 'rose', čárka: 'amber', styl: 'slate' } as const;
@@ -382,21 +360,6 @@ function Review({ w, onBack, onContinue }: { w: Writing; onBack: () => void; onC
           </Button>
           {rated < WRITING_CRITERIA.length && <span className="text-sm text-slate-500">Ohodnoť všechna kritéria.</span>}
         </div>
-      </Card>
-
-      <Card className="p-5">
-        <SectionTitle sub="Volitelné – vyžaduje API klíč v Nastavení.">Hodnocení od AI</SectionTitle>
-        {data.settings.aiApiKey ? (
-          <Button icon={<Bot size={17} />} disabled={busy || !w.text.trim()} onClick={askAi}>
-            {busy ? 'Hodnotím…' : ai ? 'Ohodnotit znovu' : 'Nechat ohodnotit AI'}
-          </Button>
-        ) : (
-          <Button variant="secondary" to="/nastaveni">
-            Nastavit API klíč
-          </Button>
-        )}
-        {err && <p className="mt-3 text-sm text-rose-600">{err}</p>}
-        {ai && <div className="mt-4 whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-[15px] leading-relaxed dark:bg-slate-800/60">{ai}</div>}
       </Card>
 
       <Card className="p-5">

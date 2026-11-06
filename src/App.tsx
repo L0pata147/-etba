@@ -13,7 +13,6 @@ import { Terms } from './pages/Terms';
 import { NonArt } from './pages/NonArt';
 import { Unknown } from './pages/Unknown';
 import { Plan } from './pages/Plan';
-import { AiTeacher } from './pages/AiTeacher';
 import { SettingsPage } from './pages/Settings';
 import { Onboarding } from './pages/Onboarding';
 import { SiteHome } from './pages/site/SiteHome';
@@ -61,7 +60,6 @@ export function App() {
         <Route path="/doucit" element={<Unknown />} />
         <Route path="/pokrok" element={<Stats />} />
         <Route path="/plan" element={<Plan />} />
-        <Route path="/ai" element={<AiTeacher />} />
         <Route path="/nastaveni" element={<SettingsPage />} />
         <Route path="/site" element={<SiteHome />} />
         <Route path="/site/tema/:id" element={<TopicDetail />} />

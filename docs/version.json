@@ -1,6 +1,6 @@
 {
-  "version": "1.62.0",
+  "version": "1.63.0",
   "notes": [
-    "Nižší horní lišta na mobilu, která při posouvání odjede; menu jen dole pod Více"
+    "Odebrán AI učitel (i nastavení API klíče a AI hodnocení slohovky)"
   ]
 }
