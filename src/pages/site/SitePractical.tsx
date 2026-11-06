@@ -13,6 +13,7 @@ import { Button, Card, PageHeader, Segmented, SectionTitle, Tag, cx } from '../.
 import { useStartSession } from '../SessionPage';
 import { Topology } from './Topology';
 import { printPage } from '../../lib/native';
+import { Cmd, VarLegend } from '../../components/Cmd';
 import { ClickTab } from './ClickTrainer';
 import { PLATFORMS, calcConfig, commandsConfig, proceduresConfig, siteConfig } from './common';
 
@@ -424,6 +425,7 @@ export function CommandsTab({ platforms = PLATFORMS }: { platforms?: Platform[] 
           {hide ? 'Ukázat příkazy' : 'Skrýt příkazy (otestuj se)'}
         </Button>
       </div>
+      <VarLegend className="mb-3" />
       <Card className="divide-y divide-slate-100 dark:divide-white/[0.06]">
         {list.map((c) => (
           <div key={c.id} className="p-4">
@@ -437,7 +439,9 @@ export function CommandsTab({ platforms = PLATFORMS }: { platforms?: Platform[] 
               </button>
             ) : (
               <>
-                <code className="mt-1 block overflow-x-auto whitespace-pre rounded-lg bg-slate-900 px-3 py-2 font-mono text-[13px] text-emerald-300">{c.command}</code>
+                <code className="mt-1 block overflow-x-auto whitespace-pre rounded-lg bg-slate-900 px-3 py-2 font-mono text-[13px] text-emerald-300">
+                  <Cmd text={c.command} />
+                </code>
                 {c.note && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{c.note}</p>}
               </>
             )}
@@ -462,6 +466,7 @@ export function ProceduresTab({ platforms = PLATFORMS }: { platforms?: Platform[
           Seřazování kroků
         </Button>
       </div>
+      <VarLegend className="mb-3" />
       <div className="space-y-3">
         {list.map((p) => (
           <details key={p.id} className="card group p-4">
@@ -475,7 +480,11 @@ export function ProceduresTab({ platforms = PLATFORMS }: { platforms?: Platform[
                   <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-800 dark:bg-brand-500/20 dark:text-brand-200">{i + 1}</span>
                   <div className="min-w-0 flex-1">
                     <div className="text-[15px]">{s.text}</div>
-                    {s.cmd && <pre className="mt-1 whitespace-pre-wrap break-words rounded-lg bg-slate-900 px-3 py-2 font-mono text-[13px] text-emerald-300">{s.cmd}</pre>}
+                    {s.cmd && (
+                      <pre className="mt-1 whitespace-pre-wrap break-words rounded-lg bg-slate-900 px-3 py-2 font-mono text-[13px] text-emerald-300">
+                        <Cmd text={s.cmd} />
+                      </pre>
+                    )}
                   </div>
                 </li>
               ))}
@@ -547,7 +556,11 @@ export function TaskCard({ t, i, done, open, onDone, onOpen, locked }: { t: Scen
               {open ? <EyeOff size={15} /> : <Eye size={15} />} {open ? 'Skrýt řešení' : 'Ukázat řešení'}
             </button>
           )}
-          {open && !locked && <pre className="mt-2 whitespace-pre-wrap break-words rounded-lg bg-slate-900 p-3 font-mono text-[13px] leading-relaxed text-slate-100">{t.solution}</pre>}
+          {open && !locked && (
+            <pre className="mt-2 whitespace-pre-wrap break-words rounded-lg bg-slate-900 p-3 font-mono text-[13px] leading-relaxed text-slate-100">
+              <Cmd text={t.solution} />
+            </pre>
+          )}
         </div>
       </div>
     </div>

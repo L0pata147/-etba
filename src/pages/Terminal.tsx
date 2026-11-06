@@ -6,6 +6,7 @@ import { useStore } from '../store';
 import { LINUX_TASKS } from '../lib/term/linux';
 import type { CheckItem, Simulator, TermTask } from '../lib/term/types';
 import { uid } from '../lib/random';
+import { Cmd } from '../components/Cmd';
 import { Button, Card, Modal, PageHeader, Tag, cx } from '../components/ui';
 
 // Packet Tracer se nesimuluje – sítě se trénují ve skutečném Packet Traceru podle „Zadání nanečisto“
@@ -250,14 +251,20 @@ function TerminalRun({ task, platform, onBack }: { task: TermTask; platform: Pla
             {hints > 0 && (
               <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-slate-600 dark:text-slate-300">
                 {task.hints.slice(0, hints).map((h) => (
-                  <li key={h}>{h}</li>
+                  <li key={h}>
+                    <Cmd text={h} tone="card" />
+                  </li>
                 ))}
               </ol>
             )}
             <button onClick={() => setSolution((x) => !x)} className="mt-3 text-sm font-semibold text-brand-600 dark:text-brand-400">
               {solution ? 'Skrýt řešení' : 'Ukázat vzorové řešení'}
             </button>
-            {solution && <pre className="mt-2 overflow-x-auto whitespace-pre rounded-lg bg-slate-900 p-3 font-mono text-[12px] leading-relaxed text-emerald-300">{task.solution}</pre>}
+            {solution && (
+              <pre className="mt-2 overflow-x-auto whitespace-pre rounded-lg bg-slate-900 p-3 font-mono text-[12px] leading-relaxed text-emerald-300">
+                <Cmd text={task.solution} />
+              </pre>
+            )}
           </Card>
         </div>
       </div>

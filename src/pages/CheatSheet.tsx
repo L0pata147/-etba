@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Printer } from 'lucide-react';
 import { DiagramView } from '../components/Diagram';
+import { Cmd } from '../components/Cmd';
 import type { SubjectId } from '../types';
 import { useStore } from '../store';
 import { CATEGORY_ORDER } from '../data/osnova';
@@ -463,7 +464,7 @@ function SectionView({ sec }: { sec: SheetSection }) {
           {sec.pairs.map((p, i) => (
             <div key={`${p.term}-${i}`} className="break-inside-avoid">
               <dt className={cx('inline font-semibold', sec.mono && 'rounded bg-slate-100 px-1 font-mono [overflow-wrap:anywhere]')} style={sec.mono ? { fontSize: '0.92em' } : undefined}>
-                {p.term}
+                {sec.mono ? <Cmd text={p.term} tone="paper" /> : p.term}
               </dt>
               <dd className="inline"> – {p.def}</dd>
             </div>
@@ -477,7 +478,7 @@ function SectionView({ sec }: { sec: SheetSection }) {
               {st.text}
               {st.cmd && (
                 <pre className="mt-0.5 whitespace-pre-wrap rounded [overflow-wrap:anywhere] bg-slate-100 px-1.5 py-0.5 font-mono text-slate-900" style={{ fontSize: '0.9em' }}>
-                  {st.cmd}
+                  <Cmd text={st.cmd} tone="paper" />
                 </pre>
               )}
             </li>

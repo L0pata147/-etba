@@ -1,6 +1,6 @@
 {
-  "version": "1.58.0",
+  "version": "1.59.0",
   "notes": [
-    "Vylepšený profil: nejbližší odměny, rychlé statistiky, barevné náhledy zamčených rámečků a pozadí"
+    "Proměnné v příkazech a postupech jsou žlutě podtržené (jména, adresy, cesty, hesla podle zadání)"
   ]
 }

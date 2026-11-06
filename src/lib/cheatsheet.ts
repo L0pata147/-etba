@@ -227,7 +227,7 @@ export function commandSheets(platform: Platform, label: string, commands: Comma
   const own = commands.filter((c) => c.platform === platform);
   const names = [...new Set(own.map((c) => c.group))].filter((g) => !groups || groups.includes(g));
   return packSheets(
-    { id: `prikazy-${platform}`, title: `Příkazy – ${label}`, subtitle: '🛠️ Praktická zkouška', accent: platformAccent(platform) },
+    { id: `prikazy-${platform}`, title: `Příkazy – ${label}`, subtitle: '🛠️ Praktická zkouška · žlutě podtržené = proměnná podle zadání', accent: platformAccent(platform) },
     names.map((g) => ({ title: g, mono: true, pairs: own.filter((c) => c.group === g).map((c) => ({ term: c.command, def: c.task + (c.note ? ` (${c.note})` : '') })) })),
     Infinity,
   );
@@ -237,7 +237,7 @@ export function commandSheets(platform: Platform, label: string, commands: Comma
 export function procedureSheets(id: string, label: string, procedures: Procedure[]): Sheet[] {
   const accent = procedures[0] ? platformAccent(procedures[0].platform) : undefined;
   return packSheets(
-    { id: `postupy-${id}`, title: `Postupy – ${label}`, subtitle: '🛠️ Praktická zkouška', accent },
+    { id: `postupy-${id}`, title: `Postupy – ${label}`, subtitle: '🛠️ Praktická zkouška · žlutě podtržené = proměnná podle zadání', accent },
     procedures.map((p) => ({ title: p.title, text: p.goal, steps: p.steps })),
     Infinity,
   );
