@@ -1,6 +1,6 @@
 {
-  "version": "1.61.0",
+  "version": "1.62.0",
   "notes": [
-    "Praktická zkouška ze sítí: Packet Tracer, Linux a Windows jako rozbalovací položky v menu, každá část na vlastní stránce"
+    "Nižší horní lišta na mobilu, která při posouvání odjede; menu jen dole pod Více"
   ]
 }

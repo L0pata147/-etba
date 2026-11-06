@@ -172,7 +172,7 @@ function CloudScenarioTab() {
       </Card>
 
       {running && (
-        <div className="sticky top-16 z-20 flex flex-wrap items-center gap-3 rounded-2xl border border-brand-500/40 bg-white px-4 py-3 shadow-lg lg:top-3 dark:bg-slate-900">
+        <div className="sticky top-2 z-20 flex flex-wrap items-center gap-3 rounded-2xl border border-brand-500/40 bg-white px-4 py-3 shadow-lg lg:top-3 dark:bg-slate-900">
           <span className={cx('font-display text-2xl font-bold tabular-nums', left < 5 * 60000 ? 'text-rose-600 dark:text-rose-400' : '')}>{clock(left / 1000)}</span>
           <span className="text-sm text-slate-500 dark:text-slate-400">
             zbývá · splněno {done.size}/{sc!.tasks.length}

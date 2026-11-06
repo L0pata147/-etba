@@ -167,7 +167,7 @@ function Editor({ w, onDone }: { w: Writing; onDone: () => void }) {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="sticky top-14 z-20 -mx-4 mb-3 flex flex-wrap items-center gap-3 border-b border-slate-200 bg-white/90 px-4 py-2 backdrop-blur dark:border-white/[0.07] dark:bg-slate-950/90 lg:top-0">
+      <div className="sticky top-0 z-20 -mx-4 mb-3 flex flex-wrap items-center gap-3 border-b border-slate-200 bg-white/90 px-4 py-2 backdrop-blur dark:border-white/[0.07] dark:bg-slate-950/90 lg:top-0">
         <span className={cx('font-semibold tabular-nums', left < 0 ? 'text-rose-600' : left < 600 ? 'text-amber-600' : '')}>
           ⏱ {left < 0 ? '+' : ''}
           {String(Math.floor(Math.abs(left) / 60)).padStart(2, '0')}:{String(Math.abs(left) % 60).padStart(2, '0')}

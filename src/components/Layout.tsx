@@ -206,7 +206,8 @@ export function Layout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Top bar (mobile) */}
-      <header className="print:hidden sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/85 px-4 py-3 backdrop-blur dark:border-white/[0.06] dark:bg-ink/85 lg:hidden">
+      {/* jen malá lišta, která při posouvání odjede – menu je dole pod „Více“ */}
+      <header className="print:hidden flex items-center justify-between border-b border-slate-200/80 bg-white/85 px-3 py-1.5 dark:border-white/[0.06] dark:bg-ink/85 lg:hidden">
         <Brand compact />
         <div className="flex items-center gap-1">
           <NavLink to="/pokrok" className="mr-1 rounded-full bg-orange-500/10 px-2 py-0.5 text-sm font-semibold text-orange-700 dark:text-orange-300" aria-label={`Série učení: ${st} dní`}>
@@ -218,9 +219,6 @@ export function Layout({ children }: { children: ReactNode }) {
           <NavLink to="/hledat" className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Hledat">
             <Search size={20} />
           </NavLink>
-          <button onClick={() => setMenuOpen(true)} className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Menu">
-            <Menu size={22} />
-          </button>
         </div>
       </header>
 
@@ -304,11 +302,11 @@ export function Layout({ children }: { children: ReactNode }) {
 function Brand({ compact }: { compact?: boolean }) {
   return (
     <NavLink to="/" className="flex items-center gap-2.5 px-2">
-      <div className="grid h-9 w-9 place-items-center rounded-xl bg-brand-700 text-white dark:bg-brand-500">
-        <GraduationCap size={20} />
+      <div className={cx('grid place-items-center rounded-xl bg-brand-700 text-white dark:bg-brand-500', compact ? 'h-7 w-7 rounded-lg' : 'h-9 w-9')}>
+        <GraduationCap size={compact ? 16 : 20} />
       </div>
       <div className="leading-tight">
-        <div className={cx('whitespace-nowrap font-display font-bold tracking-tight', compact ? 'text-[16px]' : 'text-[17px]')}>Maturitní trenér</div>
+        <div className={cx('whitespace-nowrap font-display font-bold tracking-tight', compact ? 'text-[15px]' : 'text-[17px]')}>Maturitní trenér</div>
         {!compact && <div className="text-xs text-slate-500 dark:text-slate-400">Maturita IT – 4 předměty</div>}
       </div>
     </NavLink>
