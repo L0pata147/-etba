@@ -41,6 +41,8 @@ export interface NavItem {
   to: string;
   label: string;
   icon: LucideIcon;
+  /** Rozbalovací podpoložky (odkaz položky = první podpoložka) */
+  children?: NavItem[];
 }
 
 export interface NavExam {
@@ -119,9 +121,34 @@ export const NAV_SUBJECTS: NavSubject[] = [
         format: 'Packet Tracer → Debian 13 / Windows Server',
         items: [
           { to: '/site/prakticka', label: 'Zadání nanečisto', icon: Terminal },
-          { to: '/site/prakticka?tab=pt', label: 'Packet Tracer (Cisco)', icon: Network },
-          { to: '/site/prakticka?tab=linux', label: 'Linux (Debian 13)', icon: SquareTerminal },
-          { to: '/site/prakticka?tab=windows', label: 'Windows Server', icon: MousePointerClick },
+          {
+            to: '/site/prakticka?tab=pt&cast=prikazy',
+            label: 'Packet Tracer (Cisco)',
+            icon: Network,
+            children: [
+              { to: '/site/prakticka?tab=pt&cast=prikazy', label: 'Příkazy', icon: Terminal },
+              { to: '/site/prakticka?tab=pt&cast=postupy', label: 'Postupy', icon: ListOrdered },
+            ],
+          },
+          {
+            to: '/site/prakticka?tab=linux&cast=prikazy',
+            label: 'Linux (Debian 13)',
+            icon: SquareTerminal,
+            children: [
+              { to: '/site/prakticka?tab=linux&cast=prikazy', label: 'Příkazy', icon: Terminal },
+              { to: '/site/prakticka?tab=linux&cast=postupy', label: 'Postupy', icon: ListOrdered },
+            ],
+          },
+          {
+            to: '/site/prakticka?tab=windows&cast=postupy',
+            label: 'Windows Server',
+            icon: MousePointerClick,
+            children: [
+              { to: '/site/prakticka?tab=windows&cast=postupy', label: 'Postupy (GUI)', icon: ListOrdered },
+              { to: '/site/prakticka?tab=windows&cast=klikani', label: 'Klikací trénink', icon: MousePointerClick },
+              { to: '/site/prakticka?tab=windows&cast=prikazy', label: 'Příkazy', icon: Terminal },
+            ],
+          },
           { to: '/site/prakticka?tab=vypocty', label: 'Výpočty (adresace)', icon: Calculator },
         ],
       },
@@ -181,7 +208,7 @@ export const NAV_BOTTOM: NavItem[] = [
 
 const ALL_ITEMS: { item: NavItem; subject?: SubjectId }[] = [
   ...NAV_TOP.map((item) => ({ item })),
-  ...NAV_SUBJECTS.flatMap((s) => s.exams.flatMap((e) => e.items.map((item) => ({ item, subject: s.id })))),
+  ...NAV_SUBJECTS.flatMap((s) => s.exams.flatMap((e) => e.items.flatMap((item) => (item.children ?? [item]).map((c) => ({ item: c, subject: s.id }))))),
   ...NAV_BOTTOM.map((item) => ({ item })),
 ];
 

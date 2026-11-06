@@ -85,7 +85,31 @@ export function Layout({ children }: { children: ReactNode }) {
       return n;
     });
 
-  const link = (n: NavItem, small = false) => {
+  const link = (n: NavItem, small = false): ReactNode => {
+    if (n.children) {
+      // rozbalovací skupina (např. Packet Tracer → Příkazy, Postupy)
+      const key = `group:${n.label}`;
+      const childActive = n.children.some((c) => c.to === active?.to);
+      const isOpen = open.has(key) || childActive;
+      return (
+        <div key={key}>
+          <button
+            type="button"
+            onClick={() => toggleSubject(key)}
+            aria-expanded={isOpen}
+            className={cx(
+              'flex w-full items-center gap-3 rounded-xl px-3 py-1.5 text-left text-[14px] font-medium transition hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05]',
+              childActive ? 'font-semibold text-brand-800 dark:text-brand-200' : 'text-slate-600 dark:text-slate-400',
+            )}
+          >
+            <n.icon size={16} className={childActive ? 'text-brand-600 dark:text-brand-300' : undefined} />
+            <span className="flex-1">{n.label}</span>
+            <ChevronDown size={15} className={cx('shrink-0 text-slate-400 transition', isOpen && 'rotate-180')} />
+          </button>
+          {isOpen && <div className="ml-5 border-l border-slate-200 pl-1.5 dark:border-white/[0.07]">{n.children.map((c) => link(c, true))}</div>}
+        </div>
+      );
+    }
     const isActive = active?.to === n.to;
     return (
       <Link

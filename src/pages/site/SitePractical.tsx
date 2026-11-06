@@ -36,6 +36,14 @@ const PARTS: Record<'pt' | 'linux' | 'windows', { value: Part; label: string }[]
     { value: 'prikazy', label: 'Příkazy' },
   ],
 };
+/** Nadpis a popis každé části praktické zkoušky – v menu je každá zvlášť */
+const TITLE: Record<Tab, [string, string]> = {
+  zadani: ['Zadání nanečisto', 'Praktická zkouška ze sítí: nejdřív Packet Tracer (Cisco), potom se losuje Linux (Debian 13), nebo Windows Server.'],
+  pt: ['Packet Tracer (Cisco)', 'Příkazy a postupy pro router a switch v Packet Traceru.'],
+  linux: ['Linux (Debian 13)', 'Příkazy a postupy pro server s Debianem 13 ve VirtualBoxu.'],
+  windows: ['Windows Server', 'Windows Server přes grafické rozhraní – postupy, klikací trénink a pár příkazů do příkazového řádku.'],
+  vypocty: ['Výpočty (adresace)', 'Adresy sítí, broadcast, rozsahy, masky, VLSM a IPv6 – jako při návrhu adresace v Packet Traceru.'],
+};
 const TAB_PLATFORM: Record<'pt' | 'linux' | 'windows', Platform> = { pt: 'cisco', linux: 'linux', windows: 'windows' };
 // staré odkazy (?tab=prikazy / postupy / klikani)
 const LEGACY: Record<string, [Tab, Part]> = { prikazy: ['pt', 'prikazy'], postupy: ['pt', 'postupy'], klikani: ['windows', 'klikani'] };
@@ -50,20 +58,8 @@ export function SitePractical() {
   return (
     <div>
       <div className="print:hidden">
-        <PageHeader title="Praktická zkouška – sítě" emoji="🛠️" sub="Nejdřív Packet Tracer (Cisco), potom se losuje Linux (Debian 13), nebo Windows Server." />
+        <PageHeader title={TITLE[tab][0]} emoji="🛠️" sub={TITLE[tab][1]} />
       </div>
-      <Segmented
-        className="mb-5 print:hidden"
-        value={tab}
-        onChange={(v) => setParams(v === 'zadani' ? {} : { tab: v }, { replace: true })}
-        options={[
-          { value: 'zadani', label: 'Zadání nanečisto' },
-          { value: 'pt', label: '🛜 Packet Tracer' },
-          { value: 'linux', label: '🐧 Linux' },
-          { value: 'windows', label: '🪟 Windows Server' },
-          { value: 'vypocty', label: 'Výpočty' },
-        ]}
-      />
       {(tab === 'pt' || tab === 'linux' || tab === 'windows') && part && (
         <>
           <Segmented className="mb-4 print:hidden" value={part} onChange={(v) => setParams({ tab, cast: v }, { replace: true })} options={parts} />
