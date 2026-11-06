@@ -3,7 +3,8 @@ import { Dumbbell, ListOrdered, Server, Terminal } from 'lucide-react';
 import { useStore } from '../../store';
 import { CLOUD_EXTRA_FROM, CLOUD_TOPICS } from '../../data/cloud/topics';
 import { cloudPracticalProgress, topicLastStudied, topicProgress } from '../../lib/progress';
-import { Button, Card, PageHeader, Pct, ProgressBar, SectionTitle } from '../../components/ui';
+import { Button, PageHeader, SectionTitle } from '../../components/ui';
+import { ExamCard, ExamCards } from '../../components/SubjectPage';
 import { useStartSession } from '../SessionPage';
 import { commandsConfig, topicConfig } from '../site/common';
 import { TopicGrid } from '../site/TopicGrid';
@@ -18,57 +19,53 @@ export function CloudHome() {
 
   return (
     <div>
-      <PageHeader
-        title="Programové vybavení cloudu"
-        emoji="☁️"
-        sub="Praktická zkouška – virtualizace, virtuální sítě a úložiště, zálohy, vysoká dostupnost, kontejnery a veřejný cloud."
-        action={
-          <Button icon={<Server size={18} />} to="/cloud/prakticka">
+      <PageHeader title="Programové vybavení cloudu" emoji="☁️" sub="Praktická zkouška – virtualizace, virtuální sítě a úložiště, zálohy, vysoká dostupnost, kontejnery a veřejný cloud." />
+      <ExamCards>
+        <ExamCard subject="cloud" title="Praktická zkouška" value={prac} info="Linux (NFS, GlusterFS), VirtualBox, Docker, Hyper-V a Proxmox VE.">
+          <Button size="sm" icon={<Server size={16} />} to="/cloud/prakticka">
             Zadání nanečisto
           </Button>
+          <Button size="sm" variant="secondary" icon={<ListOrdered size={16} />} to="/cloud/prakticka?tab=postupy">
+            Postupy
+          </Button>
+          <Button size="sm" variant="secondary" icon={<Terminal size={16} />} onClick={() => start(commandsConfig(['virtualbox', 'docker', 'hyperv', 'proxmox'], 'Cloud – příkazy (mix)'))}>
+            Příkazy
+          </Button>
+        </ExamCard>
+        <ExamCard subject="cloud" title="Okruhy (teorie)" value={theory} info={`${rows.filter((r) => r.p >= 0.75).length} z ${rows.length} okruhů zvládnuto – pojmy, které u zkoušky vysvětluješ.`}>
+          <Button
+            size="sm"
+            icon={<Dumbbell size={16} />}
+            onClick={() =>
+              start(
+                topicConfig(
+                  weakest.map((w) => w.t.id),
+                  'Cloud – nejslabší okruhy',
+                ),
+              )
+            }
+          >
+            Nejslabší okruhy
+          </Button>
+        </ExamCard>
+        <ExamCard subject="cloud" title="Terminál" value={null} info="Simulovaný Debian – NFS a GlusterFS podle hodin.">
+          <Button size="sm" icon={<Terminal size={16} />} to="/terminal">
+            Otevřít terminál
+          </Button>
+        </ExamCard>
+      </ExamCards>
+      <SectionTitle
+        sub="Klikni na okruh – výklad, pojmy, kvíz a trénink."
+        action={
+          <Button size="sm" variant="secondary" to="/cloud/trenink">
+            Vlastní trénink
+          </Button>
         }
-      />
-      <div className="mb-6 grid gap-3 sm:grid-cols-2">
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <div className="font-bold">Teorie (okruhy)</div>
-            <span className="text-lg font-bold">
-              <Pct value={theory} />
-            </span>
-          </div>
-          <ProgressBar value={theory} className="mt-2" height="h-2.5" />
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Pojmy a principy, které budeš u praktické zkoušky potřebovat vysvětlit i použít.</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" icon={<Dumbbell size={16} />} onClick={() => start(topicConfig(weakest.map((w) => w.t.id), 'Cloud – nejslabší okruhy'))}>
-              Nejslabší okruhy
-            </Button>
-            <Button size="sm" variant="secondary" to="/cloud/trenink">
-              Vlastní trénink
-            </Button>
-          </div>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <div className="font-bold">Praxe (příkazy a postupy)</div>
-            <span className="text-lg font-bold">
-              <Pct value={prac} />
-            </span>
-          </div>
-          <ProgressBar value={prac} className="mt-2" height="h-2.5" />
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">VirtualBox, Docker, Hyper-V (PowerShell) a Proxmox VE.</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" icon={<Terminal size={16} />} onClick={() => start(commandsConfig(['virtualbox', 'docker', 'hyperv', 'proxmox'], 'Cloud – příkazy (mix)'))}>
-              Příkazy
-            </Button>
-            <Button size="sm" variant="secondary" icon={<ListOrdered size={16} />} to="/cloud/prakticka?tab=postupy">
-              Postupy
-            </Button>
-          </div>
-        </Card>
-      </div>
-      <SectionTitle sub="Klikni na okruh – výklad, pojmy, kvíz a trénink.">Okruhy</SectionTitle>
+      >
+        Okruhy ({rows.filter((r) => r.t.number < CLOUD_EXTRA_FROM).length})
+      </SectionTitle>
       <TopicGrid rows={rows.filter((r) => r.t.number < CLOUD_EXTRA_FROM)} />
-      <div className="mt-6">
+      <div className="mt-7">
         <SectionTitle sub="Operační systémy, bootování, procesy, souborové systémy, UPS a clustery z učitelových učebnic VRT a CCC.">Další látka z učitelova textu</SectionTitle>
         <TopicGrid rows={rows.filter((r) => r.t.number >= CLOUD_EXTRA_FROM)} />
       </div>

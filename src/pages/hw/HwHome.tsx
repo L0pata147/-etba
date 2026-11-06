@@ -5,7 +5,8 @@ import { HW_EXTRA_FROM, HW_TOPICS } from '../../data/hw/topics';
 import { HW_GENERATORS, generateHwCalcQuestions } from '../../lib/hwgen';
 import { areaMastery, topicLastStudied, topicProgress } from '../../lib/progress';
 import { shuffle } from '../../lib/random';
-import { Button, Card, PageHeader, Pct, ProgressBar, SectionTitle } from '../../components/ui';
+import { Button, PageHeader, SectionTitle } from '../../components/ui';
+import { ExamCard, ExamCards } from '../../components/SubjectPage';
 import { useStartSession } from '../SessionPage';
 import { calcConfig, siteConfig, topicConfig } from '../site/common';
 import { TopicGrid } from '../site/TopicGrid';
@@ -25,74 +26,65 @@ export function HwHome() {
 
   return (
     <div>
-      <PageHeader
-        title="Technické vybavení počítačů"
-        emoji="🖥️"
-        sub="Písemný test v Moodlu (60 minut). Okruhy podle maturitního zadání, látka podle učitelova textu."
-        action={
-          <Button icon={<ClipboardList size={18} />} to="/hw/test">
-            Cvičný test
+      <PageHeader title="Technické vybavení počítačů" emoji="🖥️" sub="Písemný test v Moodlu (60 minut). Okruhy podle maturitního zadání, látka podle učitelova textu." />
+      <ExamCards>
+        <ExamCard
+          subject="hw"
+          title="Písemný test"
+          value={tests.length ? best : null}
+          info={tests.length ? `${tests.length}× napsáno, nejlepší výsledek` : 'Zatím žádný pokus – test jako v Moodlu, 60 minut.'}
+        >
+          <Button size="sm" icon={<ClipboardList size={16} />} to="/hw/test">
+            Napsat cvičný test
           </Button>
-        }
-      />
-      <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <div className="font-bold">Okruhy</div>
-            <span className="text-lg font-bold">
-              <Pct value={theory} />
-            </span>
-          </div>
-          <ProgressBar value={theory} className="mt-2" height="h-2.5" />
-          <Button size="sm" className="mt-3" icon={<Dumbbell size={16} />} onClick={() => start(topicConfig(weakest.map((w) => w.t.id), 'Hardware – nejslabší okruhy'))}>
+        </ExamCard>
+        <ExamCard subject="hw" title="Okruhy (teorie)" value={theory} info={`${rows.filter((r) => r.p >= 0.75).length} z ${rows.length} okruhů zvládnuto`}>
+          <Button
+            size="sm"
+            icon={<Dumbbell size={16} />}
+            onClick={() =>
+              start(
+                topicConfig(
+                  weakest.map((w) => w.t.id),
+                  'Hardware – nejslabší okruhy',
+                ),
+              )
+            }
+          >
             Nejslabší okruhy
           </Button>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <div className="font-bold">Převody a výpočty</div>
-            <span className="text-lg font-bold">
-              <Pct value={calc} />
-            </span>
-          </div>
-          <ProgressBar value={calc} className="mt-2" height="h-2.5" />
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" icon={<Calculator size={16} />} onClick={() => start(calcConfig(12, 'hw'))}>
-              Mix příkladů
-            </Button>
-          </div>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <div className="font-bold">Cvičné testy</div>
-            <span className="text-lg font-bold">{tests.length ? <Pct value={best} /> : '—'}</span>
-          </div>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{tests.length ? `${tests.length}× napsáno, nejlepší výsledek` : 'Zatím žádný pokus'}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" to="/hw/test">
-              Napsat test
-            </Button>
-            <Button size="sm" variant="secondary" to="/hw/trenink">
-              Vlastní trénink
-            </Button>
-          </div>
-        </Card>
-      </div>
+        </ExamCard>
+        <ExamCard subject="hw" title="Převody a výpočty" value={calc} info="Jednotky, soustavy, přenosové rychlosti – pokaždé nové příklady.">
+          <Button size="sm" icon={<Calculator size={16} />} onClick={() => start(calcConfig(12, 'hw'))}>
+            Mix příkladů
+          </Button>
+        </ExamCard>
+      </ExamCards>
 
-      <SectionTitle sub="Příklady se generují pokaždé nové, výsledek píšeš přesně.">Převody a výpočty</SectionTitle>
-      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-        {kinds.map(([kind, g]) => (
-          <button key={kind} onClick={() => runKind(kind, g.label)} className="card p-3 text-left text-sm font-semibold transition hover:-translate-y-0.5 hover:shadow-md">
-            {g.label}
-          </button>
-        ))}
-      </div>
-
-      <SectionTitle sub="Historie, jednotky a soustavy, základní deska, rozhraní, CPU, paměť, zdroj, vstupní, polohovací a výstupní zařízení.">Okruhy podle maturitního zadání</SectionTitle>
+      <SectionTitle
+        sub="Klikni na okruh – výklad, pojmy, kvíz a trénink."
+        action={
+          <Button size="sm" variant="secondary" to="/hw/trenink">
+            Vlastní trénink
+          </Button>
+        }
+      >
+        Okruhy podle maturitního zadání ({rows.filter((r) => r.t.number < HW_EXTRA_FROM).length})
+      </SectionTitle>
       <TopicGrid rows={rows.filter((r) => r.t.number < HW_EXTRA_FROM)} />
-      <div className="mt-6">
+      <div className="mt-7">
         <SectionTitle sub="Kapitoly z učitelova textu, které zadání výslovně nejmenuje – v testu se ale objevit můžou.">Další látka z učitelova textu</SectionTitle>
         <TopicGrid rows={rows.filter((r) => r.t.number >= HW_EXTRA_FROM)} />
+      </div>
+      <div className="mt-7">
+        <SectionTitle sub="Příklady se generují pokaždé nové, výsledek píšeš přesně.">Převody podle druhu</SectionTitle>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+          {kinds.map(([kind, g]) => (
+            <button key={kind} onClick={() => runKind(kind, g.label)} className="card p-3 text-left text-sm font-semibold transition hover:-translate-y-0.5 hover:shadow-md">
+              {g.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
