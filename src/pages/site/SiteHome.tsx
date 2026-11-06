@@ -66,8 +66,14 @@ export function SiteHome() {
             <Button size="sm" icon={<Network size={16} />} to="/site/prakticka">
               Zadání nanečisto
             </Button>
-            <Button size="sm" variant="secondary" icon={<Terminal size={16} />} to="/site/prakticka?tab=prikazy">
-              Příkazy
+            <Button size="sm" variant="secondary" icon={<Terminal size={16} />} to="/site/prakticka?tab=pt">
+              Packet Tracer
+            </Button>
+            <Button size="sm" variant="secondary" to="/site/prakticka?tab=linux">
+              🐧 Linux
+            </Button>
+            <Button size="sm" variant="secondary" to="/site/prakticka?tab=windows">
+              🪟 Windows
             </Button>
             <Button size="sm" variant="secondary" icon={<Calculator size={16} />} onClick={() => start(calcConfig())}>
               Výpočty

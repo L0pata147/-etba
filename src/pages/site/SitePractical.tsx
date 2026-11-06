@@ -17,11 +17,36 @@ import { Cmd, VarLegend } from '../../components/Cmd';
 import { ClickTab } from './ClickTrainer';
 import { PLATFORMS, calcConfig, commandsConfig, proceduresConfig, siteConfig } from './common';
 
-type Tab = 'zadani' | 'prikazy' | 'postupy' | 'klikani' | 'vypocty';
+type Tab = 'zadani' | 'pt' | 'linux' | 'windows' | 'vypocty';
+type Part = 'prikazy' | 'postupy' | 'klikani';
+
+/** Části u každé platformy (Packet Tracer, Linux, Windows Server) */
+const PARTS: Record<'pt' | 'linux' | 'windows', { value: Part; label: string }[]> = {
+  pt: [
+    { value: 'prikazy', label: 'Příkazy' },
+    { value: 'postupy', label: 'Postupy' },
+  ],
+  linux: [
+    { value: 'prikazy', label: 'Příkazy' },
+    { value: 'postupy', label: 'Postupy' },
+  ],
+  windows: [
+    { value: 'postupy', label: 'Postupy (GUI)' },
+    { value: 'klikani', label: 'Klikací trénink' },
+    { value: 'prikazy', label: 'Příkazy' },
+  ],
+};
+const TAB_PLATFORM: Record<'pt' | 'linux' | 'windows', Platform> = { pt: 'cisco', linux: 'linux', windows: 'windows' };
+// staré odkazy (?tab=prikazy / postupy / klikani)
+const LEGACY: Record<string, [Tab, Part]> = { prikazy: ['pt', 'prikazy'], postupy: ['pt', 'postupy'], klikani: ['windows', 'klikani'] };
 
 export function SitePractical() {
   const [params, setParams] = useSearchParams();
-  const tab = (['zadani', 'prikazy', 'postupy', 'klikani', 'vypocty'].includes(params.get('tab') ?? '') ? params.get('tab') : 'zadani') as Tab;
+  const rawTab = params.get('tab') ?? '';
+  const legacy = LEGACY[rawTab];
+  const tab = (legacy?.[0] ?? (['zadani', 'pt', 'linux', 'windows', 'vypocty'].includes(rawTab) ? rawTab : 'zadani')) as Tab;
+  const parts = tab === 'pt' || tab === 'linux' || tab === 'windows' ? PARTS[tab] : [];
+  const part = (legacy?.[1] ?? parts.find((p) => p.value === params.get('cast'))?.value ?? parts[0]?.value) as Part | undefined;
   return (
     <div>
       <div className="print:hidden">
@@ -33,16 +58,21 @@ export function SitePractical() {
         onChange={(v) => setParams(v === 'zadani' ? {} : { tab: v }, { replace: true })}
         options={[
           { value: 'zadani', label: 'Zadání nanečisto' },
-          { value: 'prikazy', label: 'Příkazy' },
-          { value: 'postupy', label: 'Postupy' },
-          { value: 'klikani', label: 'Klikání (Windows)' },
+          { value: 'pt', label: '🛜 Packet Tracer' },
+          { value: 'linux', label: '🐧 Linux' },
+          { value: 'windows', label: '🪟 Windows Server' },
           { value: 'vypocty', label: 'Výpočty' },
         ]}
       />
+      {(tab === 'pt' || tab === 'linux' || tab === 'windows') && part && (
+        <>
+          <Segmented className="mb-4 print:hidden" value={part} onChange={(v) => setParams({ tab, cast: v }, { replace: true })} options={parts} />
+          {part === 'prikazy' && <CommandsTab key={tab} platforms={[TAB_PLATFORM[tab]]} />}
+          {part === 'postupy' && <ProceduresTab key={tab} platforms={[TAB_PLATFORM[tab]]} />}
+          {part === 'klikani' && <ClickTab />}
+        </>
+      )}
       {tab === 'zadani' && <ScenarioTab />}
-      {tab === 'prikazy' && <CommandsTab />}
-      {tab === 'postupy' && <ProceduresTab />}
-      {tab === 'klikani' && <ClickTab />}
       {tab === 'vypocty' && <CalcTab />}
     </div>
   );
@@ -398,15 +428,17 @@ export function CommandsTab({ platforms = PLATFORMS }: { platforms?: Platform[] 
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Segmented
-          value={platform}
-          onChange={(p) => {
-            setPlatform(p);
-            setGroup('');
-            setShown(new Set());
-          }}
-          options={platforms.map((p) => ({ value: p, label: PLATFORM_LABEL[p] }))}
-        />
+        {platforms.length > 1 && (
+          <Segmented
+            value={platform}
+            onChange={(p) => {
+              setPlatform(p);
+              setGroup('');
+              setShown(new Set());
+            }}
+            options={platforms.map((p) => ({ value: p, label: PLATFORM_LABEL[p] }))}
+          />
+        )}
         <select value={group} onChange={(e) => setGroup(e.target.value)} aria-label="Skupina příkazů" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-slate-900">
           <option value="">Všechny skupiny</option>
           {groups.map((g) => (
@@ -461,7 +493,7 @@ export function ProceduresTab({ platforms = PLATFORMS }: { platforms?: Platform[
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Segmented value={platform} onChange={setPlatform} options={platforms.map((p) => ({ value: p, label: PLATFORM_LABEL[p] }))} />
+        {platforms.length > 1 && <Segmented value={platform} onChange={setPlatform} options={platforms.map((p) => ({ value: p, label: PLATFORM_LABEL[p] }))} />}
         <Button icon={<ListOrdered size={17} />} onClick={() => start(proceduresConfig([platform], `Postupy ${PLATFORM_LABEL[platform]} – seřaď kroky`))}>
           Seřazování kroků
         </Button>

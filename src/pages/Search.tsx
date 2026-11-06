@@ -42,7 +42,9 @@ function snippetOf(text: string, q: string): string {
   return `${from ? '…' : ''}${text.slice(from, i + q.length + 70).replace(/\s+/g, ' ')}${i + q.length + 70 < text.length ? '…' : ''}`;
 }
 
-const practicalPath = (p: Parameters<typeof platformSubject>[0], tab: string) => `/${platformSubject(p) === 'cloud' ? 'cloud' : 'site'}/prakticka?tab=${tab}`;
+const SITE_TAB: Record<string, string> = { cisco: 'pt', linux: 'linux', windows: 'windows' };
+const practicalPath = (p: Parameters<typeof platformSubject>[0], tab: string) =>
+  platformSubject(p) === 'cloud' ? `/cloud/prakticka?tab=${tab}` : `/site/prakticka?tab=${SITE_TAB[p] ?? 'pt'}&cast=${tab}`;
 
 export function SearchPage() {
   const { data } = useStore();

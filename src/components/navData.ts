@@ -119,9 +119,9 @@ export const NAV_SUBJECTS: NavSubject[] = [
         format: 'Packet Tracer → Debian 13 / Windows Server',
         items: [
           { to: '/site/prakticka', label: 'Zadání nanečisto', icon: Terminal },
-          { to: '/site/prakticka?tab=prikazy', label: 'Příkazy', icon: Terminal },
-          { to: '/site/prakticka?tab=postupy', label: 'Postupy', icon: ListOrdered },
-          { to: '/site/prakticka?tab=klikani', label: 'Klikací trénink (Windows)', icon: MousePointerClick },
+          { to: '/site/prakticka?tab=pt', label: 'Packet Tracer (Cisco)', icon: Network },
+          { to: '/site/prakticka?tab=linux', label: 'Linux (Debian 13)', icon: SquareTerminal },
+          { to: '/site/prakticka?tab=windows', label: 'Windows Server', icon: MousePointerClick },
           { to: '/site/prakticka?tab=vypocty', label: 'Výpočty (adresace)', icon: Calculator },
         ],
       },
